@@ -148,12 +148,10 @@ config_bashrc(){
     # ! BASHRC
     
     [[ "${user}" != "root" ]] && {
-        grep -q "alias fenix" ~/.bashrc &&  mv /etc/skel/.bashrc "/home/${user}/.bashrc" 2>/dev/null 
         echo -e $bashrc_banner | base64 -d >> "/home/${user}/.bashrc"
         echo "alias fenix='sudo $script_folder/main.bash'" >> "/home/${user}/.bashrc"
     
     } || {
-        grep -q "alias fenix" ~/.bashrc &&  mv /etc/skel/.bashrc "$userfolder/.bashrc" 2>/dev/null  
         echo -e $bashrc_banner | base64 -d >> $userfolder/.bashrc
         echo "alias fenix='sudo $script_folder/main.bash'" >> $userfolder/.bashrc
     
