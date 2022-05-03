@@ -4,7 +4,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/M1001-byte/FenixManager?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/M1001-byte/FenixManager?style=for-the-badge)
-![MIT License](https://img.shields.io/github/license/M1001-byte/FenixManager?style=for-the-badge)(./LICENSE)
+[![MIT License](https://img.shields.io/github/license/M1001-byte/FenixManager?style=for-the-badge)](./LICENSE)
 
 <p align="center">
 <a href="https://imgbb.com/"><img src="https://i.ibb.co/PT5Bcvg/fenixmanager.png" alt="fenixmanager" border="0"></a>
