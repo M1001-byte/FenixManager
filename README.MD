@@ -1,6 +1,7 @@
 # FenixManager
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/M1001-byte/FenixManager?style=for-the-badge)
+![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)
 ![GitHub issues](https://img.shields.io/github/issues/M1001-byte/FenixManager?style=for-the-badge)
 ![GitHub stars](https://img.shields.io/github/stars/M1001-byte/FenixManager?style=for-the-badge)
