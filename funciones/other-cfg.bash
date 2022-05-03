@@ -509,3 +509,21 @@ limit_bandwidth(){
         info "LIMITE DE ANCHO DE BANDA ACTIVADO"
     }
 }
+
+
+block_p2p_and_torrent(){
+    package_installed "xtables-addons-common" || {
+        bar "apt-get install xtables-addons-common -y"
+    }
+    [[ "${deny_p2p_torrent}" == 'true' ]]  && {
+        iptables -D FORWARD -p tcp -m ipp2p --bit -j DROP
+        iptables -D FORWARD -p udp -m ipp2p --bit -j DROP
+        info "P2P y Torrents desbloqueados."
+        sed -i "s/deny_p2p_torrent=.*/deny_p2p_torrent='false'/g" "/etc/FenixManager/preferences.bash"
+    } || {
+        iptables -I FORWARD -p tcp -m ipp2p --bit -j DROP
+        iptables -I FORWARD -p udp -m ipp2p --bit -j DROP
+        info "P2P y Torrents bloqueados."
+        [[ -z "${deny_p2p_torrent}" ]] && echo "deny_p2p_torrent='true'" >> "/etc/FenixManager/preferences.bash" ||sed -i "s/deny_p2p_torrent=.*/deny_p2p_torrent='true'/g" "/etc/FenixManager/preferences.bash"
+    }
+}
