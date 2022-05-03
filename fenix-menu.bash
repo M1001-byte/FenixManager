@@ -212,6 +212,8 @@ option_menu_software () {
 option_menu_configuration(){
     clear
     local columns=$(tput cols)
+    # relaod preferences.bash
+    source "/etc/FenixManager/preferences.bash"
     [[ $columns -le 78 ]] && {
         line_separator 72
         echo -e "${BLUE}〢 ────────────────────── 〢  ${WHITE}CONFIGURACIONES${BLUE}   〢 ────────────────────── 〢"
@@ -228,7 +230,8 @@ option_menu_configuration(){
     option_color 5 "PRUEBA DE VELOCIDAD"
     [[ -f "/etc/block-ads-fenixmanager-actived" ]] && option_color 6 "${RED}DESACTIVAR${WHITE} BLOQUEO DE ANUNCIOS" || option_color 6 "${GREEN}ACTIVAR${WHITE} BLOQUEO DE ANUNCIOS"
     [[ "${limit_bandwidth}" == 'true' ]] && option_color 7 "${RED}DESACTIVAR${WHITE} LIMITADOR DE ANCHO DE BANDA" || option_color 7 "${GREEN}ACTIVAR${WHITE} LIMITADOR DE ANCHO DE BANDA"
-    option_color 8 "CAMBIAR AJUSTES DE FENIX"
+    [[ "${deny_p2p_torrent}" == 'true' ]] && option_color 8 "${RED}DESBLOQUEAR ${WHITE} CONEXIONES P2P ( TORRENT )" || option_color 8 "${GREEN}BLOQUEAR ${WHITE} CONEXIONES P2P ( TORRENT )"
+    option_color 9 "CAMBIAR AJUSTES DE FENIX"
     option_color M "MENU PRINCIPAL"
     option_color E "SALIR"
     
@@ -262,6 +265,9 @@ option_menu_configuration(){
                 limit_bandwidth
                 ;;
             8) # CAMBIAR AJUSTES DE FENIX
+                block_p2p_and_torrent
+                ;;
+            9) # CAMBIAR AJUSTES DE FENIX
                 cfg_fenix_settings
                 ;;
             "cls" | "CLS")
@@ -278,6 +284,9 @@ option_menu_configuration(){
                 continue
                 ;;
         esac
+        sleep 1.5
+        clear
+        option_menu_configuration
     done
 }
 

@@ -23,7 +23,7 @@ sudo bash /tmp/install.bash
     * Agregar
     * Eliminar 
     * Editar
-    * Crear/Restaurar una copia de seguridad
+    * Crear / Restaurar una copia de seguridad
 * Menu de instalacion
     * Dropbear
     * Squid-proxy
@@ -39,7 +39,8 @@ sudo bash /tmp/install.bash
         * Activas/Desactivar
         * Permitir/bloquear puertos
     * Cambiar zona horaria ( Disponibles solo las de habla-hispana )
-    * Activar/Desactivar bloqueador de anuncios ( Lista de host bloqueados desde AdAway )
+    * Activar / Desactivar bloqueador de anuncios ( Lista de host bloqueados desde AdAway )
+    * Bloquear / Desbloquear P2P ( Torrents, etc )
     * Cambiar ajustes de Fenix
         * Mostar / Ocultar Paneles
 
