@@ -45,7 +45,6 @@ sudo bash /tmp/install.bash
         * Mostar / Ocultar Paneles
 
 ## ✏️ Caracteristicas Futuras
- - [ ] El redireccionamiento atravez del proxy, reescribirlo usando Golang
  - [ ] Administrar vps desde un bot de Telegram
  - [ ] Panel de administracion via web
 
