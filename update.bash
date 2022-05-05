@@ -1,4 +1,5 @@
 #!/bin/bash
+source "/etc/FenixManager/funciones/funciones.bash"
 
 check_update(){
     local remote_version=$(curl -s https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version)
@@ -17,13 +18,20 @@ check_update(){
             y|Y|S|s)
                     info "Actualizando..."
                     sleep 1
+                    rm -rf /tmp/FenixManager-old
                     mkdir /tmp/FenixManager-old 2>/dev/null
                     mv -t /tmp/FenixManager-old "${script_dir}/database/" "${script_dir}/ip" "${script_dir}/preferences.bash" || {
                         error "Ocurrio un error. La actualizacion no pudo ser completada."
                         exit $?
                     }
-                    git clone "https://github.com/M1001-byte/FenixManager.git" /etc/FenixManager
-                    mv /tmp/FenixManager-old/* /etc/FenixManager/
+                    rm -rf "/etc/FenixManager/*"
+                    git clone "https://github.com/M1001-byte/FenixManager.git" /etc/FenixManager || {
+                        error "Ocurrio un error. La actualizacion no pudo ser completada."
+                        exit $?
+                    }
+                    # /tmp/FenixManager-bak
+                    mv -t /etc/FenixManager/ /tmp/FenixManager-old/* 
+
                     local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
                     for file in $fenix_bash_files; do chmod 777 $file &>/dev/null ; done
                     info "Fenix Manager se actualizo correctamente"
@@ -34,3 +42,5 @@ check_update(){
         esac
     fi
 }
+
+check_update

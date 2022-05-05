@@ -126,7 +126,6 @@ main(){
     add_cron_job_for_udpgw
     separator "FIN DE LA INSTALACION"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
-    info "Se cerra session para que se puedan efectuar los cambios de forma correcta. ${WHITE}(${RED} Su vps NO se reiniciará${WHITE})"
     read -p 'Presione enter para continuar...'
     sleep 1.5
     clear
