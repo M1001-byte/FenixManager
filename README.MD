@@ -11,6 +11,10 @@
 <a href="https://imgbb.com/"><img src="https://i.ibb.co/PT5Bcvg/fenixmanager.png" alt="fenixmanager" border="0"></a>
 </p>
 
+## 💻 Requisitos
+ * Ubuntu 18.04 LTS o superior.
+ * Debian 9 o superior.
+
 ## 🚀 Instalacion
 
 ```bash
@@ -48,9 +52,10 @@ sudo bash /tmp/install-fenix.bash
  - [ ] Administrar vps desde un bot de Telegram
  - [ ] Panel de administracion via web
 
-
+## 📸 Screenshots
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/jWSb49Q/adm-ssh.png" alt="Administrar usuarios ssh" border="0"></a><a href="https://imgbb.com/"><img src="https://i.ibb.co/2cgcgHS/py-socks.png" alt="Proxy forwarding" border="0"></a><a href="https://imgbb.com/"><img src="https://i.ibb.co/myY2dMx/cfg-menu.png" alt="Configuraciones" border="0"></a><a href="https://imgbb.com/"><img src="https://i.ibb.co/9qP0z0s/cfg-setting-fenix.png" alt="FenixManafer Ajustes" border="0"></a><a href="https://imgbb.com/"><img src="https://i.ibb.co/LpSn9jh/cfg-proto.png" alt="Menu de protocolos" border="0"></a>
+src="https://i.ibb.co/mQfQfWB/ad
 ## Contribuir
-
 1. Bifurcar este  repositorio
 2. Crea tu rama de caracteristica (`git checkout -b feature/CaracteristicaIncreible`)
 3. Guardar los cambios  (`git commit -m 'Agregadas funciones increibles'`)
