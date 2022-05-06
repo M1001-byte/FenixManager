@@ -56,7 +56,7 @@ if __name__ == "__main__":
         for line in f:
             if "user_folder=" in line:
                 user_dir = line.split("=")[1].strip().replace("'","")
-            break
+                break
 
     config_file = f"{user_dir}/FenixManager/py-socks.conf"
     proxy_file = '/etc/FenixManager/funciones/py-proxy/direct_proxy.py'#'/etc/FenixManager/funciones/py-proxy/direct_proxy.py'

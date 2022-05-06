@@ -66,7 +66,20 @@ show_first_panel() {
 
 show_acc_ssh_info(){
     local user_db="/etc/FenixManager/database/usuarios.db"
-    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh")
+    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" 2>/dev/null || echo "1")
+    [[ $get_total_users -eq 1 ]] && {
+        error "La base de datos de usuarios no existe o esta corrupta"
+        info "Creando base de datos de usuarios"
+        sqlite3 $user_db  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );' && {
+            info "Base de datos de usuarios creada correctamente"
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            clear && fenix
+        } || {
+            error "Error al crear la base de datos de usuarios"
+            exit 1
+        }
+
+    }
     local users_=$(sqlite3 "$user_db" "SELECT nombre FROM ssh")
     local count_=0
     for i in ${users_[@]};do
@@ -297,6 +310,7 @@ option_menu() {
     option_color 3 'MENU DE INSTALACION'
     option_color 4 'CONFIGURACIONES'
     option_color 5 "${YELLOW}CREAR UN SUBDOMINIO GRATIS${WHITE}"
+    option_color 6 "${GREEN}BUSCAR ACTUALIZACIONES${WHITE}"
     option_color E "SALIR"
 
     while true;do
@@ -314,7 +328,6 @@ option_menu() {
                 clear
                 package_installed "openvpn"
                 if [[ $? -eq 0 ]];then
-                    list_users_ovpn
                     option_menu_ovpn
                 else
                     echo -e "${RED}[!]${WHITE} OpenVPN no esta instalado"
@@ -335,7 +348,42 @@ option_menu() {
             5 )
                 create_free_subdomain
                 ;;
-            
+            6 )
+                {
+                    local remote_version=$(curl -s https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version)
+                    local current_version=$(cat /etc/FenixManager/version)
+                    [[ -z "${current_version}" ]] && error "Fallo al obtener la version local."
+                    [[ -z "${remote_version}" ]] && error "Fallo al obtener la version remota. Comprueba tu conexion a internet."
+
+                    if [[ "${remote_version}" == "${current_version}" ]];then
+                        info "Tu version de Fenix Manager es la mas reciente"
+                    else
+                        info "Hay una ${GREEN}nueva version${WHITE} de Fenix Manager disponible"
+                        info "Tu version: ${current_version}"
+                        info "Nueva version: ${remote_version}"
+                        read -p "[*] Deseas actualizar? [Y/n] " opt
+                        case $opt in
+                            y|Y|S|s)
+                                info "Actualizando..."
+                                [[ -d "/tmp/FenixManager" ]] && rm -rf /tmp/FenixManager
+                                git clone "https://github.com/M1001-byte/FenixManager.git" /tmp/FenixManager && {
+                                    rsync -av --progress /tmp/FenixManager/ /etc/FenixManager/ --exclude .git
+                                    local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
+                                    for file in $fenix_bash_files; do chmod 777 $file &>/dev/null ; done
+                                    info "Fenix Manager se actualizo correctamente"
+                                    exit 0
+                                } || {
+                                    error "Ocurrio un error. La actualizacion no pudo ser completada."
+                                    exit $?
+                                }
+                                ;;
+                            *)
+                            info "Fenix Manager no se actualizo"
+                            ;;
+                        esac
+                    fi
+                }
+                    ;;
             "cls" | "CLS")
                 clear
                 main
@@ -368,8 +416,10 @@ create_free_subdomain(){
     done
 }
 
+
 main(){
     clear
+    check_and_veriy_preferences_integrity
     local user_db="/etc/FenixManager/database/usuarios.db"
     local hidden_panel=0
     script_executed_with_root_privileges

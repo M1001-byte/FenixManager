@@ -977,6 +977,16 @@ cfg_shadowsocks(){
 cgf_openvpn(){
     trap ctrl_c SIGINT SIGTERM
     clear
+    [[ ! -f "/etc/openvpn/server.conf" ]] && {
+        error "No se encuentra el archivo de configuracion de openvpn."
+        info "Es recomendable resintarlo."
+        read -p "$(echo -e "${WHITE}[*] Desea reinstalarlo? [Y/n]: ${GREEN}")" reinstall_openvpn
+        if [[ $reinstall_openvpn =~ ^[Yy]$ ]];then
+            install_openvpn
+        else
+            exit 0
+        fi
+    }
     local ovpn_port_actually=$(cat /etc/openvpn/server.conf | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | tr "\n" ' ')
     local ovpn_proto_actually=$(cat /etc/openvpn/server.conf | grep -E 'proto [a-zA-Z]{0,}' | grep -Eo '[a-zA-Z]{0,}' | tr "\n" ' ' | cut -d " " -f2)
     local oppenvpn_is_running=$(ps -ef | grep openvpn | grep -v grep | wc -l)
@@ -1010,10 +1020,12 @@ cgf_openvpn(){
     if [[ $oppenvpn_is_running -eq 0 ]];then
         option_color "5" "INICIAR OPENVPN"
         option_color "6" "DESINSTALAR OPENVPN"
+        option_color "7" "VER ESTADO OPENVPN"
     else
         option_color "5" "REINICIAR OPENVPN"
         option_color "6" "DETENER OPENVPN"
-        option_color "7" "DESINSTALAR OPENVPN"
+        option_color "7" "VER ESTADO OPENVPN"
+        option_color "8" "DESINSTALAR OPENVPN"
     fi
     option_color "B" "MENU DE INSTALACION DE SOFTWARE"
     option_color "M" "MENU PRINCIPAL"
@@ -1179,12 +1191,12 @@ cgf_openvpn(){
                 clear
                 option_menu_software
                 ;;
-            7) # DESINSTALAR OPENVPN
-                remove_openvpn
-                clear
-                option_menu_software
+            7) # DESINSTALAR/VER ESTADO OPENVPN
+                service openvpn@server status
                 ;;
-            
+            8) # REMOVER OPENVPN    
+                remove_openvpn
+                ;;
             "cls" | "CLS")
                 clear
                 cgf_openvpn
@@ -1747,3 +1759,4 @@ del_openssh_port(){
         fi
     done
 }
+
