@@ -14,7 +14,7 @@
 ## 💻 Requisitos
  * Ubuntu 18.04 LTS o superior.
  * Debian 9 o superior.
-
+ * Arquitectura de 64 bits.
 ## 🚀 Instalacion
 
 ```bash
@@ -59,9 +59,11 @@ sudo bash /tmp/install-fenix.bash
 ***
 <a href="https://imgbb.com/"><img src="https://i.ibb.co/2cgcgHS/py-socks.png" alt="Proxy forwarding" border="0"></a>
 ***
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/myY2dMx/cfg-menu.png" alt="Configur**aciones" border="0"></a><a href="https://imgbb.com/"><img src="https://i.ibb.co/9qP0z0s/cfg-setting-fenix.png" alt="FenixManafer Ajustes" border="0"></a>
+<a href="https://ibb.co/5KYCymn"><img src="https://i.ibb.co/jJVq2mW/cfg-menu.png" alt="cfg-menu" border="0"></a>
 ***
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/LpSn9jh/cfg-proto.png" alt="Menu de protocolos" border="0"></a>
+<a href="https://ibb.co/9cspNTq"><img src="https://i.ibb.co/vVZcHPJ/fenix-settings.png" alt="Ajustes FenixManager" border="0"></a>
+***
+<a href="https://ibb.co/m4xRtDx"><img src="https://i.ibb.co/0rwnZDw/menu-proto.png" alt="menu-proto" border="0"></a>
 
 ## Contribuir
 1. Bifurcar este  repositorio
