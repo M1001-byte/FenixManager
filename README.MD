@@ -18,8 +18,11 @@
 ## 🚀 Instalacion
 
 ```bash
-wget https://raw.githubusercontent.com/M1001-byte/FenixManager/dev/install.bash -O /tmp/install-fenix.bash
-sudo bash /tmp/install-fenix.bash
+sudo apt-get update # Actualizar lista de paquetes
+sudo apt-get upgrade # Actualizar paquetes
+sudo apt-get install -y wget # Instalar wget
+wget https://raw.githubusercontent.com/M1001-byte/FenixManager/dev/install.bash -O /tmp/install-fenix.bash # Descargar instalador
+sudo bash /tmp/install-fenix.bash # Instalar
 ```
 ## 🧉 Características
 
@@ -47,6 +50,8 @@ sudo bash /tmp/install-fenix.bash
     * Bloquear / Desbloquear P2P ( Torrents, etc )
     * Cambiar ajustes de Fénix
         * Mostar / Ocultar Paneles
+
+### **Y mas por venir :)**
 
 ## ✏️ Características Futuras
  - [ ] Administrar vps desde un bot de Telegram

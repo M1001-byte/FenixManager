@@ -129,7 +129,7 @@ main(){
     read -p 'Presione enter para continuar...'
     sleep 1.5
     clear
-    source $user_folder/.bashrc
+    pkill -u $(logname)
 }
 
 main
