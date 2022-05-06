@@ -14,7 +14,7 @@
 ## 🚀 Instalacion
 
 ```bash
-wget https://raw.githubusercontent.com/M1001-byte/FenixManager/main/install.bash -o /tmp/install-fenix.bash
+wget https://raw.githubusercontent.com/M1001-byte/FenixManager/main/install.bash -O /tmp/install-fenix.bash
 sudo bash /tmp/install-fenix.bash
 ```
 ## 🧉 Caracteristicas
