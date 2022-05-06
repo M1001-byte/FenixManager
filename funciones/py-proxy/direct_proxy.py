@@ -45,8 +45,9 @@ class proxy_socket(Thread):
     def incoming_connections(self):
         self.inputs = [self.remote,self.conn]
         
-        payload=self.conn.recv(self.buffer_size)
-        self.conn.sendall(self.custom_response)
+        if self.custom_response != b"None":
+            payload=self.conn.recv(self.buffer_size)
+            self.conn.sendall(self.custom_response)
 
         while self.inputs:
             try:
@@ -81,7 +82,7 @@ def parse_args() -> dict:
     parser = parser = argparse.ArgumentParser(description=desc)
     parser.add_argument("-p","--port",type=int,help="Puerto de escucha.(9090)",default=9090)
     parser.add_argument("-c","--connect",type=str,help="Direccion donde redireccionara todo el trafico. (127.0.0.1:22)",default="127.0.0.1:22")
-    parser.add_argument("--custom-response",help="Respuesta personalizada para enviar al cliente cuando se establece la conexion.",default="HTTP/1.1 200 <strong>FenixManager</strong>",type=str)
+    parser.add_argument("--custom-response",help="Respuesta personalizada para enviar al cliente cuando se establece la conexion. ( None )",default="None",type=str)
 
     args = parser.parse_args()
     return args

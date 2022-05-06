@@ -294,7 +294,7 @@ redirect_to_service() {
     for service in "${service_available[@]}"; do
         (( count++ ))
         if [[ $service == "openvpn" ]]; then
-            service openvpn status &>/dev/null
+            service openvpn@server status &>/dev/null
         elif [[ $service =~ "pysocks" ]]; then
             systemctl is-active fenixmanager-pysocks &>/dev/null
         else

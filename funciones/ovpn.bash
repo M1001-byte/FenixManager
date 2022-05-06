@@ -6,7 +6,7 @@
 db_ovpn='/etc/FenixManager/database/usuarios.db'
 
 
-source "/etc/FenixManager//preferences.bash"
+source "/etc/FenixManager/preferences.bash"
 source "/etc/FenixManager/funciones/funciones.bash"
 source "/etc/FenixManager/funciones/color.bash"
 
@@ -23,7 +23,7 @@ create_db_user_ovpn() {
         return 0
     else
         info "Creando la tabla 'ovpn' en la base de datos."
-        sqlite3 $db_ovpn 'CREATE TABLE ovpn (nombre VARCHAR(20) NOT NULL, exp_date DATETIME);'
+        sqlite3 $db_ovpn 'CREATE TABLE ovpn (nombre VARCHAR(32) NOT NULL, exp_date DATETIME);'
         if [[ $? -eq 0 ]];then
             info "La tabla 'ovpn' se ha creado correctamente."
             sleep 2
@@ -408,8 +408,8 @@ newClient() {
 
         read -rp '[*] Nombre del cliente: ' CLIENT
 
-        if [[ ${#CLIENT} -ge 20 ]];then
-            error "El nombre del cliente no puede tener más de 20 caracteres."
+        if [[ ${#CLIENT} -ge 32 ]];then
+            error "El nombre del cliente no puede tener más de 32 caracteres."
             continue
         fi
         if (grep -E '^[a-zA-Z0-9_-]+$' <<< $CLIENT &>/dev/null );then
@@ -433,28 +433,41 @@ newClient() {
     cd /etc/openvpn/easy-rsa/ || return
     case $PASS in
         1 )
-            ./easyrsa build-client-full "${CLIENT}" nopass &>/dev/null
+            ./easyrsa build-client-full "${CLIENT}" nopass &>/dev/null || {
+                error "Error al crear el cliente $CLIENT"
+                return 1
+            }
             ;;
         2 )
             info "A continucacion,se le pedira la contraseña del cliente"
-            ./easyrsa build-client-full "${CLIENT}"
+            ./easyrsa build-client-full "${CLIENT}" || {
+                error "Error al crear el cliente."
+                info "Comprueba que la contraseña este bien escrita."
+                return 1
+            }
             ;;
         * )
             error "La opción seleccionada no es valida.Por omisión se agregara el cliente sin contraseña."
-            ./easyrsa build-client-full "${CLIENT}" nopass &>/dev/null
+            ./easyrsa build-client-full "${CLIENT}" nopass &>/dev/null || {
+                error "Error al crear el cliente $CLIENT"
+                return 1
+            }
             ;;
     esac
 
     while true;do
-        read -rp "[*] ¿Cantidad de dias para expirar? [1-365]: " -e exp_date
-        
-        if (grep -E '^[1-9]+$' <<< $exp_date &>/dev/null );then
-            break
-        else
+        read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
+        if [[ -z "$date_exp" ]];then
+            info "Valor incorrecto, se asignara una fecha de expiracion de 1 dia."
+            date_exp=1
+        elif [ -z "${date_exp}" ] || [ ! grep -E '^[0-9]+$' <<< "${date_exp}" 2>/dev/null ] || [ "${date_exp}" == 0 ];then
+            info 'El valor no es correcto.'
             continue
+        else
+            exp_date_d=$(date -d "$exp_date days" +%Y-%m-%d 2>/dev/null)
+            break
         fi
     done
-    exp_date_d=$(date -d "$exp_date days" +%Y-%m-%d 2>/dev/null)
 
     sqlite3 $db_ovpn "INSERT INTO ovpn (nombre, exp_date) VALUES ('$CLIENT', '$exp_date_d')" 
 
@@ -464,7 +477,7 @@ newClient() {
 	    elif grep -qs "^tls-auth" /etc/openvpn/server.conf; then TLS_SIG="2" ; fi
         # Generates the custom client.ovpn
 	    mkdir -p "${user_folder}/ovpn-cfg/" &> /dev/null
-	    cp /etc/openvpn/client-template.txt "${user_folder}}/ovpn-cfg/$CLIENT.ovpn"
+	    cp /etc/openvpn/client-template.txt "${user_folder}/ovpn-cfg/$CLIENT.ovpn"
 	    {
 	    	echo "<ca>"
 	    	cat "/etc/openvpn/easy-rsa/pki/ca.crt"
@@ -495,7 +508,8 @@ newClient() {
         echo -e "\n$green [!] CLIENTE AGREGADO CORRECTAMENTE."
         info "La configuracion se guardo en \\033[32m${user_folder}/ovpn-cfg/$CLIENT.ovpn\\033[m ."
         echo ""
-        exit
+        read -p "Pulsa una tecla para continuar..."
+        option_menu_ovpn
     else
         error "Error al agregar el cliente"
     fi
@@ -527,7 +541,9 @@ removeClient() {
 	    rm -f "/root/$CLIENT.ovpn"
 	    sed -i "/^$CLIENT,.*/d" /etc/openvpn/ipp.txt
 	    cp /etc/openvpn/easy-rsa/pki/index.txt{,.bk}
+        rm "${user_folder}/ovpn-cfg/$CLIENT.ovpn"
         info "El cliente $CLIENT ha sido eliminado."
+        option_menu_ovpn
     else
         error "Error al eliminar el cliente $CLIENT"
     fi
@@ -568,20 +584,23 @@ remove_openvpn() {
     fi
 
     # remove database
-    sqlite3 $db_ovpn "DROP TABLE ovpn"
+    sqlite3 $db_ovpn "DROP TABLE ovpn" 2>/dev/null
 
     info "OpenVPN ha sido eliminado."
     exit 0
 }
 
 option_menu_ovpn() {
+    clear
+    list_users_ovpn
     option_color "1" "AGREGAR NUEVO USUARIO"
     option_color '2' "REMOVER USUARIO"
+    option_color '3' "CONFIGURAR OPENVPN"
     option_color 'E' "SALIR"
     option_color 'M' "MENU PRINCIPAL"
     while true;do
-        prompt=$(date +"%x %X")
-        read -rp "$(echo -e "[\\033[1;34m$prompt\\033[m] \\033[1;3;38;5;202m>>\\033[m \\033[1;32m")" -e option
+        prompt=$(date "+%x %X")
+        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option
         case $option  in
             1 )
                 newClient
@@ -589,11 +608,18 @@ option_menu_ovpn() {
             2 )
                 removeClient
                 ;;
+            3 )
+              cgf_openvpn
+              ;;
             e | E | q )
                 exit
                 ;;
             m | M )
                 fenix
+                ;;
+            "cls" | "CLS" )
+                clear
+                option_menu_ovpn
                 ;;
         esac
     done
@@ -602,9 +628,9 @@ option_menu_ovpn() {
 list_users_ovpn() {
     create_db_user_ovpn
     users_vars=$(sqlite3 $db_ovpn "SELECT rowid,nombre, exp_date FROM ovpn" )
-    echo -e "${BLUE}〢────────────────────────────────────〢${WHITE}"
-    printf "${BLUE}〢${WHITE}%-2s${RED}%-20s ${YELLOW}%-12s ${BLUE}%-10s\n" "#" "Nombre" "Expira" '〢'
-    echo -e "${BLUE}〢────────────────────────────────────〢${WHITE}"
+    line_separator 70
+    printf "${BLUE}〢${WHITE} [%-1s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "#" "Nombre" "Expira" '〢'
+    line_separator 70
     for i in $users_vars;do
         IFS='|' read -r -a user_array <<< "$i"
         local id user exp tmp
@@ -612,10 +638,18 @@ list_users_ovpn() {
         id="${user_array[0]}"        
         user="${user_array[1]}"
         exp="${user_array[2]}"
-
-        printf "${BLUE}〢${WHITE}%-2s${RED}%-20s ${YELLOW}%-12s ${BLUE}%-${#user}s\n" "${user_array[0]}" "${user_array[1]}" "${user_array[2]}" '〢'
+        
+        [[ ${#user} -gt 25 && ${columns} -lt 100 ]] && {
+            # ! (...)
+            user="${user:0:20}(...)"
+        }
+        printf "${BLUE}〢${WHITE} [%-${#id}s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "${id}" "${user}" "${exp}" '〢'
     done
-    echo -e "${BLUE}〢────────────────────────────────────〢${WHITE}"
+    line_separator 70
+    local config_files_dir="${user_folder}/ovpn-cfg"
+    printf "${WHITE}〢 %-7s ${GREEN}%-${#config_files_dir}s ${WHITE}%$(echo 72 - 8 - ${#config_files_dir} | bc )s\n" "DIR-CFG:" "${config_files_dir}" '〢'
+    line_separator 70
+
 }
 
 main() {
@@ -630,7 +664,3 @@ main() {
         install_openvpn
     fi
 }
-
-#install_openvpn
-#newClient
-#main
