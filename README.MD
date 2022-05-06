@@ -15,7 +15,7 @@
 
 ```bash
 wget https://raw.githubusercontent.com/M1001-byte/FenixManager/main/install.bash -o /tmp/install-fenix.bash
-sudo bash /tmp/install.bash
+sudo bash /tmp/install-fenix.bash
 ```
 ## 🧉 Caracteristicas
 
@@ -45,7 +45,6 @@ sudo bash /tmp/install.bash
         * Mostar / Ocultar Paneles
 
 ## ✏️ Caracteristicas Futuras
- - [ ] El redireccionamiento atravez del proxy, reescribirlo usando Golang
  - [ ] Administrar vps desde un bot de Telegram
  - [ ] Panel de administracion via web
 
