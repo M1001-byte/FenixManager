@@ -39,6 +39,29 @@ fenix() {
     "$script_dir/fenix-menu.bash"
 }
 
+check_and_veriy_preferences_integrity(){
+    local file="/etc/FenixManager/preferences.bash"
+    local file_linenumber=$(wc -l ${file} | awk '{print $1}')
+    if [ ! -f "$file" ] || [ "$file_linenumber" -eq "1" ];then
+        error "El archivo de preferencias no existe o esta alterado."
+        local user_=$(logname)
+        [[ "${user}" == "root" ]] && local user_folder="/root" || local user_folder="/home/${user_}"
+        grep "#dev" "/etc/FenixManager/preferences.bash" &> /dev/null && {
+            local branch_clone="dev"
+            local version=$(cat "/etc/FenixManager/preferences.bash" | cut -d "#" -f 1)
+        } || {
+            local branch_clone="master"
+            local version=$(cat "/etc/FenixManager/preferences.bash" )
+        }
+        local preferences_var=("user_folder='${user_folder}'" "script_dir='/etc/FenixManager'" "version='1.0'" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
+        for i in "${preferences_var[@]}"; do
+            echo "$i" >> "$file"
+        done
+        info "Se creo el archivo de preferencias."
+    fi
+
+}
+
 ctrl_c() {
     # Esto solo es valido para "software"/"programas" que no tienen un demonio habilitado en systemd.
     exit

@@ -406,7 +406,8 @@ create_free_subdomain(){
 
 
 main(){
-    clear
+    
+    check_and_veriy_preferences_integrity
     local user_db="/etc/FenixManager/database/usuarios.db"
     local hidden_panel=0
     script_executed_with_root_privileges
