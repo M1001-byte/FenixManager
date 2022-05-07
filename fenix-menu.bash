@@ -66,8 +66,8 @@ show_first_panel() {
 
 show_acc_ssh_info(){
     local user_db="/etc/FenixManager/database/usuarios.db"
-    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" 2>/dev/null || echo "1")
-    [[ $get_total_users -eq 1 ]] && {
+    local get_total_users=$()
+    if ! sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" &>/dev/null;then
         error "La base de datos de usuarios no existe o esta corrupta"
         info "Creando base de datos de usuarios"
         sqlite3 $user_db  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );' && {
@@ -79,7 +79,7 @@ show_acc_ssh_info(){
             exit 1
         }
 
-    }
+    fi
     local users_=$(sqlite3 "$user_db" "SELECT nombre FROM ssh")
     local count_=0
     for i in ${users_[@]};do
