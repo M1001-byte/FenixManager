@@ -66,8 +66,8 @@ show_first_panel() {
 
 show_acc_ssh_info(){
     local user_db="/etc/FenixManager/database/usuarios.db"
-    local get_total_users=$()
-    if ! sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" &>/dev/null;then
+    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" &>/dev/null || echo "error")
+    if [[ "${get_total_users}" == "error" ]];then
         error "La base de datos de usuarios no existe o esta corrupta"
         info "Creando base de datos de usuarios"
         sqlite3 $user_db  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );' && {
@@ -87,6 +87,7 @@ show_acc_ssh_info(){
         if [[ "${number_session}" -ne 0 ]];then count_=$((count_+1)) ; fi
     done
     local offline_users=$(echo ${get_total_users} - ${count_} | bc)
+    [[ -z "${get_total_users}" ]] && get_total_users=0
     [[ $columns -le 78 ]] && {
         printf "${WHITE}〢 %15s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#count_}s ${WHITE}%15s ${RED}%-${#count_}s ${WHITE}%$(echo 51 - 30 - 12  - ${#get_total_users} - ${#count_} - ${#offline_users} | bc)s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${count_} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
     } || {

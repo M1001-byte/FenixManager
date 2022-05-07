@@ -1238,7 +1238,7 @@ cfg_python3_proxy(){
             color_3="${YELLOW}"
         fi
         #local custom_quantity=$(grep "CUSTOM#" ${config_file} -c 2>/dev/null)
-        local custom_quantity=$(grep -E "^[CUSTOM#[0-9]{0,9}]" ${config_file} | cut -d# -f 2 | tr "]" " " | xargs)
+        local custom_quantity=$(grep -E "^[CUSTOM#[0-9]{0,9}]" ${config_file} 2>/dev/null| cut -d# -f 2 | tr "]" " " | xargs)
         local conf_key=(accept connect custom_response)
         printf "${WHITE}〢 ${color_1}%10s ${color_2}%26s ${color_3}%20s ${WHITE}%15s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
         
@@ -1296,6 +1296,11 @@ cfg_python3_proxy(){
                         read -p "$(echo -e "${WHITE}[*] Puerto a agregar :  ")" port
                         if [[ -z "$port" ]];then continue ; fi
                         if [[ $port =~ ^[0-9]+$ ]];then
+                            local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
+                            [[ $port_in_file -ne 0 ]] && {
+                                error "El puerto existe en el archivo de configuracion."
+                                continue
+                            }
                             check_if_port_is_open $port
                             if [[ $? -eq 0 ]];then
                                 break
@@ -1363,44 +1368,41 @@ cfg_python3_proxy(){
                         info "El puerto ${port} se ha agregado correctamente."
                     else
                         error "Fallo al agregar el puerto ${port}."
+                        pysocks_del_port ${port}
                     fi
                 }
                 sleep 4
                 cfg_python3_proxy
                 ;;
             2) # ELIMINAR PUERTO
-                {
-                    local ports_list=$(grep "accept" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
-                    local ports_list_array=(${ports_list})
-                    local number_of_ports=${#ports_list_array[@]}
-                    if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
-                    info "Seleccione el puerto a eliminar :"
-                    for (( i=0; i<${number_of_ports}; i++ ));do
-                        echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
-                    done
-                    read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
-                    if [[ -z "$port_to_delete" ]];then break ; fi
-                    if [[ $port_to_delete =~ ^[0-9]+$ ]];then
-                        if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then
-                            local port_to_delete="${ports_list_array[port_to_delete]}"
-                            local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1) 
-                            local line_of_port=$((line_of_port-1))
-                            local array_lines_delete
-                            for (( i=$line_of_port; i<$((line_of_port+4)); i++ ));do array_lines_delete+="${i}d;" ; done
-                            sed -i "${array_lines_delete}" ${config_file}
-                            fuser  ${port_to_delete}/tcp -k &>/dev/null
-                            if [[ "${i}" -eq 1 ]];then
-                                bar "systemctl restart fenixmanager-pysocks"
-                            else
-                                bar "systemctl restart fenixmanager-pysocks"
-                            fi
-
+                local ports_list=$(grep "accept" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
+                local ports_list_array=(${ports_list})
+                local number_of_ports=${#ports_list_array[@]}
+                if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
+                info "Seleccione el puerto a eliminar :"
+                for (( i=0; i<${number_of_ports}; i++ ));do
+                echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
+                done
+                read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
+                if [[ $port_to_delete =~ ^[0-9]+$ ]];then
+                    if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then
+                        local port_to_delete="${ports_list_array[port_to_delete]}"
+                        local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
+                        local line_of_port=$((line_of_port-1))
+                        local array_lines_delete
+                        for (( i=$line_of_port; i<$((line_of_port+4)); i++ ));do array_lines_delete+="${i}d;" ; done
+                        sed -i "${array_lines_delete}" ${config_file}
+                        fuser  ${port_to_delete}/tcp -k &>/dev/null
+                        if [[ "${i}" -eq 1 ]];then
+                            bar "systemctl restart fenixmanager-pysocks"
                         else
-                            error "Opcion invalida."
-                            continue
+                            bar "systemctl restart fenixmanager-pysocks"
                         fi
+                    else
+                        error "Opcion invalida."
+                    continue
                     fi
-                }
+                fi
                 sleep 3
                 cfg_python3_proxy
                 ;;
