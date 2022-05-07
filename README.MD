@@ -15,7 +15,7 @@
 ## 💻 Requisitos
  * Ubuntu 18.04 LTS o superior.
  * Debian 9 o superior.
- * Arquitectura de 64 bits.
+
 ## 🚀 Instalacion
 
 ```bash
