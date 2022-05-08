@@ -18,6 +18,7 @@
 
 ## 🚀 Instalacion
 
+**Versión beta. Aún hay bug y errores en la interfaz gráfica que se debe corregir. Además, se está trabajando en una interfaz más amigable para los dispositivos móviles**
 ```bash
 sudo apt-get update # Actualizar lista de paquetes
 sudo apt-get upgrade # Actualizar paquetes
