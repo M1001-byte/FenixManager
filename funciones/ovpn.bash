@@ -631,6 +631,7 @@ list_users_ovpn() {
     line_separator 70
     printf "${BLUE}〢${WHITE} [%-1s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "#" "Nombre" "Expira" '〢'
     line_separator 70
+    
     for i in $users_vars;do
         IFS='|' read -r -a user_array <<< "$i"
         local id user exp tmp
@@ -646,8 +647,8 @@ list_users_ovpn() {
         printf "${BLUE}〢${WHITE} [%-${#id}s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "${id}" "${user}" "${exp}" '〢'
     done
     line_separator 70
-    local config_files_dir="${user_folder}/ovpn-cfg"
-    printf "${WHITE}〢 %-7s ${GREEN}%-${#config_files_dir}s ${WHITE}%$(echo 72p - 8 - ${#config_files_dir} | bc )s\n" "DIR-CFG:" "${config_files_dir}" '〢'
+    local config_files_dir="${user_folder}/ovpn-cfg/"
+    printf "${WHITE}〢 %-7s ${GREEN}%-${#config_files_dir}s ${WHITE}%$(echo 72 - 8 - ${#config_files_dir} | bc )s\n" "DIR-CFG:" "${config_files_dir}" '〢'
     line_separator 70
 
 }
