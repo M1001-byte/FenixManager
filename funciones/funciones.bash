@@ -348,7 +348,8 @@ redirect_to_service() {
 list_certs() {
     cert_dir="${user_folder}/FenixManager/cert-ssl/"
     info "Listando certificados SSL en el directorio ${GREEN}$cert_dir${WHITE}"
-    certs=$(ls ${user_folder}/FenixManager/cert-ssl/)
+    local certs=$(ls ${user_folder}/FenixManager/cert-ssl/)
+    local count_=0
     
     if [[ -z "$certs" ]] ;then error "No hay certificados." ; return 1 ;fi
     line_separator 55
@@ -366,20 +367,21 @@ list_certs() {
     
     while true;do
         read -r -p "$(echo -e "${green}[*] Selecciona un certificado (*.cert,*.pem,*.crt): ")" cert_opt
-        if [[ -z "$cert_opt" ]] || [[ $cert_opt -gt $count_ ]];then
+        if [[ -z "$cert_opt" ]] || [[ $cert_opt -gt $count_ ]] || grep -E "[a-z]|[A-Z]" <<< "$cert_opt" &>/dev/null;then
             continue
         else
             CERT_FILE=$cert_dir${certs_array[$cert_opt-1]}
             break
         fi
     done
-    if [[ $CERT_FILE =~ "pem" ]];then return 0 ; fi
-    while true;do
-        read -r -p "$(echo -e" ${yellow}'[*] Selecciona una llave privada (*.key): '")" key_file
-        if [[ -z "$key_file" ]] || [[ $key_file -gt $count_ ]];then continue ; fi
-        export KEY_FILE="${cert_dir}${certs[$key_file]}"
-        break
-    done
+    [[ ! $CERT_FILE =~ "pem" ]] && {
+        while true;do
+            read -r -p "$(echo -e "${WHITE}[*] Selecciona una llave privada (*.key): ")" key_file
+            if [[ -z "$key_file" ]] || [[ $key_file -gt $count_ ]] || grep -E "[a-z]|[A-Z]" <<< "$key_file" &>/dev/null;then continue ; fi
+            export KEY_FILE="$cert_dir${certs_array[$key_file-1]}"
+            break
+        done
+    } || export KEY_FILE="$CERT_FILE" 
 
 }
 
@@ -410,6 +412,7 @@ cert_gen() {
         cat "$name.crt" >> "$name.pem"
         cat "$name.key" >> "$name.pem"
         
+        CERT_FILE="$name.pem"
         rm "$name.crt" "$name.key" &>/dev/null
         info "Certificado guardado en : $cert_dir"
     fi
@@ -424,7 +427,7 @@ stunnel4_whats_cert_to_use(){
         case  $option in
             1 )
                 cert_gen
-                continue
+                break
                 ;;
             2 )
                 list_certs

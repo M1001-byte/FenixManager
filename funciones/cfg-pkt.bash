@@ -374,11 +374,11 @@ cfg_stunnel4() {
             info "Y luego, iniciar fenix nuevamente."
             exit 1
         fi
-        local cert_conf=$(grep "cert" $file_conf | cut -d= -f2 | sed "s|${user_folder}|~|g")
+        local cert_conf=$(grep "cert" $file_conf | cut -d= -f2 | head -n1 | sed "s|${user_folder}|~|g")
         local key_conf=$(grep "key" $file_conf | cut -d= -f2 | sed "s|${user_folder}|~|g" )
         local total_custom_config accept_conn_ports
         accept_conn_ports=()
-        #total_custom_config=$(grep "custom#" ${file_conf} -c 2>/dev/null)
+        
         total_custom_config=$(grep -E -o  "custom#[0-9]{0,9}" ${file_conf} 2>/dev/null| cut -d# -f 2 | tr "\n" " " | xargs)
         for i in ${total_custom_config};do
             local line_number=$(grep -o "custom#${i}" ${file_conf} --line-number | cut -d: -f1)
@@ -411,7 +411,7 @@ cfg_stunnel4() {
         [[ $columns -le 78 ]] && line_separator 73 || line_separator 71
         printf "〢 ${WHITE}%4s: ${GREEN}%-${#cert_conf}s ${WHITE}%$(echo 72 - 4 - ${#cert_conf}  | bc)s\n" "CERT" "${cert_conf}" '〢'
         if [[ ! -z $key_conf ]];then
-            printf "〢${WHITE}%3s:${GREEN}%-${#key_conf}s ${WHITE}%$(echo 72 - 4 - ${#key_conf}  | bc)s\n" "KEY" "${key_conf}" '〢'
+            printf "〢 ${WHITE}%3s: ${GREEN}%-${#key_conf}s ${WHITE}%$(echo 73 - 4 - ${#key_conf}  | bc)s\n" "KEY" "${key_conf}" '〢'
         fi
         [[ $columns -le 78 ]] && line_separator 73 || line_separator 71
 
