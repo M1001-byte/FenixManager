@@ -220,6 +220,8 @@ clone_fenix(){
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
     local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
     echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
+    echo "simple_ui='true'" >> "/etc/FenixManager/preferences.bash"
+
 
 }
 
