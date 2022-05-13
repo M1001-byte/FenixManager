@@ -162,6 +162,7 @@ create_ssh_user_input() {
 }
 
 list_user() {
+    clear
     db="/etc/FenixManager/database/usuarios.db"
     # check if table exist
     {
@@ -189,21 +190,15 @@ list_user() {
 
     lop=$(sqlite3 $db "select rowid, * from ssh")
 
-    if [[ ${columns} -le 78 ]];then
-        line_separator 74
-        printf "${WHITE}〢%-2s ${RED}%-25s ${RED}%-15s ${BLUE}%-20s ${WHITE}%-9s〢\n" 'ID' 'NOMBRE' 'ALIAS' 'CONTRASEÑA' 'CADUCA'
-        line_separator 74
-    else
-        [[ ${columns} -ge 100 ]] && {
-            line_separator 94
-            printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-12s〢\n" 'ID' 'NOMBRE' 'ALIAS' 'CONTRASEÑA' 'EXPIRACION' 'CONEXIONES'
-            line_separator 94
-        } || {
-            line_separator 86
-            printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-10s 〢\n" 'ID' 'NOMBRE' 'ALIAS' 'CONTRASEÑA' 'EXPIRACION' 'CONEXIONES'
-            line_separator 86
-        }
-    fi
+    [[ "${simple_ui}" == "false" ]] && {
+        line_separator 96
+        printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-12s〢\n" 'ID' 'NOMBRE' 'ALIAS' 'CONTRASEÑA' 'EXPIRACION' 'CONEXIONES'
+        line_separator 96
+    } || {
+        line_separator 64
+        printf "${WHITE}〢${RED}%-32s${YELLOW}%-15s${BLUE}%12s${WHITE}%-6s〢\n" 'NOMBRE' 'CONTRASEÑA' 'EXPIRA'
+        line_separator 64
+    }
     
     for i in $lop;do
         IFS='|' read -r -a var_val <<< "$i"
@@ -218,121 +213,138 @@ list_user() {
             number_session=$number_session_openssh
         }
         
-        if [[ ! "${number_session}" -eq 0 ]];then
-            ((users_connected++))
-        fi
+        [[ ! "${number_session}" -eq 0 ]] && ((users_connected++))
 
-        if [[ -z ${var_val[2]} ]];then
-            alias_='-'
-        else
-            alias_=${var_val[2]}
-        fi
+        [[ -z ${var_val[2]} ]] && alias_='-' || alias_=${var_val[2]}
 
-        [[ ${#user} -gt 25 && ${columns} -lt 100 ]] && {
-            # ! (...)
-            user="${user:0:20}(...)"
-        }
+        [[ ${#user} -gt 25 && ${simple_ui} == "true" ]] && user="${user:0:20}(~)" # ! (...)
         
         password=${var_val[3]}
         exp=${var_val[4]}
-        conn=$number_session"/"${var_val[5]}
-        if [[ $columns -le 78 ]];then
-            printf "${WHITE}〢%-2s${RED}%-25s ${RED}%-15s${BLUE}%-20s ${WHITE}%-6s\n" $id $user $alias_ $password $exp 
-        elif [[ ${columns} -ge 100 ]];then
-            printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-11s〢\n" $id $user $alias_ $password $exp $conn
-        else
-            printf "${WHITE}〢 %-2s ${RED}%-25s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-10s〢\n" $id $user $alias_ $password $exp $conn
-        fi
+        conn="${number_session}/${var_val[5]}"
+        [[ "${simple_ui}" == "false" ]] && {
+            printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-8s %-2s〢\n" $id $user $alias_ $password $exp $conn
+        } || {
+            printf "${WHITE}〢${RED}%-25s${WHITE}[${alias_}]${YELLOW} %-15s${BLUE} %10s${WHITE}\n" "${user}"  $password $exp
+        }
     done
+    [[ "${simple_ui}" == "true" ]] && line_separator 64
     local users_disconnected=$(($total_users - $users_connected))
-    if [[ $columns -le 78 ]];then
-        line_separator 74
-        local length_=$(echo 58 - 15 - 15 - 15 - ${#total_users} - ${#users_connected} - ${#users_disconnected} | bc)
-        printf "${WHITE}〢 %15s ${YELLOW}%-${#total_users}s ${WHITE}%15s ${GREEN}%-${#users_connected}s ${WHITE}%15s ${RED}%-${#users_disconnected}s ${WHITE}%${length_}s\n" "TOTAL:" "[ ${total_users} ]" "CONECTADOS:" "[ ${users_connected} ]" "DESCONECTADOS:" "[ ${users_disconnected} ]" '〢'
-        line_separator 74
-    elif [[ ${columns} -ge 100 ]];then
-        local tcp_conn=$(ss -t | grep ssh -c)
-        line_separator 94
-        local length_=$(echo 80 - 60 - ${#total_users} - ${#users_connected} - ${#users_disconnected} - ${#tcp_conn} - 7| bc)
-        printf "${WHITE}〢 %15s ${YELLOW}%-${#total_users}s ${WHITE}%15s ${GREEN}%-${#users_connected}s ${WHITE}%15s ${RED}%-${#users_disconnected}s ${WHITE} %-15s ${GREEN}%-${#tcp_conn}s ${WHITE}%${length_}s\n" "TOTAL:" "[ ${total_users} ]" "CONECTADOS:" "[ ${users_connected} ]" "DESCONECTADOS:" "[ ${users_disconnected} ]" 'CONEXIONES-TCP:' "[ ${tcp_conn} ]" '〢'
-        line_separator 94
-    else
-        line_separator 86
-        local length_=$(echo 72 - 15 - 15 - 15 - ${#total_users} - ${#users_connected} - ${#users_disconnected} | bc)
-        printf "${WHITE}〢 %15s ${YELLOW}%-${#total_users}s ${WHITE}%15s ${GREEN}%-${#users_connected}s ${WHITE}%15s ${RED}%-${#users_disconnected}s ${WHITE}%${length_}s\n" "TOTAL:" "[ ${total_users} ]" "CONECTADOS:" "[ ${users_connected} ]" "DESCONECTADOS:" "[ ${users_disconnected} ]" '〢'
-        line_separator 86
-    fi
+    local total_openssh_connections=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | wc -l)
+    [[ "${simple_ui}" == "true" ]] && {
+        read -p "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
+        clo
+    }
 
+}
+
+monitor_users(){
+    local user_count=$(sqlite3 $userdb "select count(*) from ssh")
+    local users_connected=0
+    local users_disconnected=0
+    clear
+    line_separator 60
+    
+    printf "${WHITE}〢 ${RED}%-32s ${GREEN}%10s ${WHITE}/ ${YELLOW}%-10s${WHITE} %5s\n" "USUARIO" "CONEXIONES" "PERMITIDAS" "〢"
+    line_separator 60
+    for i in $(sqlite3 $userdb "select rowid, * from ssh");do
+        IFS='|' read -r -a var_val <<< "$i"
+        local max_conn=${var_val[5]}
+        local user=${var_val[1]}
+        number_session_openssh=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$user")
+        process_is_running "dropbear" && {
+            number_session_dropbear=$(ps auxwww | grep 'dropbear' | awk '{print $1 }' | grep -w -c "$user")
+            number_session=$((number_session_openssh + number_session_dropbear))
+        } || {
+            number_session=$number_session_openssh
+        }
+        [[ ! "${number_session}" -eq 0 ]] && ((users_connected++))
+        printf "${WHITE}〢 ${RED}%-32s ${GREEN}%10s ${WHITE}/ ${YELLOW}%-10s${WHITE} %5s${WHITE}\n" "${user}" "${number_session}" "${max_conn}" "〢"
+    done
+    line_separator 60
+    read -p "$(echo -e $WHITE'[*] Presione ENTER para continuar...')"
+    clear ; clo
+}
+
+list_id_user_simple(){
+    for i in $(sqlite3 $userdb "select rowid, * from ssh");do
+        IFS='|' read -r -a var_val <<< "$i"
+        local id=${var_val[0]}
+        local username=${var_val[1]}
+        local alias_=${var_val[2]}
+        
+        printf  "${WHITE}%-5s [ ${GREEN}${id}${WHITE} ] ${RED}${username} ${YELLOW}${alias_}${WHITE}\n"
+    done
 }
 
 option_menu_ssh() {
     option_color '1' 'AGREGAR USUARIO'
     option_color '2' 'ELIMINAR USUARIO'
     option_color '3' 'EDITAR USURIO'  
-    option_color '4' 'CREAR UN BACKUP DE LA BASE DE DATOS'
-    option_color '5' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
-    option_color '6' "${RED}ELIMINAR TODOS LOS USUARIOS"
+    [[ ${simple_ui} == "true" ]] && {
+        option_color "4" "LISTAR TODOS LOS USUARIOS"
+        option_color "5" "MONITOR DE USUARIOS CONECTADOS"
+        option_color '6' 'CREAR UN BACKUP DE LA BASE DE DATOS'
+        option_color '7' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
+        option_color '8' "${RED}ELIMINAR TODOS LOS USUARIOS"
+
+    } || {
+        option_color '4' 'CREAR UN BACKUP DE LA BASE DE DATOS'
+        option_color '5' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
+        option_color '6' "${RED}ELIMINAR TODOS LOS USUARIOS"
+    }
     option_color 'E' 'SALIR'
     option_color 'M' 'MENU PRINCIPAL'
     
     while true;do
         prompt=$(date "+%x %X")
-        read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
         case $option in
-            1 )
-                create_ssh_user_input
-                clo
-                ;;
-            2 )
-                delete_user
-                break
-                ;;
-            3 )
-                edit_user
-                break
-                ;;
-            4 )
-                backup_user
-                break
-                ;;
-            5 )
-                restore_backup
-                break
-                ;;
-            6 )
-                delete_all_users
-                ;;
-            e | E | q | Q )
-                exit 0
-                ;;
-            m | M )
-                fenix
-                ;;
-                
+            1 ) create_ssh_user_input && clo ;;
+            2 ) delete_user ;;
+            3 ) edit_user ;;
+            4 ) [[ ${simple_ui} == "true" ]] && list_user || backup_user ;;
+            5 ) [[ ${simple_ui} == "true" ]] && monitor_users || restore_backup ;;
+            6 ) [[ ${simple_ui} == "true" ]] && backup_user || delete_all_users ;;
+            7 ) restore_backup ;;
+            8 ) delete_all_users ;;
+            e | E | q | Q ) exit 0 ;;
+            m | M ) fenix ;;
+            "cls" | "Cls" | "CLS" ) clo ;;
+            * ) tput cuu1 && tput el1 ;;
             esac
         done
 }
 
 delete_user () {
+    [[ "${simple_ui}" == "true" ]] && {
+        list_id_user_simple
+    }
     read -p "$(echo -e $WHITE'[*] Ingrese el id del usuario a eliminar : ' )" id_user
-    user_name=$(sqlite3 $userdb "select rowid,nombre from ssh where rowid = $id_user" | awk '{split($0,a,"|");print a[2]}')
+    local user_name=$(sqlite3 $userdb "select rowid,nombre from ssh where rowid = $id_user" 2>/dev/null| awk '{split($0,a,"|");print a[2]}')
+    
+    if [[ -z  "${user_name}" ]];then
+        error "No existe un usuario con ese id. O no hay usuarios en la base de datos."
+        return 1
+    fi
     
     grep -q $user_name /etc/passwd
     if [[ $? != 0 ]];then
         error 'El usuario esta presente en la base de datos,pero no en el sistema.'
         sqlite3 $userdb "delete from ssh where nombre = '$user_name'"
-        if [[ $status == 0 ]];then
+        if [[ $? == 0 ]];then
             info 'Usuario eliminado de la base de datos'
         else
             error 'Fallo la eliminacion del usuario de la base de datos.'
         fi
-        read -p "$(echo -e $WHITE'[*] Presione enter para continuar... ' )"
     else
         pkill -u $user_name
         sqlite3 $userdb "delete from ssh where nombre = '$user_name'"
         userdel $user_name
         info  "El Usuario ${RED}${user_name}${WHITE} eliminado con exito."
     fi
+
+    [[ "${simple_ui}" == "true" ]] && read -p "$(echo -e $WHITE'[*] Presione enter para continuar... ' )"
     clo
 }
 
@@ -363,19 +375,21 @@ delete_all_users() {
 
 edit_user () {
     all_ids=$(sqlite3 $userdb "select rowid,nombre from ssh" | awk '{split($0,a,"|");print a[1]}')
-    
+    list_id_user_simple
     read -p "$(echo -e $GREEN'[*] Ingrese el id del usuario a editar : ' )" id_user
+    
     if [[ ! $all_ids =~ $id_user ]];then
         error 'El id ingresado no existe en la base de datos.'
         read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
         clo
     fi
+
     name=$(sqlite3 $userdb "select nombre from ssh where rowid = $id_user")
     info "Editando el usuario ${RED}$name${WHITE}.Presione enter si no deseas editar una opcion."
 
     while true;do
         read -p "$(echo -e $WHITE'[*] Ingrese el nuevo nombre del usuario : ' )" new_name
-        if [[ ${#user} -gt 32 ]];then
+        if [[ ${#new_name} -gt 32 ]];then
             error 'El nombre de usuario no puede tener mas de 32 caracteres.'
             continue
         fi
@@ -384,11 +398,13 @@ edit_user () {
             break
         else
             if ! check_user_exist $new_name;then
-                break
+                continue
             fi
         fi
+        break
     done
     default_password=$(sqlite3 $userdb "select password from ssh where rowid = $id_user")
+    
     while true;do
         read -p "$(echo -e $MAGENTA'[*] Contraseña para '$new_name' : ')" password
         if [[ ${#password} -gt 20 ]];then
@@ -399,22 +415,27 @@ edit_user () {
              password=$default_password
              break
         fi
+        break
     done
     
     exp_date_default=$(sqlite3 $userdb "select exp_date from ssh where rowid = $id_user")
-    read -p "$(echo -e $RED'[*] Cantidad de dias a expirar : ' )" exp_date
-    if  [[ -z $exp_date ]];then
-        exp_date=$exp_date_default
-    else
-        exp_date=$(date -d "$exp_date days" +%Y-%m-%d)
-    fi
+    while true;do
+        read -p "$(echo -e $RED'[*] Cantidad de dias a expirar : ' )" exp_date
+    
+        [[ -z $exp_date ]] && exp_date=$exp_date_default
+        
+        [[ $exp_date =~ ^[0-9]+$ ]] && exp_date=$(date -d "$exp_date days" +%Y-%m-%d 2>/dev/null) ; break
+    done
     
     max_conn_default=$(sqlite3 $userdb "select max_conn from ssh where rowid = $id_user")
-    read -p "$(echo -e $YELLOW'[*] Cantidad de conexiones permitidas : ' )" max_conn
+    while true;do
+        read -p "$(echo -e $YELLOW'[*] Cantidad de conexiones permitidas : ' )" max_conn
     
-    if [[ -z $max_conn ]];then
-        max_conn=$max_conn_default
-    fi
+        if [[ -z $max_conn ]];then
+            max_conn=$max_conn_default
+        fi
+        [[ $max_conn =~ ^[0-9]+$ ]] &&  break
+    done
 
     info "${RED}[!]${WHITE} = valor modificados. ${GREEN}[+]${WHITE} = valor por defecto"
     if [[ "$new_name" != "$name" ]];then
@@ -443,7 +464,11 @@ edit_user () {
         case $confirm in
             s | S )
                 sqlite3 $userdb "update ssh set nombre = '$new_name', password = '$password', exp_date = '$exp_date', max_conn = '$max_conn' where rowid = $id_user"
-                echo -e "\\033[1;32m[*] El Usuario $new_name (anteriormente $name) editado con exito.\\033[m"
+                pkill -9 -u $name &>/dev/null && userdel $name &>/dev/null
+                pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
+                useradd -g "ssh_user" --no-create-home --shell /bin/false --gid $group_ssh  -p "$pass" "$new_name"
+                info "El usuaio $new_name ha sido editado con exito."
+                read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
                 clo
                 ;;
             n | N )
@@ -473,10 +498,11 @@ backup_user () {
         local url=$(curl bashupload.com/db_backup.db --data-binary @$database_file &> ${mk_file})
         url=$(grep -Eo "(http|https)://[a-zA-Z0-9./?=_%:-]*" ${mk_file})
         
-        echo -e "${YELLOW}〢 PARA RESTAURAR EL BACKUP,SIMPLEMENTE COPIE Y PEGUE EL SIGUIENTE COMANDO:〢"
-        echo ""
-        echo -e "${GREEN} cd ~/FenixManager/backup/ && wget $url -O backup_usuarios_$date_.db -q --show-progress "
-        echo ""
+        info "COPIES EL SIGUIENTE COMANDO Y PEGALO EN LA TERMINAL:"
+        echo -e "\n"
+        echo -en "${GREEN} cd ~/FenixManager/backup/ && \n wget $url -O backup_usuarios_$date_.db -q "
+        echo -e "\n"
+        [[ "${simple_ui}" == "true" ]] && database_file="${database_file//"$user_folder"/"~"}"
         info "Copia de seguridad creada con exito. ${GREEN}$database_file${WHITE}"
         rm $mk_file
     else
@@ -491,32 +517,37 @@ restore_backup () {
     
     if [[ $backup_files == 0 ]];then
         error 'No hay copias de seguridad en el directorio.'
-        info "Cree una copia de seguridad primero.Y luego guerdela en el directorio ${user_folder}/backup"
+        info "Cree una copia de seguridad primero."
+        info "Luego guerdela en el directorio ${user_folder}/backup"
         read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
         clo
     fi
     
     count_=0
 
-    [[ ${columns} -le 78 ]] && {
-        line_separator 73
-        printf "〢${WHITE} %-2s ${YELLOW}%-38s${WHITE} %33s\n" 'ID' 'NOMBRE DEL ARCHIVO' "〢"
+    [[ "${simple_ui}" == "false" ]] && {
+        line_separator 96
+        printf "〢${WHITE} %-4s ${YELLOW}%-38s${WHITE} %15s %39s\n" 'ID' 'NOMBRE DEL ARCHIVO' "TAMAÑO" "〢"
+        line_separator 96
     } || {
-        line_separator 79
-        printf "〢${WHITE} %-2s   ${YELLOW}%-38s${WHITE} %39s\n" 'ID' 'NOMBRE DEL ARCHIVO' "〢"
+        line_separator 60
+        printf "〢${WHITE} %-4s ${YELLOW}%-30s${WHITE} %26s\n" 'ID' 'NOMBRE DEL ARCHIVO' "〢"
+        line_separator 60
     }
+    
     for file in $backup_files;do
         count_=$(expr $count_ + 1)
-        [[ ${columns} -le 78 ]] && {
-            printf "〢${WHITE} [%${#count_}s] ${YELLOW}%-38s${WHITE} %32s\n" "${count_}" "${file}" "〢"
+        local file_size=$(du -h $backup_dir/$file | awk '{print $1}')
+        [[ "${simple_ui}" == "false" ]] && {
+            printf "〢${WHITE} [%-${#id}s] ${YELLOW}%-38s${WHITE} %15s %$(echo 93 - 38 - 15 - ${#id} | bc)s \n" "${count_}" "${file}" "${file_size}" "〢"
         } || {
-            printf "〢${WHITE} [%${#count_}s]  ${YELLOW}%-38s${WHITE} %39s\n" "${count_}" "${file}" "〢"
+            printf "〢${WHITE} [%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((61 -  4 -  -${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
         }
     done
-    [[ ${columns} -le 78 ]] && line_separator 73 || line_separator 79
+    [[ "${simple_ui}" == "false" ]] && line_separator 96 || line_separator 60
     
     while true;do
-        read -p "$(echo -e $GREEN'[*] Seleccione el ID de la copia de seguridad a restaurar : ' )" id_backup
+        read -p "$(echo -e $GREEN'[*] ID de la copia de seguridad a restaurar : ' )" id_backup
         if grep '[Aa-Zz]' <<< $id_backup > /dev/null;then
             error 'Solo valores numericos.'
             continue
@@ -554,10 +585,54 @@ restore_backup () {
         esac
 }
 
+show_acc_ssh_info(){
+    local user_db="/etc/FenixManager/database/usuarios.db"
+    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" 2> /dev/null || echo "error")
+    if [[ "${get_total_users}" == "error" ]];then
+        error "La base de datos de usuarios no existe o esta corrupta"
+        info "Creando base de datos de usuarios"
+        sqlite3 $user_db  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );' && {
+            info "Base de datos de usuarios creada correctamente"
+            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
+            clear && fenix
+        } || {
+            error "Error al crear la base de datos de usuarios"
+            exit 1
+        }
+
+    fi
+    local users_=$(sqlite3 "$user_db" "SELECT nombre FROM ssh")
+    local online_user=0
+    for i in ${users_[@]};do
+        local number_session=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$i")
+        [[ "${number_session}" -ne '0' ]] &&  ((online_user++))
+    done
+    local offline_users=$(echo ${get_total_users} - ${online_user} | bc)
+    
+    [[ -z "${get_total_users}" ]] && get_total_users=0
+    
+    [[ "${simple_ui}" == "false" ]] && {
+        printf "${WHITE}〢 %20s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#online_user}s ${WHITE}%16s ${RED}%-${#offline_users}s ${WHITE}%-$(echo 75 - 20 - 12 - 16 - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${online_user} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
+    } || {
+        printf "${WHITE}〢 %13s ${YELLOW}%-${#get_total_users}s ${WHITE} %-10s ${GREEN}%-${#online_user}s ${WHITE}%12s ${RED}%${#offline_users}s${WHITE}%-$(echo 60 - 16 - 35  - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s〢\n" "USUARIOS-SSH:" "[${get_total_users}]" "CONECTADOS:" "[${online_user}]" "DESCONECTADOS:" "[${offline_users}]"
+    }
+}
+
 clo() {
-    clear
-    list_user
-    option_menu_ssh
+    [[ "${simple_ui}" == "false" ]] && {
+        clear
+        list_user  
+        line_separator 96
+        show_acc_ssh_info
+        line_separator 96
+        option_menu_ssh
+    } || {
+        clear
+        line_separator 60
+        show_acc_ssh_info
+        line_separator 60
+        option_menu_ssh
+    }
 }
 
 check_sqlite3() {

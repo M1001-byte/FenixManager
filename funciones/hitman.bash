@@ -88,7 +88,7 @@ main(){
         "delete_temp_user"|5)
             delete_temp_user "${2}" "${3}"
             ;;
-        *|"help"|"-h")
+        "help"|"-h")
             help_msg
             ;;
     esac

@@ -26,8 +26,6 @@ create_db_user_ovpn() {
         sqlite3 $db_ovpn 'CREATE TABLE ovpn (nombre VARCHAR(32) NOT NULL, exp_date DATETIME);'
         if [[ $? -eq 0 ]];then
             info "La tabla 'ovpn' se ha creado correctamente."
-            sleep 2
-            main
         else
             error "Error al crear la tabla 'ovpn'."
             exit 1
@@ -192,7 +190,7 @@ installQuestions() {
 
 install_openvpn() {
     clear
-    separator "INSTALANDO OPENVPN"
+    echo -e "${BLUE}〢───────────────────〢 ${WHITE}INSTALANDO OPENVPN ${BLUE}〢─────────────────〢"
     trap ctrl_c SIGINT SIGTERM
     bar "apt-get install openvpn -y"
     if [[ $? != 0 ]];then
@@ -209,7 +207,7 @@ install_openvpn() {
     fi
 
     if [[ !  -f /etc/openvpn/server.conf ]];then
-        bar "apt-get -y install ca-certificates gnupg"
+        bar "apt-get -y install ca-certificates gnupg" 'hidden_et'
         if [[ -d /etc/openvpn/easy-rsa/ ]];then
             rm -rf /etc/openvpn/easy-rsa/
         fi
@@ -400,6 +398,8 @@ install_openvpn() {
     echo -e "remote $IP $PORT\ndev tun\nresolv-retry infinite\nnobind\npersist-key\npersist-tun\nremote-cert-tls server\nverify-x509-name $SERVER_NAME name\nauth $HMAC_ALG\nauth-nocache\ncipher $CIPHER\ntls-client\ntls-version-min 1.2\ntls-cipher $CC_CIPHER\nignore-unknown-option block-outside-dns\nsetenv opt block-outside-dns # Prevent Windows 10 DNS leak\nverb 3" >>/etc/openvpn/client-template.txt
     info "Openvpn configurado correctamente!."
     read -p "Pulsa una tecla para continuar..."
+    clear
+    cgf_openvpn
 }
 
 newClient() {
@@ -408,7 +408,7 @@ newClient() {
 
         read -rp '[*] Nombre del cliente: ' CLIENT
 
-        if [[ ${#CLIENT} -ge 32 ]];then
+        if [[ ${#CLIENT} -gt 32 ]];then
             error "El nombre del cliente no puede tener más de 32 caracteres."
             continue
         fi
@@ -458,8 +458,8 @@ newClient() {
     while true;do
         read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
         if [[ -z "$date_exp" ]];then
-            info "Valor incorrecto, se asignara una fecha de expiracion de 1 dia."
-            date_exp=1
+            error "Valor incorrecto."
+            continue
         elif [ -z "${date_exp}" ] || [ ! grep -E '^[0-9]+$' <<< "${date_exp}" 2>/dev/null ] || [ "${date_exp}" == 0 ];then
             info 'El valor no es correcto.'
             continue
@@ -587,7 +587,8 @@ remove_openvpn() {
     sqlite3 $db_ovpn "DROP TABLE ovpn" 2>/dev/null
 
     info "OpenVPN ha sido eliminado."
-    exit 0
+    clear
+    fenix
 }
 
 option_menu_ovpn() {
@@ -628,28 +629,28 @@ option_menu_ovpn() {
 list_users_ovpn() {
     create_db_user_ovpn
     users_vars=$(sqlite3 $db_ovpn "SELECT rowid,nombre, exp_date FROM ovpn" )
-    line_separator 70
-    printf "${BLUE}〢${WHITE} [%-1s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "#" "Nombre" "Expira" '〢'
-    line_separator 70
+    line_separator 60
+    printf "${BLUE}〢${WHITE} [%-1s] ${RED}%-32s ${YELLOW}%-10s ${WHITE}%14s\n" "#" "Nombre" "Expira" '〢'
+    line_separator 60
     
     for i in $users_vars;do
         IFS='|' read -r -a user_array <<< "$i"
         local id user exp tmp
         
-        id="${user_array[0]}"        
+        id="${user_array[0]}"
         user="${user_array[1]}"
         exp="${user_array[2]}"
         
-        [[ ${#user} -gt 25 && ${columns} -lt 100 ]] && {
-            # ! (...)
-            user="${user:0:20}(...)"
-        }
-        printf "${BLUE}〢${WHITE} [%-${#id}s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%26s\n" "${id}" "${user}" "${exp}" '〢'
+        # [[ ${#user} -gt 25 && ${simple_ui} == "true" ]] && {
+            # # ! (...)
+            # user="${user:0:20}(...)"
+        # }
+        printf "${BLUE}〢${WHITE} [%-${#id}s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%14s\n" "${id}" "${user}" "${exp}" '〢'
     done
-    line_separator 70
+    line_separator 60
     local config_files_dir="${user_folder}/ovpn-cfg/"
-    printf "${WHITE}〢 %-7s ${GREEN}%-${#config_files_dir}s ${WHITE}%$(echo 72 - 8 - ${#config_files_dir} | bc )s\n" "DIR-CFG:" "${config_files_dir}" '〢'
-    line_separator 70
+    printf "${WHITE}〢 %-7s ${GREEN}%-${#config_files_dir}s ${WHITE}%$(echo 60 - 8 - ${#config_files_dir} | bc )s\n" "DIR-CFG:" "${config_files_dir}" '〢'
+    line_separator 60
 
 }
 

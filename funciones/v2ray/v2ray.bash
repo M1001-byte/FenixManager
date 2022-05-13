@@ -43,7 +43,8 @@ cfg_v2ray(){
     # Es por eso que me tome el trabajo de traducir el panel webui. ( chino a espanol ).
     v2ray_and_x_ui_installed_or_running
     clear
-    separator "CONFIGURANDO V2RAY"
+    #separator "CONFIGURANDO V2RAY"
+    echo -e "${BLUE}〢─────────────────〢 ${WHITE}CONFIGURANDO V2RAY${BLUE} 〢───────────────────〢"
     show_status_v2ray_xui
     
     # x-ui-is-installed
@@ -133,7 +134,7 @@ cfg_v2ray(){
 cfg_x_ui(){
     clear
     v2ray_and_x_ui_installed_or_running
-    separator "CONFIGURANDO X-UI ( Panel web )"
+    echo -e "${BLUE}〢───────────〢 ${WHITE}CONFIGURANDO X-UI ( PANEL WEB )${BLUE} 〢────────────〢"
     show_web_panel_info
     
     
@@ -162,34 +163,23 @@ cfg_x_ui(){
 
         case $user_option in
             1) # REINICIAR/INICIAR X-UI
-                if [[ $x_ui_is_running == 0 ]] ; then
-                    bar "systemctl restart x-ui"
-                    sleep 2.5
-                else
-                    bar "systemctl start x-ui"
-                    sleep 2.5
-                    cfg_x_ui
-                fi
+                [[ $x_ui_is_running == 0 ]] && bar "systemctl restart x-ui" || bar "systemctl start x-ui"
+                sleep 2.5
+                cfg_x_ui
                 ;;
             2) # DETENER/VER ESTADO X-UI
-                if [[ $x_ui_is_running == 0 ]] ; then
-                    bar "systemctl stop x-ui"
-                    sleep 2.5
-                    cfg_x_ui
-                else
-                    systemctl status x-ui
-                    sleep 2.5
-                fi
+                [[ $x_ui_is_running == 0 ]] && bar "systemctl stop x-ui" || systemctl status x-ui
+                sleep 2.5
+                cfg_x_ui
                 ;;
             3) # DESINSTALAR/VER ESTADO DE X-UI
-                if [[ $x_ui_is_running == 0 ]] ; then
+                [[ $x_ui_is_running == 0 ]] && {
                     systemctl status x-ui
-                    sleep 2.5
-                else
+                } || {
                     x-ui uninstall
                     rm /usr/bin/x-ui -f
-                    break
-                fi
+                    sleep 2.5
+                }
                 ;;
             4) # RESTABLECER CONTRASEÑA DE USUARIO
                 {
@@ -223,10 +213,12 @@ cfg_x_ui(){
             6) # CAMBIAR PUERTO DEL PANEL
                 {
                     port_input
-                    local new_port=${puertos_array[1]}
-                    /usr/local/x-ui/x-ui setting -port ${port} &>/dev/null
+                    local new_port=${puertos_array[0]}
+                    /usr/local/x-ui/x-ui setting -port ${new_port} &>/dev/null
                     systemctl restart x-ui
                     info "El puerto del panel se ha cambiado a ${GREEN}${new_port}${WHITE}."
+                    sleep 1.5
+                    cfg_x_ui
                 }
                 ;;
             7) # DESINSTALAR X-UI
@@ -285,14 +277,12 @@ show_status_v2ray_xui(){
         color_2="${RED}"
     fi
 
-    one_length=$(echo 65 - $(echo "V2RAY  ${v2ray_string}" | wc -c ) | bc)
-    two_length=$(echo 65 - $(echo "PANEL WEB  ${x_ui_string}" | wc -c ) | bc)
+    one_length=$(echo 61 - $(echo "V2RAY  ${v2ray_string}" | wc -c ) | bc)
+    two_length=$(echo 61 - $(echo "PANEL WEB  ${x_ui_string}" | wc -c ) | bc)
     
     printf "${WHITE}〢 V2RAY : ${color_1}${v2ray_string}${WHITE} %${one_length}s\n" "〢"
     printf "${WHITE}〢 PANEL WEB : ${color_2}${x_ui_string}${WHITE} %${two_length}s\n" "〢"
-    #echo -e "${WHITE}〢 V2RAY: ${v2ray_string}\t\t\t\t\t  〢"
-    #echo -e "${WHITE}〢 PANEL WEB: ${x_ui_string}\t\t\t\t\t  〢"
-    line_separator 62
+    line_separator 60
 }
 show_web_panel_info(){
     local log_cmd username password
@@ -301,15 +291,15 @@ show_web_panel_info(){
     local password=$(sqlite3 /etc/x-ui/x-ui.db "select password from users" )
     local url_="http://$(curl -s ipinfo.io/ip):${port_to_bind}"
 
-    one_length=$(echo 77 - $(echo "PUERTO DEL PANEL ${port_to_bind}" | wc -c ) | bc)
-    two_length=$(echo 77 - $(echo "USUARIO DEL PANEL ${username}" | wc -c ) | bc)
-    three_length=$(echo 78 - $(echo "CONTRASEÑA DEL PANEL ${password}" | wc -c ) | bc)
+    one_length=$(echo 61 - $(echo "PUERTO DEL PANEL ${port_to_bind}" | wc -c ) | bc)
+    two_length=$(echo 61 - $(echo "USUARIO DEL PANEL ${username}" | wc -c ) | bc)
+    three_length=$(echo 62 - $(echo "CONTRASEÑA DEL PANEL ${password}" | wc -c ) | bc)
     [[ -n "${domain_}" ]] && {
         local url_="http://${domain_}:${port_to_bind}"
     }
-    printf "${WHITE}〢 %-10s : ${GREEN}%0.9s ${WHITE}%${one_length}s\n" "PUERTO DEL PANEL" "${port_to_bind}" '〢'
-    printf "${WHITE}〢 %-10s : ${GREEN}%-${#username}s ${WHITE}%${two_length}s\n" "USUARIO DEL PANEL" "${username}" '〢'
-    printf "${WHITE}〢 %-10s : ${GREEN}%-${#password}s ${WHITE}%${three_length}s\n" "CONTRASEÑA DEL PANEL" "${password}" '〢'
-    printf "${WHITE}〢 %-5s ${GREEN}%-${#url_}s ${WHITE}%$(echo 77 - 5 - ${#url_} | bc )s\n" "URL:" "${url_}" '〢'
-    line_separator 75
+    printf "${WHITE}〢 %-10s: ${GREEN}%0.9s ${WHITE}%${one_length}s\n" "PUERTO DEL PANEL" "${port_to_bind}" '〢'
+    printf "${WHITE}〢 %-10s: ${GREEN}%-${#username}s ${WHITE}%${two_length}s\n" "USUARIO DEL PANEL" "${username}" '〢'
+    printf "${WHITE}〢 %-10s: ${GREEN}%-${#password}s ${WHITE}%${three_length}s\n" "CONTRASEÑA DEL PANEL" "${password}" '〢'
+    printf "${WHITE}〢 %-5s ${GREEN}%-${#url_}s ${WHITE}%$(echo 60 - 5 - ${#url_} | bc )s\n" "URL:" "${url_}" '〢'
+    line_separator 60
 }

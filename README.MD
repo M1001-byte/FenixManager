@@ -1,4 +1,4 @@
-# FénixManager
+# FénixManager (Simple UI)
 
 ![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)
@@ -60,17 +60,7 @@ sudo bash /tmp/install-fenix.bash # Instalar
  - [ ] Panel de administracion via web
 
 ## 📸 Screenshots
-**Si la  visualización del script no es correcta: es recomendable reducir el tamaño de la fuente de tu terminal.**
-***
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/jWSb49Q/adm-ssh.png" alt="Administrar usuarios ssh" border="0"></a>
-***
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/2cgcgHS/py-socks.png" alt="Proxy forwarding" border="0"></a>
-***
-<a href="https://ibb.co/5KYCymn"><img src="https://i.ibb.co/jJVq2mW/cfg-menu.png" alt="cfg-menu" border="0"></a>
-***
-<a href="https://ibb.co/9cspNTq"><img src="https://i.ibb.co/vVZcHPJ/fenix-settings.png" alt="Ajustes FenixManager" border="0"></a>
-***
-<a href="https://ibb.co/m4xRtDx"><img src="https://i.ibb.co/0rwnZDw/menu-proto.png" alt="menu-proto" border="0"></a>
+
 
 ## Contribuir
 1. Bifurcar este  repositorio

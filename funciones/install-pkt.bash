@@ -128,7 +128,7 @@ install_stunnel4() {
 install_slowdns() {
     trap ctrl_c SIGINT SIGTERM SIGKILL
     clear
-    separator "INSTALANDO SLOWDNS"
+    echo -e "${BLUE}〢───────────────────〢${WHITE} INSTALANDO SLOWDNS ${BLUE}〢─────────────────〢${WHITE}"
     chmod +x $script_dir/bin/slowdns
     local key=$(mktemp)
     local pub=$(mktemp slowdns_pub.XXX)
@@ -146,7 +146,6 @@ install_slowdns() {
     $script_dir/bin/slowdns -gen-key -privkey-file "$key" -pubkey-file "$pub" 1>/dev/null 
     info "Clave publica : $(cat $pub)"
     echo -e "$(cat $pub)" > "${user_folder}/FenixManager/slowdns_pubkey"
-    info "Se recomienda seleccionar la opcion correspondiente a SSH/DROPBEAR"
     local local_service=22
     iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 5353
     
@@ -158,6 +157,7 @@ install_slowdns() {
         error 'Error al iniciar slowdns.'
     fi
     read -p "$(echo -e "$YELLOW[*] Presione enter para continuar.${endcolor}") " option
+    cfg_slowdns
 
 }
 

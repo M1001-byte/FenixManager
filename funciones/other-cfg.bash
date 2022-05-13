@@ -45,18 +45,18 @@ cfg_hitman(){
     local minutes_=$(grep -E ".*/[0-9]{1,3}" "${fenixmanager_crontab_file}" -o | awk '{split($0,a,"/"); print a[2]}')
         
     clear
-    separator "CONFIGURACIÓN DE HITMAN"
+    echo -e "${BLUE}〢──────────────────〢 ${WHITE}CONFIGURANDO HITMAN ${BLUE}〢─────────────────〢"
     show_info(){
         # 69
         # 67
         local cron_is_running=$(ps -ef | grep -v grep | grep cron | wc -l)
         # ! CHECK IF CRON IS RUNNING
         if [ $cron_is_running -eq 0 ]; then
-            printf "${WHITE}〢%4s : ${RED}%54s ${WHITE}%10s\n" "CRON" "[ DETENIDO ] NO SE PUEDE EJECUTAR EL SCRIPT DE HITMAN." "〢"
+            printf "${WHITE}〢%4s : ${RED}%46s ${WHITE}%10s\n" "CRON" "[ DETENIDO ] NO SE PUEDE EJECUTAR EL SCRIPT DE HITMAN." "〢"
             bar "systemctl start cron"
             if [ $? -eq 0 ]; then info "SE HA INICIADO EL SERVICIO CRON." ; sleep 4 && cfg_hitman ; else error "NO SE HA INICIADO EL SERVICIO CRON. CONTACTESE CON EL ADMINISTRADOR." ; exit $? ; fi
         else
-            printf "${WHITE}〢%4s : ${GREEN}%16s ${WHITE}%48s\n" "CRON" "[ EJECUTANDOSE ]" "〢"
+            printf "${WHITE}〢%4s : ${GREEN}%16s ${WHITE}%39s\n" "CRON" "[ EJECUTANDOSE ]" "〢"
         fi
         # ! CHECK IF CRON-FILE EXISTS
         if [ ! -f "$fenixmanager_crontab_file" ]; then
@@ -64,15 +64,15 @@ cfg_hitman(){
             sleep 3
             add_cront_job_for_hitman
         else
-            printf "${WHITE}〢%9s : ${GREEN}%${#fenixmanager_crontab_file}s ${WHITE}%35s\n" "CRON-FILE" "${fenixmanager_crontab_file}" "〢"
+            printf "${WHITE}〢%9s : ${GREEN}%${#fenixmanager_crontab_file}s ${WHITE}%$((60 - 10 - ${#fenixmanager_crontab_file}))s\n" "CRON-FILE" "${fenixmanager_crontab_file}" "〢"
         fi
-        printf "${WHITE}〢%15s : ${GREEN}%${#hitman_logfile}s ${WHITE}%21s\n" "HITMAN-LOG-FILE" "${hitman_logfile}" "〢"
-        line_separator 67
+        printf "${WHITE}〢%15s : ${GREEN}%${#hitman_logfile}s ${WHITE}%$((60 - 16 - ${#hitman_logfile}))s\n" "HITMAN-LOG-FILE" "${hitman_logfile}" "〢"
+        line_separator 60
         local info_hour_del_expired_acc="DIARIAMENTE, A LAS 00:00: HITMAN ELIMINARA LAS CUENTAS EXPIRADAS."
-        printf "${WHITE}〢${YELLOW}%${#info_hour_del_expired_acc}s ${WHITE}%3s\n" "${info_hour_del_expired_acc}" "〢"
+        printf "${WHITE}${YELLOW}%${#info_hour_del_expired_acc}s ${WHITE}%3s\n" "${info_hour_del_expired_acc}"
         local info_check_acc_exceded_limit="CADA ${minutes_} MINUTOS,HITMAN COMPROBARA SI HAY CUENTAS CON EXCEDENTE DE LIMITE DE CONEXIONES."
-        printf "${WHITE}〢${YELLOW}%${#info_check_acc_exceded_limit}s ${WHITE}%3s\n" "${info_check_acc_exceded_limit}" "〢"
-        line_separator 67
+        printf "${WHITE}${YELLOW}%${#info_check_acc_exceded_limit}s ${WHITE}%3s\n" "${info_check_acc_exceded_limit}" ""
+        line_separator 60
     }
     show_info
     option_color 1 "VER REGISTRO DE HITMAN"
@@ -87,7 +87,9 @@ cfg_hitman(){
         case $opt in
             1) # VER REGISTRO DE HITMAN
                 clear
-                [[ -f "${hitman_logfile}" ]] && cat "${hitman_logfile}" || info "No hay registro de hitman."
+                [[ -f "${hitman_logfile}" ]] && {
+                    [[ "${simple_ui}" == "true" ]] && nano "${hitman_logfile}" ; cfg_hitman || less "${hitman_logfile}"
+                } || info "No hay registro de hitman."
                 ;;
             2) # CAMBIAR EL TIEMPO DE EJECUCIÓN; USUARIOS CON EXCEDENTE DE CONEXIONES
                 {   
@@ -133,16 +135,17 @@ cfg_hitman(){
 
 cfg_firewall_ufw(){
     clear
-    separator "CONFIGURACION  DE ( UFW ) " # ! 72
+    echo -e "${BLUE}〢─────────────〢 ${WHITE}CONFIGURANDO FIREWALL ( UFW ) ${BLUE}〢────────────〢"
     local color_ ufw_installed ufw_status ufw_file ports_allow ports_deny
     ufw_installed=$(dpkg -l | grep -E "^ii" | grep -E "ufw" | wc -l)
     ufw_status=$(ufw status | grep -Eo "inactive" &>/dev/null && echo "[ INACTIVO ]" || echo "[ ACTIVO ]")
     ufw_file="/etc/default/ufw"
+    
     show_info(){
         # ! UFW IS RUNNING OR INSTALLED
         if [[ "${ufw_installed}" -eq 1 ]];then
             [[ "${ufw_status}" =~ "[ INACTIVO ]" ]] && color_="${RED}" ||  color_="${GREEN}"
-            local nn_length_=$(echo 71 - ${#ufw_status} - 3 | bc)
+            local nn_length_=$(echo 60 - ${#ufw_status} - 4 | bc)
             printf "${WHITE}〢%3s : ${color_}%${#ufw_status}s ${WHITE}%${nn_length_}s\n" "UFW" "${ufw_status}" "〢"
         else
             printf "${WHITE}〢%3s : ${RED}%60s ${WHITE}%15s\n" "UFW" "[ NO INSTALADO ] NO SE PUEDE EJECUTAR EL SCRIPT DE FIREWALL." "〢"
@@ -161,13 +164,13 @@ cfg_firewall_ufw(){
         ports_allow=$(ufw status | grep "ALLOW" -c )
         ports_deny=$(ufw status | grep "DENY" -c )
         logfile="/var/log/ufw.log"
-        printf "${WHITE}〢%8s : ${GREEN}%${#logfile}s ${WHITE}%47s\n" "LOG-FILE" "${logfile}" "〢"
-        printf "${WHITE}〢%18s : ${GREEN}%${#ports_allow}s ${WHITE}%$(echo 71 - 18 - ${#ports_allow} | bc )s\n" "PUERTOS PERMITIDOS" "${ports_allow}" "〢"
-        printf "${WHITE}〢%18s : ${RED}%${#ports_deny}s ${WHITE}%$(echo 71 - 18 - ${#ports_deny} | bc )s\n" "PUERTOS BLOQUEADOS" "${ports_deny}" "〢"
-        line_separator 72
-        printf "${WHITE}〢${YELLOW}%71s ${WHITE}%0s\n" "ESTE MENU PERMITE REALIZAR OPERACIONES HIPER-BASICAS SOBRE EL FIREWALL." "〢"
-        printf "${WHITE}〢${YELLOW}%68s ${WHITE}%7s\n" "PARA UNA MEJOR ADMINISTRACIÓN, SE RECOMIENDA LEER LA DOCUMENTACION." "〢"
-        line_separator 72
+        printf "${WHITE}〢%8s : ${GREEN}%${#logfile}s ${WHITE}%$((60 - 9 - ${#logfile}))s\n" "LOG-FILE" "${logfile}" "〢"
+        printf "${WHITE}〢%18s : ${GREEN}%${#ports_allow}s ${WHITE}%$((60 - 19 - ${#ports_allow} ))s\n" "PUERTOS PERMITIDOS" "${ports_allow}" "〢"
+        printf "${WHITE}〢%18s : ${RED}%${#ports_deny}s ${WHITE}%$(( 60 - 19 - ${#ports_deny} ))s\n" "PUERTOS BLOQUEADOS" "${ports_deny}" "〢"
+        line_separator 60
+        echo -e "${YELLOW}ESTE MENU PERMITE REALIZAR OPERACIONES HIPER-BASICAS."
+        echo -e "${YELLOW}PARA UNA MEJOR ADMINISTRACIÓN, SE RECOMIENDA LEER LA DOCUMENTACION.${WHITE}"
+        line_separator 60
     }
     show_info
     if [[ "${ufw_status}" =~ "[ INACTIVO ]" ]];then
@@ -197,25 +200,13 @@ cfg_firewall_ufw(){
                 sleep 3
                 cfg_firewall_ufw
                 ;;
-            2) # PERMITIR PUERTOS
-                deny_allow_port_ufw_input "allow"
-                ;;
-            3) # BLOQUEAR PUERTOS
-                deny_allow_port_ufw_input "deny"
-                ;;
-            4) # LISTAR TODAS LAS REGLAS
-                ufw status
-                ;;
-            "cls" | "CLS")
-                clear
-                cfg_firewall_ufw
-                ;;
-            [Mm])
-                fenix
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
+            2) deny_allow_port_ufw_input "allow" ;;
+            3) deny_allow_port_ufw_input "deny" ;;
+            4) clear ; less <<< $(ufw status) ; cfg_firewall_ufw ;;
+            "cls" | "CLS") clear && cfg_firewall_ufw ;;
+            [Mm]) fenix ;;
+            q|Q|e|E) exit 0 ;;
+            *) tput cuu1 && tput el1
             esac
     done
 }
@@ -223,20 +214,21 @@ cfg_firewall_ufw(){
 cfg_timezone(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    separator "CONFIGURANDO LA ZONA HORARIA" # ! 74
+    echo -e "${BLUE}〢─────────────〢 ${WHITE}CONFIGURANDO LA ZONA HORARIA ${BLUE}〢──────────────〢"
     local timezone_actual=$(cat /etc/timezone)
-    local length_=$(echo 75 - ${#timezone_actual} - 7 | bc)
+    local length_=$(echo 62 - ${#timezone_actual} - 7 | bc)
     printf "${WHITE}〢%7s ${GREEN}%${#timezone_actual}s ${WHITE}%${length_}s\n" "ACTUAL:" "${timezone_actual}" "〢"
-    line_separator 74
+    line_separator 61
     # list country hispanoamerica                                         # !chile
     local opt_for_timedatectl=("Mexico_City" Bogota Madrid "Argentina/Buenos_Aires" Caracas Lima "Santiago" Guatemala Guayaquil Cuba "Paz" "Santo_Domingo" Tegucigalpa "El_Salvador" Asuncion Managua "Costa_Rica" "Puerto_Rico" Panama Montevideo) 
     local country_list=(Mexico Colombia España Argentina Venezuela Peru Chile Guatemala Ecuador Cuba Bolivia "Republica Dominicana" Honduras Salvador Paraguay Nicaragua "Costa Rica" "Puerto Rico" Panama Uruguay)
     for i in "${!country_list[@]}";do
-        local length_=$(echo 75 - ${#country_list[i]} - ${#i} - 4 | bc)
+        local length_=$(echo 62 - ${#country_list[i]} - ${#i} - 4 | bc)
         printf "${WHITE}〢[%${#i}s] : ${GREEN}%${#country_list[$i]}s ${WHITE}%${length_}s\n" "${i}" "${country_list[$i]}" '〢'
     done
+    line_separator 61
     while true;do
-        read -r -p "$(echo -e "${WHITE}[${BBLUE}Selecciona la opcion correspondiente a tu pais${WHITE}")] : " opt
+        read -r -p "$(echo -e "${BLUE}[*] Zona Horaria [0-19]${WHITE}") : " opt
         if [[ "${opt}" =~ ^[0-9]+$ ]];then
             if [ "${opt}" -ge 0 ] && [ "${opt}" -lt ${#opt_for_timedatectl[@]} ];then
                 local timezone_="${opt_for_timedatectl[$opt]}"
@@ -248,31 +240,39 @@ cfg_timezone(){
         fi
     done        
     local timezone=$(timedatectl list-timezones | grep  "${timezone_}"  )
-    bar "timedatectl set-timezone ${timezone}"
-    read -r -p "$(echo -e "${WHITE}[${BBLUE}Presiona ENTER para regresar al menu principal${WHITE}]")"
+    timedatectl set-timezone ${timezone} && {
+        info "Zona horaria ${GREEN}${timezone}${WHITE} seleccionada."
+        sleep 3
+        fenix
+    } || {
+        error "No se ha podido seleccionar la zona horaria ${timezone}."
+        sleep 3
+        fenix
+    }
 }
 
 cfg_fail2ban(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    separator "CONFIGURACIÓN DE FAIL2BAN"
+    echo -e "${BLUE}〢──────────────〢 ${WHITE}CONFIGURACIÓN DE FAIL2BAN${BLUE} 〢───────────────〢"
     local fail2ban_status=$(systemctl is-active fail2ban &>/dev/null;echo $?)
     local fail2ban_log_file="/var/log/fail2ban.log"
     show_info(){
         
         if [[ "${fail2ban_status}" -eq 0 ]];then
-            printf "${WHITE}〢%8s : ${GREEN}%10s ${WHITE}%52s\n" "FAIL2BAN" "[ ACTIVO ]" "〢"
+            printf "${WHITE}〢%8s : ${GREEN}%10s ${WHITE}%41s\n" "FAIL2BAN" "[ ACTIVO ]" "〢"
         else
-            printf "${WHITE}〢%8s : ${RED}%10s ${WHITE}%50s\n" "FAIL2BAN" "[ INACTIVO ]" "〢"
+            printf "${WHITE}〢%8s : ${RED}%10s ${WHITE}%41s\n" "FAIL2BAN" "[ INACTIVO ]" "〢"
         fi
-        printf "${WHITE}〢%8s : ${GREEN}%${#fail2ban_log_files}s ${WHITE}%41s\n" "LOG-FILE" "${fail2ban_log_file}" "〢"
-        line_separator 69
+        printf "${WHITE}〢%8s : ${GREEN}%${#fail2ban_log_files}s ${WHITE}%$((60 - 9 - ${#fail2ban_log_file}))s\n" "LOG-FILE" "${fail2ban_log_file}" "〢"
+        line_separator 60
+
     }
     show_info
-    echo -e "〢${YELLOW}FAIL2BAN PREVIENE QUE SU SERVIDOR SEA VICTIMA DE ATAQUE DE FUERZA BRUTA${WHITE}〢"
-    printf "${WHITE}〢${YELLOW}%-35s ${WHITE}%38s\n" "LO RECOMENDABLE ES NO DESACTIVARLO." "〢"
-    #echo -e "〢${YELLOW}${WHITE}〢"
-    line_separator 69
+    echo -e "${YELLOW}FAIL2BAN PREVIENE QUE SU SERVIDOR SEA VICTIMA DE ATAQUE DE FUERZA BRUTA${WHITE}"
+    echo -e  "${YELLOW}LO RECOMENDABLE ES ${RED}NO${YELLOW} DESACTIVARLO."
+    
+    line_separator 60
     [[ "${fail2ban_status}" -eq 0 ]] && option_color 1 "DESACTIVAR FAIL2BAN" || option_color 1 "ACTIVAR FAIL2BAN"
     option_color 2 "VER ARCHIVO DE REGISTRO"
     option_color 3 "REINICIAR FAIL2BAN"
@@ -282,35 +282,22 @@ cfg_fail2ban(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -r -p "$(echo -e "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case $opt in
-            1) # ACTIVAR/DESACTIVAR FAIL2BAN
-                if [[ "${fail2ban_status}" -eq 0 ]];then
-                    bar "systemctl stop fail2ban"
-                else
-                    bar "systemctl start fail2ban"
-                fi
+            1) [[ "${fail2ban_status}" -eq 0 ]] && bar "systemctl stop fail2ban" || bar "systemctl start fail2ban"
                 sleep 3
                 cfg_fail2ban
                 ;;
-            2) # VER ARCHIVO DE REGISTRO
-                less "${fail2ban_log_file}"
-                ;;
+            2) clear ; [[ "${simple_ui}" == "true" ]] && nano "${fail2ban_log_file}" || less "${fail2ban_log_file}" clear ; cfg_fail2ban ;;
             3) # REINICIAR FAIL2BAN
                 bar "systemctl restart fail2ban"
                 sleep 4
                 cfg_fail2ban
                 ;;
-            "cls" | "CLS")
-                clear
-                cfg_fail2ban
-                ;;
-            [Mm])
-                fenix
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
+            "cls" | "CLS") clear && cfg_fail2ban ;;
+            [Mm]) fenix ;;
+            q|Q|e|E) exit 0 ;;
+            *) tput cuu1 && tput el1 ;;
             esac
     done
     
@@ -318,7 +305,6 @@ cfg_fail2ban(){
 
 speedtest_(){
     package_installed speedtest-cli || bar "apt install speedtest-cli -y"
-    info "Por favor, espera unos segundos mientras se realiza la prueba de velocidad..."
     local result_=$(speedtest --simple)
     local result_=($(echo "${result_}" | sed -r 's/^.*([0-9]{1,3}[\.]{1}[0-9]{1,3}[\.]{1}[0-9]{1,3}[\.]{1}[0-9]{1,3}).*$/\1/'))
     
@@ -326,9 +312,9 @@ speedtest_(){
     local download_speed="${result_[4]} ${result_[5]}"
     local upload_speed="${result_[7]} ${result_[8]}"
 
-    local lenght_ping=$(echo 81 - 4 -${#ping} | bc) 
-    local lenght_down=$(echo 81 - 21 -${#download_speed} | bc) 
-    local lenght_up=$(echo 81 - 19 -${#upload_speed} | bc) 
+    local lenght_ping=$(echo 60 - 5 -${#ping} | bc) 
+    local lenght_down=$(echo 60 - 22 -${#download_speed} | bc) 
+    local lenght_up=$(echo 60 - 20 -${#upload_speed} | bc) 
     
     printf "${WHITE}〢%4s : ${GREEN}%${#ping}s ${WHITE}%${lenght_ping}s\n" "PING" "${ping}" "〢"
     printf "${WHITE}〢%21s : ${GREEN}%${#download_speed}s ${WHITE}%${lenght_down}s\n" "VELOCIDAD DE DESCARGA" "${download_speed}" "〢"
@@ -368,27 +354,37 @@ cfg_blockads(){
 cfg_fenix_settings(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    separator "AJUSTES DE FENIX-MANAGER"
+    echo -e "${BLUE}〢───────────────〢 ${WHITE}AJUSTES DE FENIX-MANAGER${BLUE} 〢─────────────〢"
+    
     local preferences="/etc/FenixManager/preferences.bash"
 
     [[ ! -f "${preferences}" ]] && touch "${preferences}"
-    printf "${WHITE}〢%-18s ${WHITE}%$(echo 72 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
-    # [[ "${show_fenix_banner}" == "false" ]] && option_color 0 "MENU DE INCIO: ${RED}OCULTAR${WHITE} TEXTO SOBRE FENIXMANAGER ( MOSTRAR UN BANNER DE FENIX )" || option_color 0 "MENU DE INCIO: ${GREEN}MOSTRAR${WHITE} TEXTOS SOBRE FENIXMANAGER ( OCULTAR BANNER DE FENIX )"   
-    # [[ "${hide_first_panel}" == "false" ]] && option_color 1 "MENU DE INCIO: ${RED}OCULTAR${WHITE} PRIMER PANEL ( RAM, CPU, OS, ETC )" || option_color 1 "MENU DE INCIO: ${GREEN}MOSTRAR${WHITE} PRIMER PANEL ( RAM, CPU, OS, ETC )"
-    # [[ "${hide_second_panel}" == "false" ]] && option_color 2 "MENU DE INCIO: ${RED}OCULTAR${WHITE} SEGUNDO PANEL ( CONTADOR DE USUARIOS SSH )" || option_color 2 "MENU DE INCIO: ${GREEN}MOSTRAR${WHITE} SEGUNDO PANEL ( CONTADOR DE USUARIOS SSH )"
-    # [[ "${hide_third_panel}" == "false" ]] && option_color 3 "MENU DE INICIO: ${RED}OCULTAR${WHITE} TERCER PANEL ( ESTADISTICAS DEL ADAPTADOR DE RED )" || option_color 3 "MENU DE INICIO: ${GREEN}MOSTRAR${WHITE} TERCER PANEL ( ESTADISTICAS DEL ADAPTADOR DE RED )"
-    # [[ "${hide_ports_open_services_in_home_menu}" == "false" ]] && option_color 4 "MENU DE INICIO: ${RED}OCULTAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )" || option_color 4 "MENU DE INICIO: ${GREEN}MOSTRAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )"
-    # [[ "${hide_ports_open_services_in_protocol_menu}" == "false" ]] && option_color 5 "MENU DE PROTOCOLOS: ${RED}OCULTAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )" || option_color 5 "MENU DE PROTOCOLOS: ${GREEN}MOSTRAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )"
-    [[ "${show_fenix_banner}" == "false" ]] && option_color 0 "${RED}OCULTAR${WHITE} TEXTO SOBRE FENIXMANAGER ( MOSTRAR UN BANNER DE FENIX )" || option_color 0 "${GREEN}MOSTRAR${WHITE} TEXTOS SOBRE FENIXMANAGER ( OCULTAR BANNER DE FENIX )"   
-    [[ "${hide_first_panel}" == "false" ]] && option_color 1 "${RED}OCULTAR${WHITE} PRIMER PANEL ( RAM, CPU, OS, ETC )" || option_color 1 "${GREEN}MOSTRAR${WHITE} PRIMER PANEL ( RAM, CPU, OS, ETC )"
-    [[ "${hide_second_panel}" == "false" ]] && option_color 2 "${RED}OCULTAR${WHITE} SEGUNDO PANEL ( CONTADOR DE USUARIOS SSH )" || option_color 2 "${GREEN}MOSTRAR${WHITE} SEGUNDO PANEL ( CONTADOR DE USUARIOS SSH )"
-    [[ "${hide_third_panel}" == "false" ]] && option_color 3 "${RED}OCULTAR${WHITE} TERCER PANEL ( ESTADISTICAS DEL ADAPTADOR DE RED )" || option_color 3 "${GREEN}MOSTRAR${WHITE} TERCER PANEL ( ESTADISTICAS DEL ADAPTADOR DE RED )"
-    [[ "${hide_ports_open_services_in_home_menu}" == "false" ]] && option_color 4 "${RED}OCULTAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )" || option_color 4 "${GREEN}MOSTRAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )"
-    [[ $columns -le 78 ]] && line_separator 70 || line_separator 68
-    printf "${WHITE}〢%-21s ${WHITE}%$(echo 72 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
+    [[ "${simple_ui}" == 'false' ]] && {
+        printf "${WHITE}〢%-18s ${WHITE}%$(echo 72 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
+    } || {
+        printf "${WHITE}〢%-18s ${WHITE}%$(echo 60 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
+    }
+    
+    local home_var_val=("show_fenix_banner" "hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
+    local home_var_desc=("banner de Fenix-Manager" "panel de informacion (os,etc)" "panel de usuarios ssh" "panel de adaptadores de red" "panel de puertos abiertos")
+    for ((i=0;i<${#home_var_val[@]};i++));do
+        local var_name="${home_var_val[$i]}"
+        local var_value=$(set -o posix ; set | grep -o "${var_name}=.*" | cut -d "=" -f 2 ) # get value of var_name
+        if [[ "${var_name}" == "show_fenix_banner" ]];then
+            [[ "${var_value}" == "true" ]] && local var_desc="TEXTO SOBRE DE FENIX-MANAGER" || local var_desc="TEXTO ( MOSTRAR BANNER )"
+        else
+            local var_desc="${home_var_desc[$i]}"        
+        fi
+        [[ "${var_value}" == "false" ]] && option_color "$i" "${RED}OCULTAR${WHITE} ${var_desc^^}" || option_color $i "${GREEN}MOSTRAR${WHITE} ${var_desc^^}"
+    done
+
+    [[ "${simple_ui}" == 'false' ]] && {
+        printf "${WHITE}〢%-21s ${WHITE}%$(echo 72 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
+    } || {
+        printf "${WHITE}〢%-21s ${WHITE}%$(echo 60 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
+    }
     [[ "${hide_ports_open_services_in_protocol_menu}" == "false" ]] && option_color 5 "${RED}OCULTAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )" || option_color 5 "${GREEN}MOSTRAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )"
-    [[ $columns -le 78 ]] && line_separator 70 || line_separator 68
-    option_color 6 "CONFIGURAR UN DOMINIO: ESTO ES IRRELEVANTE, SOLO SE USARA/MOSTRARA EN CASOS NECESARIOS"
+    [[ "${simple_ui}" == 'false' ]] && line_separator 68 || line_separator 58
     option_color M "VOLVER AL MENU PRINCIPAL"
     option_color E "SALIR"
     
@@ -398,7 +394,7 @@ cfg_fenix_settings(){
         read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case ${opt} in
             0)
-                [[ "${show_fenix_banner=}" == "false" ]] && {
+                [[ "${show_fenix_banner}" == "false" ]] && {
                     sed -i "s/show_fenix_banner=.*/show_fenix_banner='true'/g" "${preferences}"
                 } || {
                     sed -i "s/show_fenix_banner=.*/show_fenix_banner='false'/g" "${preferences}"
@@ -451,13 +447,6 @@ cfg_fenix_settings(){
                 sleep 1.5
                 fenix
                 ;;
-            6) # Add domain
-                # read domain name
-                read -p "$(echo -e "${WHITE}[*] Ingrese el nombre del dominio : ")" domain
-                echo "domain_='$domain'" >> "${preferences}"
-                info "Dominio ${domain} agregado"
-                ;;
-            
             
             [Mm])
                 fenix

@@ -10,28 +10,23 @@ info(){ echo -e "\\033[1;33m[INFO]\\033[m \\033[1;37m$*\\033[m";}
 error() { echo -e "\\033[1;31m[ERROR]\\033[m \\033[1;37m$*\\033[m";}
 warning() { echo -e "\\033[1;33m[ADVERTENCIA]\\033[m \\033[1;37m$*\\033[m";}
 space() { echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢─────────────────── 〢\\033[m";}
-separator() { echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢─────────────────── 〢\\033[m";}
+separator() {
+    local str=$@
+    echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢────────────────────────〢\\033[m";
+}
+
 line_separator() {    
     # ** $2 = color de la linea ( default: azul )
     # ** $1 = longitud de la linea
-    # ** Antes de invocar esta funcion y pasarle el parametro, hay que tener en cuentas dos cosas:
-    # ** 1 - La longitud total de la linea,le tienes que restar dos (  El primer y ultimo caracter a agregar es el 〢 )
-    # ** Ejemplo:
-    # ** Si desea una linea de longitud de 20 caracteres, entonces debe pasarle 18
     local length_line color_
-    [[ $columns -le 78 ]] && str="〢" || str="〢 "
+    str="〢"
     length_line=$1
     color_=$2
     [ -z $color_ ] && color_="${BLUE}"
     if [[ $length_line -lt 0 ]];then  length_line=50 ; fi
     for i in $(seq 1 $length_line);do  str+="─" ; done
-    [[ $columns -le 78 ]] && {
-        echo -e "${BLUE}${str}〢${WHITE}"
-    } || {
-        echo -e "${BLUE}${str} 〢${WHITE}"
-    }
+    echo -e "${BLUE}${str}〢${WHITE}"
 }
-cfg_menu(){ echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢─────────────────── 〢\\033[m";}
 stty -echoctl # hide ^C
 trap ctrl_c SIGINT SIGTERM
 
@@ -200,12 +195,12 @@ check_user_exist () {
 }
 
 bar() {
-    # $1 es el texto que se muestra en la barra de progreso.Por defecto es el comando completo
-    # $2 el comando a ejecutar
+    # $1 el comando a ejecutar
     local str="###############"
     local s=0.25
     local bg_process="$1"
     local textshow="$1"
+    [[ "$3" == "hidden_et" || "$2" == "hidden_et" ]] && local hidden_time_execution='true' || local hidden_time_execution='false'
     local tmpfile
     tmpfile=$(mktemp -t progress.XXXXXXXX)
     
@@ -221,7 +216,11 @@ bar() {
         for i in {1..14}; do
             sleep 0.25
             s=$(echo ${s} + 0.25| bc)
-            printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$textshow" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
+            [[ "${hidden_time_execution}" == 'false' ]] && {
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$textshow" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
+            } || {
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$textshow" "${str:0:$i}]"  # save time 
+            }
             done
         done  & 
     trap "blc_=1" SIGINT SIGTERM 
@@ -245,7 +244,11 @@ bar() {
         local result_color=$red #red
     fi
 
-    printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" " ET: ${endtime}"
+    [[ "${hidden_time_execution}" == 'true' ]] && {
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" 
+    } || {
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" " ET: ${endtime}"
+    }
     rm -f "${tmpfile}"
     return $STAT
 
@@ -287,8 +290,8 @@ redirect_to_service() {
     
     openvpn_ports=$(grep -oP '^\s*port\s+\K[0-9]+' /etc/openvpn/server.conf 2>/dev/null &)
     # check service is running
-    [[ $columns -le 78 ]] && line_separator 72 || line_separator 70
-    printf "${WHITE}〢[ %-2s] ǂ %-12s ǂ %-31s ǂ %-15s〢\n" "#" "Servicio" "Puerto" "Estado"
+    line_separator 62
+    printf "${WHITE}〢[ %-2s]| %-12s| %-31s| %-8s〢\n" "#" "Servicio" "Puerto" "Estado"
     local count=0
     local array_service=()
     for service in "${service_available[@]}"; do
@@ -310,19 +313,19 @@ redirect_to_service() {
             else
                 ports_used_by_service=$(netstat -ltnp | grep "$service" | awk '{split($4,a,":"); print a[2]}' | tr '\n' ' ')
             fi
-            printf "〢${green}[ %-2s]${WHITE} ǂ ${green}%-12s${WHITE} ǂ ${green}%-31s${WHITE} ǂ ${green}%-15s${WHITE}〢\n" "$count" "$service" "$ports_used_by_service" "ACTIVO"
+            printf "〢${green}[ %-2s]${WHITE}| ${green}%-12s${WHITE}| ${green}%-31s${WHITE}| ${green}%-8s${WHITE}〢\n" "$count" "$service" "$ports_used_by_service" "ACTIVO"
             array_service+=("$count:$ports_used_by_service")
 
         else
             (( count-- ))
-            printf "〢${red}[ %-2s]${WHITE} ǂ ${red}%-12s${WHITE} ǂ ${red}%-31s${WHITE} ǂ ${red}%-15s${WHITE}〢\n" "-" "$service" "-" "INACTIVO"
+            printf "〢${red}[ %-2s]${WHITE}| ${red}%-12s${WHITE}| ${red}%-31s${WHITE}| ${red}%-8s${WHITE}〢\n" "-" "$service" "-" "INACTIVO"
         fi
     done
-    [[ $columns -le 78 ]] && line_separator 72 || line_separator 70
-    printf "${WHITE}〢${YELLOW}[ %-2s ]${WHITE} %-32s %35s\n" "10" "UTILIZAR UN PUERTO PERSONALIZADO" "〢"
-    [[ $columns -le 78 ]] && line_separator 72 || line_separator 70
+    line_separator 62
+    printf "${WHITE}〢${YELLOW}[ %-2s ]${WHITE} %-30s %25s\n" "10" "UTILIZAR UN PUERTO PERSONALIZADO" "〢"
+    line_separator 62
     while true;do
-        read  -r -p "$(echo -e "${WHITE}[*] Ingrese el numero del servicio al que desea redireccionar: ")" service_number
+        read  -r -p "$(echo -e "${WHITE}[*] # del servicio al que desea redireccionar: ")" service_number
         if [[ -z "$service_number" ]]; then continue ; fi
         if grep -E "[a-z]|[A-Z]" <<< "$service_number" &>/dev/null;then continue ; fi
         if [[ $service_number -lt 1 ]] || [[ $service_number -gt 10 ]]; then continue ; fi
@@ -347,26 +350,28 @@ redirect_to_service() {
 
 list_certs() {
     cert_dir="${user_folder}/FenixManager/cert-ssl/"
-    info "Listando certificados SSL en el directorio ${GREEN}$cert_dir${WHITE}"
+    info "Directorios de certificados SSL : ${GREEN}${cert_dir//"${user_folder}"/"~"}${WHITE}"
     local certs=$(ls ${user_folder}/FenixManager/cert-ssl/)
     local count_=0
     
     if [[ -z "$certs" ]] ;then error "No hay certificados." ; return 1 ;fi
-    line_separator 55
-    printf "〢 ${blue}%-2s ${green}%-25s ${yellow}%-25s\n" '#' 'Nombre' 'Fecha de creacion' 
-    line_separator 55
+    line_separator 60
+    printf "〢 ${blue}%-2s ${green}%-30s ${yellow}%-25s${WHITE}〢\n" '#' 'Nombre' 'Fecha de creacion' 
+    line_separator 60
 
     for i in $certs;do
         (( count_ ++ ))
         certs_array+=("$i")
+        [[ "${i}" =~ ".pem"|".crt"|".cert" ]] && local color_="${GREEN}" || local color_="${RED}"
+
         date_=$(date -r "$cert_dir$i" +"%d/%m/%Y")
         local length_=$(echo 54 - ${#count_} - ${#i} - ${#date_} | bc)
-        printf "${WHITE}〢${blue}[%-${#count_}s] ${green}%-${#i}s ${yellow}%-${#date_}s ${WHITE} %${length_}s\n" "$count_" "$i" "$date_" "〢"
+        printf "〢 ${blue}%-2s ${color_}%-30s ${yellow}%-25s${WHITE}〢\n" "$count_" "$i" "$date_"
     done
-    line_separator 55
+    line_separator 60
     
     while true;do
-        read -r -p "$(echo -e "${green}[*] Selecciona un certificado (*.cert,*.pem,*.crt): ")" cert_opt
+        read -r -p "$(echo -e "${green}[*] Certificado (*.cert,*.pem,*.crt): ")" cert_opt
         if [[ -z "$cert_opt" ]] || [[ $cert_opt -gt $count_ ]] || grep -E "[a-z]|[A-Z]" <<< "$cert_opt" &>/dev/null;then
             continue
         else
@@ -376,9 +381,9 @@ list_certs() {
     done
     [[ ! $CERT_FILE =~ "pem" ]] && {
         while true;do
-            read -r -p "$(echo -e "${WHITE}[*] Selecciona una llave privada (*.key): ")" key_file
-            if [[ -z "$key_file" ]] || [[ $key_file -gt $count_ ]] || grep -E "[a-z]|[A-Z]" <<< "$key_file" &>/dev/null;then continue ; fi
-            export KEY_FILE="$cert_dir${certs_array[$key_file-1]}"
+            read -r -p "$(echo -e "${RED}[*] Llave privada (*.key): ")" key_file
+            if [[ -z "${key_file}" ]] || [[ "${key_file}" -gt $count_ ]] || [[ "${key_file}" =~ "[a-z]|[A-Z" ]];then continue ; fi
+            export KEY_FILE="$cert_dir${certs_array[$key_file-1]}" &>/dev/null
             break
         done
     } || export KEY_FILE="$CERT_FILE" 
@@ -481,30 +486,23 @@ list_banners(){
     # LISTA TODO LOS BANNERS EN EL DIRECTORIO
     # LA OPCION ELEGIDA POR EL USUARIO SE GUARDA EN LA VARIABLE BANNER_FILE
     local banners_dir="${user_folder}/FenixManager/banner/"
-    info "Listando banners en el directorio ${GREEN}${banners_dir}${WHITE}"
+    info "Directorio de banners: ${GREEN}${banners_dir//"${user_folder}"/"~"}${WHITE}"
     local banners_array=($(ls "${banners_dir}/"))
-    [[ $columns -le 78 ]] && {
-            line_separator 72
-            printf "${WHITE}〢 %-4s %-25s %-22s %-10s %-10s\r" "ID" "Nombre" "Tamaño" "Fecha de creacion" "〢"
-        } || {
-            line_separator 79
-            printf "${WHITE}〢 %-4s %-22s %-22s %-30s〢\n" "ID" "Nombre" "Tamaño" "Fecha de creacion"
-        }
+    line_separator 60
+    printf "${WHITE}〢 ${GREEN}%-4s ${YELLOW}%-25s ${WHITE}%-10s %13s\n" "ID" "NOMBRE" "FECHA DE CREACION" "〢"
+    line_separator 60
+        
     for (( i=0; i<(${#banners_array[*]}); i++ ));do
         local file="${banners_array[$i]}"
         local fullpath_file="${banners_dir}${file}"
         local file_size="$(du -sh ${fullpath_file} | cut -f1)"
         local file_date=$(stat -c %y "${fullpath_file}" | cut -d " " -f 1)
         local lenght_date=${#file_date}
-        [[ $columns -le 78 ]] && {
-            printf "${WHITE}〢 %-4s %-25s %-22s %-10s %9s\n" "$i" "$file" "$file_size" "$file_date" "〢"
-        } || {
-            printf "${WHITE}〢 %-4s %-30s %-21s %-21s %2s\n" "$i" "$file" "$file_size" "$file_date"  "〢"
-        }
+        printf "${WHITE}〢 ${GREEN}%-4s ${YELLOW}%-25s ${WHITE}%-10s %$((60 - 5 - 25 -10))s\n" "$i" "$file"  "$file_date" "〢"
     done 
-    [[ $columns -le 78 ]] && line_separator 72 || line_separator 79
+    line_separator 60
     while true;do
-        read -r -p "$(echo -e "${YELLOW}[*] Ingrese el ID del banner que desea utilizar: ")" banner_id
+        read -r -p "$(echo -e "${WHITE}[*] ID del banner : ")" banner_id
         if [[ $banner_id -lt 0 || $banner_id -gt ${#banners_array[@]}-1 ]];then
             error "El ID ingresado no es valido."
             continue
@@ -635,4 +633,3 @@ show_users_and_port_template(){
     printf "${WHITE}╚%73s╝\n" | sed 's/ /═/g'
 
 }
-

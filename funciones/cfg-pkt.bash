@@ -13,11 +13,12 @@ cfg_squid_proxy(){
     clear
     trap ctrl_c SIGINT SIGTERM
     squid_file_config='/etc/squid/squid.conf'
-    cfg_menu "CONFIGURANDO SQUID-PROXY"
+    echo -e  "${BLUE}〢─────────────〢${WHITE} CONFIGURANDO SQUID-PROXY ${BLUE}〢─────────────────〢${WHITE}"
     show_info(){
         # 70
         local _color_ips _color_dominios squid_is_running _squid_run_color one_length two_length three_length four_length
         local ports_squid=$(cat $squid_file_config | grep http_port | awk '{print $2}' | tr "\n" " ")
+        
         if [[ -f "/etc/squid/ip_allows" ]];then
             local number_host_ip_in_white_list=$(wc -l < /etc/squid/ip_allows)
             _color_ips=${GREEN}
@@ -47,18 +48,18 @@ cfg_squid_proxy(){
             local auth_is_enable="[ DESACTIVADO ]"
             _color_auth_enable=${RED}
         fi
-        one_length=$(echo 8 + $(echo "${ports_squid}" | wc -c ) - 70 | bc | tr "-" " ")
-        two_length=$(echo 24 + $(echo ${number_host_ip_in_white_list} | wc -c ) - 70 | bc | tr "-" " ")
-        three_length=$(echo 28 + $(echo ${number_host_domain_in_white_list} | wc -c ) - 70 | bc | tr "-" " ")
-        four_length=$(echo 6 + $(echo ${squid_is_running} | wc -c ) - 70 | bc | tr "-" " ")
-        five_length=$(echo 14 + $(echo ${auth_is_enable} | wc -c ) - 70 | bc | tr "-" " ")
+        one_length=$(echo 8 + $(echo "${ports_squid}" | wc -c ) - 60 | bc | tr "-" " ")
+        two_length=$(echo 24 + $(echo ${number_host_ip_in_white_list} | wc -c ) - 60 | bc | tr "-" " ")
+        three_length=$(echo 28 + $(echo ${number_host_domain_in_white_list} | wc -c ) - 60 | bc | tr "-" " ")
+        four_length=$(echo 6 + $(echo ${squid_is_running} | wc -c ) - 60 | bc | tr "-" " ")
+        five_length=$(echo 14 + $(echo ${auth_is_enable} | wc -c ) - 60 | bc | tr "-" " ")
 
         printf "${WHITE}〢 %-7s : ${GREEN}%1s ${WHITE}%${one_length}s\n" "Puertos" "${ports_squid}" '〢'
         printf "${WHITE}〢 %-23s : ${_color_ips}%1s ${WHITE}%${two_length}s\n" "IP'S en la lista blanca" "${number_host_ip_in_white_list}" '〢'
         printf "${WHITE}〢 %-27s : ${_color_dominios}%1s ${WHITE}%${three_length}s\n" "Dominios en la lista blanca" "${number_host_domain_in_white_list}" '〢'
         printf "${WHITE}〢 %-13s : ${_color_auth_enable}%1s ${WHITE}%${five_length}s\n" "Autenticacion" "${auth_is_enable}" '〢'
         printf "${WHITE}〢 %-5s : ${_color_squid_run}%1s ${WHITE}%${four_length}s\n" "SQUID" "${squid_is_running}" '〢'
-        line_separator 68
+        line_separator 60
 
     }
     show_info
@@ -356,7 +357,7 @@ cfg_stunnel4() {
         else
             sed -i "s\cert =.*\cert = $CERT_FILE\g" /etc/stunnel/stunnel.conf
             # check if stunnel.conf load key file
-            if grep "key" /etc/stunnel/stunnel.conf;then
+            if grep "key" /etc/stunnel/stunnel.conf &>/dev/null;then
                 sed -i "s\key =.*\key = $KEY_FILE\g" /etc/stunnel/stunnel.conf
             else
                 local cert_line=$(grep -n "cert" /etc/stunnel/stunnel.conf | cut -d: -f1)
@@ -364,6 +365,8 @@ cfg_stunnel4() {
             fi
         fi
         info "Certificado cambiado correctamente."
+        sleep 1.5
+        cfg_stunnel4
     }
     show_info(){
         local file_conf="/etc/stunnel/stunnel.conf"
@@ -398,7 +401,7 @@ cfg_stunnel4() {
         else
             _color=( ${RED} ${RED} )
         fi
-        printf "〢 ${_color[0]}%22s ${_color[1]}%38s ${WHITE}%13s\n" "ACCEPT" "CONNECT" '〢'
+        printf "〢 ${_color[0]}%20s ${_color[1]}%20s ${WHITE}%20s\n" "ACCEPT" "CONNECT" '〢'
         
         IFS='|' read -r -a array <<< "$accept_conn_ports"
         for i in ${array[@]};do
@@ -406,19 +409,19 @@ cfg_stunnel4() {
             local conn=$(echo "${i}" | cut -d: -f2)
             local accept_len=${#accept}
             local conn_len=${#conn}
-            printf "〢${_color[0]}%22s ${_color[1]}%38s ${WHITE}%14s\n" "${accept}" "${conn}" '〢'
+            printf "〢 ${_color[0]}%18.5s ${_color[1]}%19.5s ${WHITE}%23s\n" "${accept}" "${conn}" '〢'
         done
-        [[ $columns -le 78 ]] && line_separator 73 || line_separator 71
-        printf "〢 ${WHITE}%4s: ${GREEN}%-${#cert_conf}s ${WHITE}%$(echo 72 - 4 - ${#cert_conf}  | bc)s\n" "CERT" "${cert_conf}" '〢'
-        if [[ ! -z $key_conf ]];then
-            printf "〢 ${WHITE}%3s: ${GREEN}%-${#key_conf}s ${WHITE}%$(echo 73 - 4 - ${#key_conf}  | bc)s\n" "KEY" "${key_conf}" '〢'
+        line_separator 60
+        printf "〢 ${WHITE}%4s: ${GREEN}%-${#cert_conf}s ${WHITE}%$(echo 60 - 5 - ${#cert_conf}  | bc)s\n" "CERT" "${cert_conf}" '〢'
+        if [[ -n $key_conf ]];then
+            printf "〢 ${WHITE}%3s: ${GREEN}%-${#key_conf}s ${WHITE}%$(echo 60 - 4 - ${#key_conf}  | bc)s\n" "KEY" "${key_conf}" '〢'
         fi
-        [[ $columns -le 78 ]] && line_separator 73 || line_separator 71
+        line_separator 60
 
     }
     trap ctrl_c SIGINT SIGTERM
     clear
-    cfg_menu "CONFIGURANDO STUNNEL4 (SSL)" #! 75 
+    echo -e "${BLUE}〢──────────────〢${WHITE}CONFIGURANDO STUNNEL4 (SSL)${BLUE}〢───────────────〢${WHITE}"
     show_info
     
     
@@ -506,49 +509,28 @@ cfg_stunnel4() {
                 }
                 ;;
             3) # REINICIAR/INICIAR  stunnel4
-                {
-                    if [[ $stunnel_is_running -eq 0 ]];then
-                        bar "service stunnel4 restart"
-                        sleep 1.5
-                        cfg_stunnel4
-                    else
-                        bar "service stunnel4 start"
-                        sleep 1.5
-                        cfg_stunnel4
-                    fi
-                }
+                [[ $stunnel_is_running -eq 0 ]] && bar "service stunnel4 restart" || bar "service stunnel4 start"
+                sleep 1.5    
+                cfg_stunnel4
+                
                 ;;
             4) # DETENER/CAMBIAR CERTIFICADO SSL stunnel4
-                if [[ $stunnel_is_running -eq 0 ]];then
-                    bar "service stunnel4 stop"
-                    if [[ $? -eq 0 ]];then
-                        sleep 1.5
-                        cfg_stunnel4
-                    else
-                        error "Error al detener stunnel4."
-                    fi
-                else
-                    info "Certificado actual: ${GREEN}$cert_actuallly_installed${WHITE}"
-                    change_ssl_cert
-                fi
-                sleep 3
+                [[ $stunnel_is_running -eq 0 ]] && bar "service stunnel4 stop" || change_ssl_cert
+                sleep 1.5
                 cfg_stunnel4
                 ;;
             5) # CAMBIAR CERTIFICADO/VER ESTADO SSL
-                if [[ $stunnel_is_running -eq 0 ]];then
-                    info "Certificado actual: ${GREEN}$cert_actuallly_installed${WHITE}"
+                [[ $stunnel_is_running -eq 0 ]] && {
                     change_ssl_cert
-                else
-                    systemctl status stunnel4
-                fi
+                    sleep 1.5
+                    cfg_stunnel4
+                } || systemctl status stunnel4
                 ;;
             6) # VER ESTADO/DESINSTALAR STUNNEL4
-                if [[ $stunnel_is_running -eq 0 ]];then
-                    systemctl status stunnel4
-                else
+                [[ $stunnel_is_running -eq 0 ]] && systemctl status stunnel4 || {
                     unistall_stunnel4
                     option_menu_software
-                fi
+                }
                 ;;
             7) # DESINSTALAR STUNNEL4
                 unistall_stunnel4
@@ -619,7 +601,8 @@ cfg_shadowsocks(){
         rm_init_cfg_and_end_cfg_from_file "/etc/fail2ban/jail.conf" "shadowsocks-libev"
     }
     clear
-    cfg_menu "CONFIGURANDO SHADOWSOCKS"
+    #cfg_menu "CONFIGURANDO SHADOWSOCKS"
+    echo -e "${BLUE}〢──────────────〢${WHITE} CONFIGURANDO SHADOWSOCKS ${BLUE}〢────────────────〢"
     check_jq_is_installed
     local shadowsocks_is_running=$(systemctl status shadowsocks-libev.service &>/dev/null;echo $?)
     
@@ -634,29 +617,29 @@ cfg_shadowsocks(){
         ss_pid=$(pidof ss-server)
         obfs_server_pid=$(pidof obfs-server)
         local one_length two_length three_length
-        one_length=$(echo 70 - $(echo "PUERTO ACTUAL ${puerto_actual}" | wc -c ) | bc )
-        two_length=$(echo 71 - $(echo "CONTRASEÑA ACTUAL ${password_actual}" | wc -c ) | bc )
+        one_length=$(echo 60 - $(echo "PUERTO ACTUAL ${puerto_actual}" | wc -c ) | bc )
+        two_length=$(echo 61 - $(echo "CONTRASEÑA ACTUAL ${password_actual}" | wc -c ) | bc )
 
         printf "${WHITE}〢 %-10s : ${GREEN}%0.9s ${WHITE}%${one_length}s\n" "PUERTO ACTUAL" "${puerto_actual}" '〢'
         printf "${WHITE}〢 %-10s : ${GREEN}%-${#password_actual}s ${WHITE}%${two_length}s\n" "CONTRASEÑA ACTUAL" "${password_actual}" '〢'
     
         if [[ ! -z "$(pidof obfs-server)" ]];then
             local tmp_str="SHADOWSOCKS-LIBEV SIMPLE-OBFS: ON"
-            three_length=$(echo 70 - $(echo ${tmp_str} | wc -c ) | bc )
+            three_length=$(echo 60 - $(echo ${tmp_str} | wc -c ) | bc )
             printf "${WHITE}〢 %-10s : ${GREEN}%-3s ${WHITE}%${three_length}s\n" "SHADOWSOCKS-LIBEV SIMPLE-OBFS" "ON" '〢'
         else
 
             if [[ ! -z "$(pidof ss-server)" ]];then
                 local tmp_str="SHADOWSOCKS-LIBEV: ON"
-                three_length=$(echo 70 - $(echo ${tmp_str} | wc -c ) | bc )
+                three_length=$(echo 60 - $(echo ${tmp_str} | wc -c ) | bc )
                 printf "${WHITE}〢 %-10s : ${GREEN}%-3s ${WHITE}%${three_length}s\n" "SHADOWSOCKS-LIBEV" "ON" '〢'
             else
                 local tmp_str="SHADOWSOCKS-LIBEV:  OFF"
-                three_length=$(echo 70 - $(echo ${tmp_str} | wc -c ) | bc )
+                three_length=$(echo 60 - $(echo ${tmp_str} | wc -c ) | bc )
                 printf "${WHITE}〢 %-10s : ${RED}%-4s ${WHITE}%${three_length}s\n" "SHADOWSOCKS-LIBEV" "OFF" '〢'
             fi
         fi
-        line_separator 68
+        line_separator 60
     }
     show_info
     option_color "0" "VER CONFIGURACION URI"
@@ -721,7 +704,7 @@ cfg_shadowsocks(){
                         read -p "$(echo -e "${WHITE}[*] Ingrese el nuevo puerto: ${GREEN}")" new_port
                         if [[ -z $new_port ]]; then continue ; fi
                         check_if_port_is_open $new_port
-                        if [[ $? -eq 0 ]];then add_ufw_rules $new_port ; break ; else continue ; fi
+                        if [[ $? -eq 0 ]];then ufw allow $new_port &>/dev/null; break ; else continue ; fi
                     done
                     echo -e "${WHITE}[*] Cambiando el puerto a ${GREEN}$new_port${WHITE}."
                     local tmp_file=$(mktemp)
@@ -736,7 +719,6 @@ cfg_shadowsocks(){
                         error "Error al cambiar el puerto."
                         sleep 1.5
                     fi
-                    read -p "$(echo -e "${WHITE}[*] Presione ENTER para continuar...")"
                     clear
                     cfg_shadowsocks
 
@@ -776,7 +758,7 @@ cfg_shadowsocks(){
             3) # instalar/administrar plugin
                 {   
                     clear                            
-                    cfg_menu "SHADOWSOCKS-LIBEV | SIMPLE-OBFS"
+                    echo -e "${BLUE}〢────────────〢 ${WHITE}SHADOWSOCKS-LIBEV | SIMPLE-OBFS${BLUE} 〢───────────〢"
                     
                     if [[ $simple_obfs_installed -eq 0 ]];then
                         if [[ ! -z "$obfs_server_pid" ]];then
@@ -990,12 +972,12 @@ cgf_openvpn(){
     local ovpn_port_actually=$(cat /etc/openvpn/server.conf | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | tr "\n" ' ')
     local ovpn_proto_actually=$(cat /etc/openvpn/server.conf | grep -E 'proto [a-zA-Z]{0,}' | grep -Eo '[a-zA-Z]{0,}' | tr "\n" ' ' | cut -d " " -f2)
     local oppenvpn_is_running=$(ps -ef | grep openvpn | grep -v grep | wc -l)
-    cfg_menu "CONFIGURANDO OPENVPN"
+    echo -e "${BLUE}〢─────────────────〢${WHITE}CONFIGURANDO OPENVPN${BLUE}〢───────────────────〢"
     
     show_info(){
         local one_length two_length
-        one_length=$(echo 66 - $(echo "PUERTO ${ovpn_port_actually}" | wc -c ) | bc )
-        two_length=$(echo 66 - $(echo "PROTOCOLO ${ovpn_proto_actually}" | wc -c ) | bc )
+        one_length=$(echo 60 - $(echo "PUERTO ${ovpn_port_actually}" | wc -c ) | bc )
+        two_length=$(echo 60 - $(echo "PROTOCOLO ${ovpn_proto_actually}" | wc -c ) | bc )
         if [[ $oppenvpn_is_running -eq 1 ]];then
             ovpn_status="[ EN EJECUCION ]"
             stat_color=${GREEN}
@@ -1003,12 +985,12 @@ cgf_openvpn(){
             ovpn_status="[ DETENIDO ]"
             stat_color=${RED}
         fi
-        three_length=$(echo 66 - $(echo "OPENVPN ${ovpn_status}" | wc -c ) | bc )
+        three_length=$(echo 60 - $(echo "OPENVPN ${ovpn_status}" | wc -c ) | bc )
 
         printf "${WHITE}〢 %-6s : ${GREEN}%5s ${WHITE}%${one_length}s\n" "PUERTO" "${ovpn_port_actually}" '〢'
         printf "${WHITE}〢 %-9s : ${GREEN}%-${#two_length}s ${WHITE}%${two_length}s\n" "PROTOCOLO" "${ovpn_proto_actually}" '〢'
         printf "${WHITE}〢 %-6s : ${stat_color}%-${#three_length}s ${WHITE}%${three_length}s\n" "OPENVPN" "${ovpn_status}" '〢'
-        line_separator 64
+        line_separator 60
     
     }
     show_info
@@ -1182,6 +1164,8 @@ cgf_openvpn(){
                 {
                     if [[ $oppenvpn_is_running -eq 0 ]];then
                         remove_openvpn
+                        clear
+                        fenix
                     else
                         bar "systemctl stop openvpn@server"
                         sleep 1.5
@@ -1196,6 +1180,8 @@ cgf_openvpn(){
                 ;;
             8) # REMOVER OPENVPN    
                 remove_openvpn
+                clear
+                fenix
                 ;;
             "cls" | "CLS")
                 clear
@@ -1221,7 +1207,7 @@ cgf_openvpn(){
 cfg_python3_proxy(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    cfg_menu "CONFIGURANDO PYTHON3-PROXY"
+    echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO PYSOCKS ${BLUE}〢──────────────────〢${WHITE}"
     local config_file="${user_folder}/FenixManager/py-socks.conf"
     local pysocks_is_actived=$(systemctl is-active fenixmanager-pysocks &>/dev/null;echo $?)
     if [[ "$pysocks_is_actived" -eq 0 ]];then local pysocks_pid=$(systemctl show --property MainPID --value fenixmanager-pysocks); fi
@@ -1240,7 +1226,7 @@ cfg_python3_proxy(){
         #local custom_quantity=$(grep "CUSTOM#" ${config_file} -c 2>/dev/null)
         local custom_quantity=$(grep -E "^[CUSTOM#[0-9]{0,9}]" ${config_file} 2>/dev/null| cut -d# -f 2 | tr "]" " " | xargs)
         local conf_key=(accept connect custom_response)
-        printf "${WHITE}〢 ${color_1}%10s ${color_2}%26s ${color_3}%20s ${WHITE}%15s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
+        printf "${WHITE}〢 ${color_1}%-10s ${color_2}%26s ${color_3}%20s ${WHITE}%$((60 - 10 - 26 - 20))s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
         
         if [[ -z "${custom_quantity}" ]];then
             line_separator 70
@@ -1262,10 +1248,10 @@ cfg_python3_proxy(){
                     fi
                     array_cfg+=("${!key}")
                 done
-                printf "${WHITE}〢 ${color_1}%10s ${color_2}%26s ${color_3}%20s ${WHITE}%15s\n" "${array_cfg[0]}" "${array_cfg[2]}" "${array_cfg[1]}" '〢'
+                printf "${WHITE}〢 ${color_1}%5s ${color_2}%31s ${color_3}%20s ${WHITE}%$((60 - 5 - 31 - 20))s\n" "${array_cfg[0]}" "${array_cfg[2]}" "${array_cfg[1]}" '〢'
             done
         fi
-        line_separator 70
+        line_separator 61
         
     }
     show_info
@@ -1313,9 +1299,9 @@ cfg_python3_proxy(){
                     ((number_of_custom_config++))
                     
                     select_status_code(){
-                        info "Pequeña ayuda para el codigo de respuesta:\n\t${GREEN}[ 101 ]${WHITE} Es utilizado para websocket.\n\t${GREEN}[ 200 ]${WHITE} Es utilizado para conexiones directas ( o con proxy)."
+                    
                         while true;do
-                            read -p "$(echo -e "${BLUE}[*] Seleccione el codigo de estado HTTP a enviar [100-599] : ")" status_code
+                            read -p "$(echo -e "${BLUE}[*] Seleccione el codigo de estado HTTP  [100-599] : ")" status_code
                             if [[ -z "$status_code" ]];then continue ; fi
                             if [[ $status_code =~ ^[0-9]+$ ]];then
                                 if [[ $status_code -ge 100 && $status_code -le 599 ]];then
@@ -1360,9 +1346,9 @@ cfg_python3_proxy(){
                     echo -e "${base_cfg}" >> "${config_file}"
                     local service_status=$(systemctl status fenixmanager-pysocks &>/dev/null;echo $?)
                     if [[ $service_status -eq 0 ]];then
-                        bar "systemctl reload fenixmanager-pysocks"
+                        bar "systemctl reload fenixmanager-pysocks" "hidden_et"
                     else
-                        bar "systemctl restart fenixmanager-pysocks"
+                        bar "systemctl restart fenixmanager-pysocks" "hidden_et"
                     fi
                     if [[ $? -eq 0 ]];then
                         info "El puerto ${port} se ha agregado correctamente."
@@ -1381,7 +1367,7 @@ cfg_python3_proxy(){
                 if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
                 info "Seleccione el puerto a eliminar :"
                 for (( i=0; i<${number_of_ports}; i++ ));do
-                echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
+                    echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
                 done
                 read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
                 if [[ $port_to_delete =~ ^[0-9]+$ ]];then
@@ -1393,14 +1379,9 @@ cfg_python3_proxy(){
                         for (( i=$line_of_port; i<$((line_of_port+4)); i++ ));do array_lines_delete+="${i}d;" ; done
                         sed -i "${array_lines_delete}" ${config_file}
                         fuser  ${port_to_delete}/tcp -k &>/dev/null
-                        if [[ "${i}" -eq 1 ]];then
-                            bar "systemctl restart fenixmanager-pysocks"
-                        else
-                            bar "systemctl restart fenixmanager-pysocks"
-                        fi
+                        bar "systemctl restart fenixmanager-pysocks" "hidden_et"
                     else
                         error "Opcion invalida."
-                    continue
                     fi
                 fi
                 sleep 3
@@ -1410,25 +1391,17 @@ cfg_python3_proxy(){
                 systemctl status fenixmanager-pysocks
                 ;;
             4) # INICIAT/DETENER PYSOCKS
-                if [[ "$pysocks_is_actived" -eq 0 ]];then
-                    bar "systemctl stop fenixmanager-pysocks"
-                else
-                    bar "systemctl start fenixmanager-pysocks"
-                fi
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" "hidden_et" || bar "systemctl start fenixmanager-pysocks" "hidden_et"
                 sleep 2
                 cfg_python3_proxy
                 ;;
             5) # REINICIAR/DESHABILIAR PYSOCKS
-                if [[ "$pysocks_is_actived" -eq 0 ]];then
-                    bar "systemctl restart fenixmanager-pysocks"
-                else
-                    bar "systemctl disable fenixmanager-pysocks"
-                fi
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-pysocks" "hidden_et" || bar "systemctl disable fenixmanager-pysocks" 'hidden_et'
                 sleep 3
                 cfg_python3_proxy
                 ;;
             6) #DESHABILITAR PYSOCKS
-                bar "systemctl disable fenixmanager-pysocks"
+                bar "systemctl disable fenixmanager-pysocks" "hidden_et"
                 sleep 3
                 cfg_python3_proxy
                 ;;
@@ -1453,8 +1426,9 @@ cfg_python3_proxy(){
 cfg_slowdns(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    cfg_menu "CONFIGURANDO SLOWDNS"
+    echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO SLOWDNS ${BLUE}〢─────────────────〢"
     local slowdns_running=$(pgrep slowdns &>/dev/null;echo $?)
+    local pub_key=$(cat "${user_folder}/FenixManager/slowdns_pubkey" 2>/dev/null)
     show_info(){
         # 66
         if [[ $slowdns_running -eq 1 ]];then
@@ -1464,24 +1438,22 @@ cfg_slowdns(){
             local slowdns_pid=$(pgrep slowdns)
             local process_argv=$(cat "/proc/${slowdns_pid}/cmdline" | sed -e 's/\x00/ /g'; echo)
             IFS=' ' read -r -a array_argv <<< "${process_argv}"
-            protocolo=${array_argv[1]//-}
-            port=${array_argv[2]//:}
-            pub_key=$(cat "${user_folder}/FenixManager/slowdns_pubkey")
-            name_server=${array_argv[5]}
-            connect_to=${array_argv[6]}
-            length_=$(echo 50 - "${#name_server}" | bc)
+            local protocolo=${array_argv[1]//-}
+            local port=${array_argv[2]//:}
+            local name_server=${array_argv[5]}
+            local connect_to=${array_argv[6]}
             # 12 
-            printf "${WHITE}〢 %-10s : ${GREEN}%2s ${WHITE}%51s\n" "PROTOCOLO" "${protocolo^^}" '〢'
-            printf "${WHITE}〢 %-7s : ${GREEN}%32s ${WHITE}%25s\n" "PUERTO" "PREROUTING :${port}/udp -> :53/udp" '〢'
-            printf "${WHITE}〢 %-14s : ${GREEN}%10s ${WHITE}%${length_}s\n" "NameServer(NS)" "${name_server}" '〢'
-            printf "${WHITE}〢 %-8s : ${GREEN}%10s ${WHITE}%44s\n" "CONNECT" "${connect_to}" '〢'
-            printf "${WHITE}〢 %-7s : ${GREEN}%10s ${WHITE}%0s\n" "PUB-KEY" "${pub_key}" '〢'
+            printf "${WHITE}〢 %-10s : ${GREEN}%2s ${WHITE}%45s\n" "PROTOCOLO" "${protocolo^^}" '〢'
+            printf "${WHITE}〢 %-7s : ${GREEN}%32s ${WHITE}%19s\n" "PUERTO" "PREROUTING :${port}/udp -> :53/udp" '〢'
+            printf "${WHITE}〢 %-14s : ${GREEN}%10s ${WHITE}%$((44 - ${#name_server}))s\n" "NameServer(NS)" "${name_server}" '〢'
+            printf "${WHITE}〢 %-8s : ${GREEN}%10s ${WHITE}%38s\n" "CONNECT" "${connect_to}" '〢'
         fi
-        line_separator 64
+        line_separator 60
     }
     show_info
 
     option_color 1 "DETENER SLOWDNS"
+    option_color 2 "MOSTRAR CLAVE PUBLICA   "
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"    
@@ -1492,9 +1464,12 @@ cfg_slowdns(){
         case $option in
             1) #DETENER SLOWDNS
                 bar "killall slowdns"
-                rm "${script_dir}/config/slowdns_pubkey"
+                rm "${user_folder}/FenixManager/slowdns_pubkey" 2>/dev/null
                 sleep 2
                 fenix
+                ;;
+            2) #MOSTRAR CLAVE PUBLICA
+                [[ -z "${pub_key}" ]] && error "No se ha encontrado la clave publica." || echo -e "${pub_key}"
                 ;;
             [bB])
                 option_menu_software
@@ -1514,11 +1489,14 @@ cfg_slowdns(){
 cfg_ssh_dropbear(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    [[ $columns -le 78 ]] && cfg_menu "CONFIGURANDO SSH / DROPBEAR" || cfg_menu "CONFIGURANDO OPENSSH / DROPBEAR"
-    # 75
+    # ! 〢────────────────────〢 CONFIGURANDO SSH / DROPBEAR 〢────────────────────────〢  # 77
+    
+    echo -e "${BBLUE}〢────────────────〢 ${WHITE}CONFIGURANDO SSH / DROPBEAR${BBLUE} 〢───────────〢${WHITE}"
+    
     local ssh_file="/etc/ssh/sshd_config"
     local dropbear_file="/etc/default/dropbear"
     local dropbear_is_installed
+    
     show_info(){
         local ssh_ports=$(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' ')
         local ssh_is_running=$(pgrep sshd &>/dev/null;echo $?)
@@ -1531,19 +1509,13 @@ cfg_ssh_dropbear(){
             ssh_is_running="[ DESACTIVADO ]"
             color_1="${RED}"
         fi
-        local length_=$(echo 73 - 8 - ${#ssh_is_running} | bc)
-        [[ $columns -le 78 ]] && {
-            printf "${WHITE}〢 %8s ${color_1}%${#ssh_is_running}s %$(echo 69 - 8 - ${#ssh_is_running} | bc )s ${WHITE}〢\n" "OPENSSH:" "${ssh_is_running}"
-            printf "${WHITE}〢 %8s ${color_1}%${#ssh_ports}s ${WHITE}%$(echo 69 - 8 - ${#ssh_ports} | bc )s 〢\n" "PUERTOS:" "${ssh_ports}"
-            printf "${WHITE}〢 %7s ${color_1}%${#ssh_banner}s ${WHITE}%$(echo 69 - 7 - ${#ssh_banner} | bc )s 〢\n" "BANNER:" "${ssh_banner}"
-        } || {
-            printf "${WHITE}〢 %8s ${color_1}%${#ssh_is_running}s %${length_}s ${WHITE}〢\n" "OPENSSH:" "${ssh_is_running}"
-            local length_=$(echo 73 - 8 - ${#ssh_ports} | bc)
-            printf "${WHITE}〢 %8s ${color_1}%${#ssh_ports}s ${WHITE}%${length_}s 〢\n" "PUERTOS:" "${ssh_ports}"
-            printf "${WHITE}〢 %7s ${color_1}%${#ssh_banner}s ${WHITE}%$(echo 73 - 7 - ${#ssh_banner} | bc )s 〢\n" "BANNER:" "${ssh_banner}"
-        }
+        
+        printf "${WHITE}〢 %8s ${color_1}%${#ssh_is_running}s %$((60 - 12 - ${#ssh_is_running}))s ${WHITE}〢\n" "OPENSSH:" "${ssh_is_running}"
+        printf "${WHITE}〢 %8s ${color_1}%${#ssh_ports}s ${WHITE}%$((60 - 12 - ${#ssh_ports} | bc ))s 〢\n" "PUERTOS:" "${ssh_ports}"
+        printf "${WHITE}〢 %7s ${color_1}%${#ssh_banner}s ${WHITE}%$((60 - 11 - ${#ssh_banner} | bc ))s 〢\n" "BANNER:" "${ssh_banner}"
+        
         # ! DROPBEAR
-        [[ $columns -le 78 ]] && line_separator 73 || line_separator 75
+        line_separator 60
         package_installed "dropbear" && {
             dropbear_is_installed=0
             local dropbear_is_runing=$(pgrep dropbear &>/dev/null;echo $?)
@@ -1557,26 +1529,20 @@ cfg_ssh_dropbear(){
             dropbear_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
             dropbear_ports+=" $(grep "^DROPBEAR_PORT=.*" /etc/default/dropbear | awk '{split($0,a,"="); print a[2]}')"
             local dropbear_banner=$(grep -o "^DROPBEAR_BANNER=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s|${user_folder}|~|g" | xargs)
-            [[ $columns -le 78 ]] && {
-                printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$(echo 72 - 9 - ${#drop_str} | bc )s\n" "DROPBEAR:" "${drop_str}" '〢'
+        
+            # ! dropbear status
+            printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$(echo 60 - 10 - ${#drop_str} | bc )s\n" "DROPBEAR:" "${drop_str}" '〢'
+            [ -z "${dropbear_ports}" ] && dropbear_ports="No se pudieron obtener los puertos."
+            # ! dropbear ports
+            printf "${WHITE}〢 %8s ${color_1}%${#dropbear_ports}s ${WHITE}%$((60 - 12 - ${#dropbear_ports} | bc))s 〢\n" "PUERTOS:" "${dropbear_ports}"
+            # ! dropbear banner
+            printf "${WHITE}〢 %7s ${GREEN}%${#dropbear_banner}s ${WHITE}%$((60 - 11 - ${#dropbear_banner} | bc ))s 〢\n" "BANNER:" "${dropbear_banner}"
             
-                [ -z "${dropbear_ports}" ] && dropbear_ports="No se pudieron obtener los puertos."
-                printf "${WHITE}〢 %8s ${color_1}%${#dropbear_ports}s ${WHITE}%$(echo 69 - 8 - ${#dropbear_ports} | bc)s 〢\n" "PUERTOS:" "${dropbear_ports}"
-            
-                printf "${WHITE}〢 %7s ${GREEN}%${#dropbear_banner}s ${WHITE}%$(echo 69 - 7 - ${#dropbear_banner} | bc )s 〢\n" "BANNER:" "${dropbear_banner}"
-            } || {
-                printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$(echo 76 - 9 - ${#drop_str} | bc )s\n" "DROPBEAR:" "${drop_str}" '〢'
-            
-                [ -z "${dropbear_ports}" ] && dropbear_ports="No se pudieron obtener los puertos."
-                printf "${WHITE}〢 %8s ${color_1}%${#dropbear_ports}s ${WHITE}%$(echo 73 - 8 - ${#dropbear_ports} | bc)s 〢\n" "PUERTOS:" "${dropbear_ports}"
-            
-                printf "${WHITE}〢 %7s ${GREEN}%${#dropbear_banner}s ${WHITE}%$(echo 73 - 7 - ${#dropbear_banner} | bc )s 〢\n" "BANNER:" "${dropbear_banner}"
-            }
         } || {
             dropbear_is_installed=1
             printf "${WHITE}〢 %9s ${RED}%16s ${WHITE} %$(echo 76 - 9 - 16 | bc )s\n" "DROPBEAR:" "[ NO INSTALADO ]" '〢'
         }
-        line_separator 75
+        line_separator 60
     }
     show_info
     [[ ${dropbear_is_installed} -eq 0 ]] && {
@@ -1629,9 +1595,9 @@ cfg_ssh_dropbear(){
                 cfg_ssh_dropbear
                 ;;
             2) # ELIMINAR PUERTOS DROPBEAR/OPENSSH
-                info "Seleccione la opcion correspondiente para el puerto que deseas eliminar."
                 [[ ${dropbear_is_installed} -eq 0 ]] && {
-                    info "EL puerto 143, es el puerto por defecto de dropbear.No se puede eliminar." 
+                    info "143, es el puerto por defecto de dropbear." 
+                    info "No se puede eliminar."
                     local dropbear_extra_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
                     IFS=" " read -r -a ports_array <<< $dropbear_extra_ports
                     for ((i=0;i<${#ports_array[@]};i++));do

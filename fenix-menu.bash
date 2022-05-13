@@ -12,28 +12,30 @@ source "/etc/FenixManager/preferences.bash"
 
 
 simple_text_fenix(){
-    [[ $columns -le 78 ]] && {
-        line_separator 72
-        printf "${GREEN}〢 ───── 〢${WHITE}%-10s${GREEN}〢 ────── 〢${WHITE}%-14s${GREEN}〢 ────── 〢${WHITE}%${#version}s${GREEN}〢 ──── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
-        line_separator 72
-    } || {
+    if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
         line_separator 85
         printf "${GREEN}〢 ─────────── 〢${WHITE}%-10s${GREEN}〢──────────〢${WHITE}%-14s${GREEN}〢─────────〢${WHITE}%${#version}s${GREEN}〢 ────────── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
         line_separator 85
-    }    
+    else
+        line_separator 60
+        printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
+        line_separator 60
+        
+    fi
 }
 
 show_first_panel() {
     local tmp_distro=($(lsb_release -d |cut -f2 | tr a-z A-Z))
     local distro="${tmp_distro[0]} ${tmp_distro[1]}"
-    kernel=$(uname -r | tr a-z A-Z )
-    arch=$(dpkg --print-architecture)
+    local kernel=$(uname -r | tr a-z A-Z )
+    local arch=$(dpkg --print-architecture)
     
     
     local mem_total=$(free --kilo -h | awk 'NR==2{printf $2}')
     local mem_used=$(free --kilo -h | awk 'NR==2{printf $3}')
     local mem_free=$(free --kilo -h | awk 'NR==2{printf $4}')
-    local mem_disp=$(free --kilo -h | awk 'NR==2{printf $7}') 
+    local mem_available=$(free --kilo -h | awk 'NR==2{printf $7}') 
+    local mem_used_percent=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
     swap=$(swapon -s)
     swap_total=$(free --kilo -h  | awk 'NR==3{printf $2}')
@@ -44,55 +46,24 @@ show_first_panel() {
     cpu_model=$(grep name < /proc/cpuinfo | uniq | awk '{ for(f=4; f<=NF; f++) { printf $f " "; } }')
     cpu_used=$(top -b -n1 | grep 'Cpu(s)' | awk '{print $2 + $4}')
     
-    [[ $columns -le 78 ]] && {
+    if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
         printf "${WHITE}〢 ${RED}%-7s ${WHITE}%-${#distro}s ${RED}%-7s ${WHITE}%-${#kernel}s ${RED}%13s ${WHITE}%-${#arch}s %$(echo 68 - 27 - ${#distro} - ${#kernel} - ${#arch} | bc)s\n" "DISTRO:" "$distro" "KERNEL:" "$kernel" "ARQUITECTURA:" "${arch^^}" "〢"
-        printf "${WHITE}〢 ${RED}%-4s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%5s %$(echo 68 - 4 - 11 - 11 - 18  - 3 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} | bc)s\n" "RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_disp}" "〢" 
+        printf "${WHITE}〢 ${RED}%-4s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%5s %$(echo 68 - 4 - 11 - 11 - 18  - 3 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} | bc)s\n" "RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_available}" "〢" 
         if [[ ! -z "${swap}" ]];then
             printf "${WHITE}〢 ${RED}%-8s ${WHITE}%-${#swap_total}s  ${RED}%14s ${WHITE}%-${#swap_used}s ${RED}%11s ${WHITE}%-${#swap_free}s %$(echo 68 - 12 - 11 - ${#swap_total} - ${#swap_used} - ${#swap_free} | bc)s\n" "SWAP:" "$swap_total" "EN USO:" "$swap_used" "LIBRE:" "$swap_free" "〢"
         fi
         printf "${WHITE}〢 ${RED}%-6s ${WHITE}%-${#cpu_core}s ${RED}%-7s ${WHITE}%-${#cpu_model}s ${RED}%-7s ${WHITE}%${#cpu_used}s %$(echo 68 - 6 - 16 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} | bc)s\n" "CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
-    } || {
-        printf "${WHITE}〢 ${RED}%-7s ${WHITE}%-${#distro}s ${RED}%-7s ${WHITE}%-${#kernel}s ${RED}%13s ${WHITE}%-${#arch}s %$(echo 83 - 27 - ${#distro} - ${#kernel} - ${#arch} | bc)s\n" "DISTRO:" "$distro" "KERNEL:" "$kernel" "ARQUITECTURA:" "${arch^^}" "〢"
-        printf "${WHITE}〢 ${RED}%-12s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%${#mem_disp}s %$(echo 70 - 12 - 11 - 18 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} | bc)s\n" "MEMORIA RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_disp}" "〢" 
-        if [[ ! -z "${swap}" ]];then
-            local length_third_line=$(echo 72 - 12 - 11 - ${#swap_total} - ${#swap_used} - ${#swap_free} | bc)
-            printf "${WHITE}〢 ${RED}%-8s ${WHITE}%-${#swap_total}s  ${RED}%14s ${WHITE}%-${#swap_used}s ${RED}%11s ${WHITE}%-${#swap_free}s %${length_third_line}s\n" "SWAP:" "$swap_total" "EN USO:" "$swap_used" "LIBRE:" "$swap_free" "〢"
-        fi
-        printf "${WHITE}〢 ${RED}%-10s ${WHITE}%-${#cpu_core}s ${RED}%-8s ${WHITE}%-${#cpu_model}s ${RED}%-8s ${WHITE}%-${#cpu_used}s %$(echo 78 - 12 - 11 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} | bc)s\n" "CPU-CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
-    }
-    
-    
-}
-
-show_acc_ssh_info(){
-    local user_db="/etc/FenixManager/database/usuarios.db"
-    local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" &>/dev/null || echo "error")
-    if [[ "${get_total_users}" == "error" ]];then
-        error "La base de datos de usuarios no existe o esta corrupta"
-        info "Creando base de datos de usuarios"
-        sqlite3 $user_db  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );' && {
-            info "Base de datos de usuarios creada correctamente"
-            read -n 1 -s -r -p "Presiona cualquier tecla para continuar..."
-            clear && fenix
-        } || {
-            error "Error al crear la base de datos de usuarios"
-            exit 1
-        }
-
+    else
+        printf "${WHITE}〢 ${WHITE}%-4s${RED}%-${#distro}s ${WHITE}%-6s ${RED}%-${#arch}s ${WHITE}%-8s ${RED}%-${#kernel}s ${WHITE}%-$(echo 60 - 18 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
+        printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
+        
+        printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'
+        printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"
+        
     fi
-    local users_=$(sqlite3 "$user_db" "SELECT nombre FROM ssh")
-    local count_=0
-    for i in ${users_[@]};do
-        number_session=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$user")
-        if [[ "${number_session}" -ne 0 ]];then count_=$((count_+1)) ; fi
-    done
-    local offline_users=$(echo ${get_total_users} - ${count_} | bc)
-    [[ -z "${get_total_users}" ]] && get_total_users=0
-    [[ $columns -le 78 ]] && {
-        printf "${WHITE}〢 %15s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#count_}s ${WHITE}%15s ${RED}%-${#count_}s ${WHITE}%$(echo 51 - 30 - 12  - ${#get_total_users} - ${#count_} - ${#offline_users} | bc)s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${count_} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
-    } || {
-        printf "${WHITE}〢 %20s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#count_}s ${WHITE}%16s ${RED}%-${#count_}s ${WHITE}%$(echo 66 - 20 - 12 - 16 - ${#get_total_users} - ${#count_} - ${#offline_users} | bc)s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${count_} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
-    }
+
+    
+    
 }
 
 show_network_stat(){
@@ -101,29 +72,34 @@ show_network_stat(){
     local default_iface_network_stat=($(ifconfig ${default_iface} | grep -o "(.*)" ))
     local net_down_stat=${default_iface_network_stat[1]}
     local public_ip=$(cat /etc/FenixManager/ip 2>/dev/null)
-    net_down_stat=$(echo $net_down_stat | sed -e 's/^[()]//' -e 's/[()]$//')
+    if [[ -z "${public_ip}" ]];then
+        local public_ip=$(curl -s ipconfig.io/ip)
+        echo "${public_ip}" > "${file_with_ip}"
+    fi
+    local net_down_stat="$(echo $net_down_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
     local net_up_stat=${default_iface_network_stat[3]}
-    net_up_stat=$(echo $net_up_stat | sed -e 's/^[()]//' -e 's/[()]$//')
-    [[ $columns -le 78 ]] && {
-        printf "${WHITE}〢 ${RED}%-9s ${WHITE}%-15s ${RED}%-7s ${WHITE} %-15s ${RED}%-9s ${WHITE}%-${#default_iface}s ${WHITE}%$(echo 65 - 10 - 15 - 7 - 15 - 9 - ${#default_iface} | bc)s〢\n" "DESCARGA:" "$net_down_stat MB" "SUBIDA:" "$net_up_stat MB" "INTERFAZ:" "${default_iface}"
-        printf "${WHITE}〢 ${GREEN}%40s ${WHITE}%33s\n" "${public_ip}" '〢'
-    } || {
+    local net_up_stat="$(echo $net_up_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
+    [[ "${simple_ui}" == "false" ]] && {
         printf "${WHITE}〢 ${RED}%-9s ${WHITE}%-15s ${RED}%-7s ${WHITE} %-15s ${RED}%-9s ${WHITE}%-${#default_iface}s ${GREEN}%${#public_ip}s ${WHITE}%$(echo 78 - 9 - 15 - 7 - 15 - 9 - ${#default_iface} - ${#public_ip} | bc)s〢\n" "DESCARGA:" "$net_down_stat MB" "SUBIDA:" "$net_up_stat MB" "INTERFAZ:" "${default_iface}" "${public_ip}"
+    } || {
+        printf "${WHITE}〢 ${RED}%-10s ${WHITE}%-${#net_down_stat}s ${RED}%10s ${WHITE}%-${#net_up_stat}s ${RED}%12s ${WHITE}%-${#default_iface}s %$(echo 56 - 32 - ${#net_down_stat} - ${#net_up_stat} - ${#default_iface} | bc)s\n" "DESCARGA:" "${net_down_stat}" "SUBIDA:" "${net_up_stat}" "INTERFAZ:" "${default_iface}" "〢"
+        printf "${WHITE}〢 ${RED}%25s ${GREEN}%-15s ${WHITE}%$(echo 60 - 40 | bc)s \n" "DIRECCION IP:" "${public_ip}" "〢"
     }
 }
 
 option_menu_software () {
     clear
     local columns=$(tput cols)
-    [[ $columns -le 78 ]] && {
-        line_separator 72
-        echo -e "${BLUE}〢 ───────────────────── 〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢 ──────────────────── 〢"
-        line_separator 72
+    [[ "${simple_ui}" == "false" ]] && {
+        line_separator 85
+        echo -e "${BLUE}〢───────────────────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢───────────────────────────────〢"
+        line_separator 85
     } || {
-        line_separator 85
-        echo -e "${BLUE}〢 ────────────────────────── 〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢 ────────────────────────────── 〢"
-        line_separator 85
+        line_separator 60
+        echo -e "${BLUE}〢───────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢──────────────────〢"
+        line_separator 60
     }
+    
     [[ "${hide_ports_open_services_in_protocol_menu=}" == 'false' ]] && {
         list_services_and_ports_used "table"
         [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
@@ -140,85 +116,22 @@ option_menu_software () {
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[${BBLUE}${prompt}${WHITE}")] : " option
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
         
         case $option in 
-            0) # OPENSSH/DROPBEAR
-                cfg_ssh_dropbear
-                main
-                ;;
-            1 ) # squid proxy
-                if [[ ${installed_packages[*]} =~ squid ]];then
-                    cfg_squid_proxy
-                else
-                    squid_proxy_install
-                fi
-                main
-                ;;
-            2 ) # stunnel4
-                if [[ ${installed_packages[*]} =~ stunnel4 ]];then
-                    cfg_stunnel4
-                else
-                    install_stunnel4
-                fi
-                main
-                ;;
-            3 ) #slowdns
-                if [[ ${installed_packages[*]} =~ slowdns ]];then
-                    cfg_slowdns
-                else
-                    install_slowdns
-                fi
-                main
-                ;;
-            4 ) #shadowsocks-libev
-                if [[ ${installed_packages[*]} =~ shadowsocks-libev ]];then
-                    cfg_shadowsocks
-                else
-                    install_shadowsocks
-                fi
-                main
-                ;;
-            5 ) #openvpn
-                if [[ ${installed_packages[*]} =~ openvpn ]];then
-                    cgf_openvpn
-                else
-                    install_openvpn
-                fi
-                main
-                
-                ;;
-            6) # v2ray
-                if [[ ${installed_packages[*]} =~ v2ray ]];then
-                    cfg_v2ray
-                else
-                    des_install_v2ray_core 1
-                fi
-                main
-                ;;
+            0) cfg_ssh_dropbear && main ;;
+            1 ) [[ ${installed_packages[*]} =~ squid ]] && cfg_squid_proxy || squid_proxy_install ;;
+            2 ) [[ ${installed_packages[*]} =~ stunnel4 ]] && cfg_stunnel4 || install_stunnel4 ;;
+            3 ) [[ ${installed_packages[*]} =~ slowdns ]] && cfg_slowdns || install_slowdns ;;
+            4 ) [[ ${installed_packages[*]} =~ shadowsocks-libev ]] && cfg_shadowsocks || install_shadowsocks ;;
+            5 ) [[ ${installed_packages[*]} =~ openvpn ]] && cgf_openvpn || install_openvpn ;;
+            6) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
+            7) [[ ${installed_packages[*]} =~ python3-proxy ]] && cfg_python3_proxy || install_python3_proxy ;;
             
-            7) # python3-proxy
-                if [[ ${installed_packages[*]} =~ python3-proxy ]];then
-                    cfg_python3_proxy
-                else
-                    install_python3_proxy
-                fi
-                main
-                ;;
-            "cls" | "CLS")
-                clear
-                option_menu_software
-                ;;
-            [mM])
-                fenix 
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
-            *)
-                continue
-                ;;
-            
+            "cls" | "CLS") clear && option_menu_software ;;
+            [mM]) fenix  ;;
+            q|Q|e|E) exit 0 ;;
+            *) tput cuu1 && tput el1
         esac
     done
 }
@@ -228,15 +141,16 @@ option_menu_configuration(){
     local columns=$(tput cols)
     # relaod preferences.bash
     source "/etc/FenixManager/preferences.bash"
-    [[ $columns -le 78 ]] && {
-        line_separator 72
-        echo -e "${BLUE}〢 ────────────────────── 〢  ${WHITE}CONFIGURACIONES${BLUE}   〢 ────────────────────── 〢"
-        line_separator 72
+    [[ "${simple_ui}" == 'false' ]] && {
+        line_separator 85
+        echo -e "${BLUE}〢───────────────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢──────────────────────────────────〢"
+        line_separator 85
     } || {
-        line_separator 85
-        echo -e "${BLUE}〢 ────────────────────────── 〢  ${WHITE}CONFIGURACIONES${BLUE}   〢 ───────────────────────────────── 〢"
-        line_separator 85
+        line_separator 60
+        echo -e "${BLUE}〢─────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢───────────────────〢"
+        line_separator 60
     }
+    
     option_color 1 "ADMINISTRAR HITMAN"
     option_color 2 "ADMINISTRAR FIREWALL ( UFW )"
     option_color 3 "CAMBIAR ZONA HORARIA"
@@ -250,62 +164,28 @@ option_menu_configuration(){
     option_color E "SALIR"
     
     while true;do
-        trap ctrl_c SIGINT SIGTERM
+        #trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -r -p "$(printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : ")" opt
         case $opt in
-            1) # ADMINISTRAR HITMAN
-                cfg_hitman
-                ;;
-            2) # ADMINISTAR FIREWALL ( UFW )
-                cfg_firewall_ufw
-                fenix
-                ;;
-            3) # CAMBIAR ZONA HORARIAS
-                cfg_timezone
-                fenix
-                ;;
-            4) # ADMINISTRAR FAIL2BAN
-                cfg_fail2ban
-                fenix
-                ;;
-            5) # SPEEDTEST
-                speedtest_
-                ;;
-            6) # BLOQUEAR ANUNCIOS  
-                [[ -f "/etc/block-ads-fenixmanager-actived" ]] && cfg_blockads 1 || cfg_blockads 0
-                ;;
-            7) # LIMIT BANDWIDTH
-                limit_bandwidth
-                ;;
-            8) # CAMBIAR AJUSTES DE FENIX
-                block_p2p_and_torrent
-                ;;
-            9) # CAMBIAR AJUSTES DE FENIX
-                cfg_fenix_settings
-                ;;
-            "cls" | "CLS")
-                clear
-                option_menu_configuration
-                ;;
-            [mM])
-                fenix
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
-            *)
-                continue
-                ;;
+            1)  cfg_hitman ;;
+            2)  cfg_firewall_ufw && fenix ;;
+            3)  cfg_timezone && fenix ;;
+            4)  cfg_fail2ban && fenix ;;
+            5)  speedtest_ ;;
+            6)  [[ -f "/etc/block-ads-fenixmanager-actived" ]] && cfg_blockads 1 || cfg_blockads 0 ;;
+            7)  limit_bandwidth ;;
+            8)  block_p2p_and_torrent ;;
+            9)  cfg_fenix_settings ;;
+            "cls" | "CLS") clear && option_menu_configuration ;;
+            [mM]) fenix ;;
+            q|Q|e|E) exit 0 ;;
+            *) tput cuu1 && tput el1 ;;
         esac
-        sleep 1.5
-        clear
-        option_menu_configuration
     done
 }
 
 option_menu() {
-
     option_color 1 "ADMINISTRAR USUARIOS SSH"
     option_color 2 "ADMINISTRAR USUARIOS OPENVPN"
     option_color 3 'MENU DE INSTALACION'
@@ -317,12 +197,11 @@ option_menu() {
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " user_option
+        read -r -p "$(printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : ")" user_option
+        
         case $user_option in
             1 )
-                clear
-                list_user
-                option_menu_ssh
+                clo
                 break
                 ;;
             2 )
@@ -337,18 +216,10 @@ option_menu() {
                 fi
                 break
                 ;;
-            3 )
-                option_menu_software
-                ;;
-            3 )
-                option_menu_configuration
-                ;;
-            4 )
-                option_menu_configuration
-                ;;
-            5 )
-                create_free_subdomain
-                ;;
+            3 ) option_menu_software ;;
+            3 ) option_menu_configuration ;;
+            4 ) option_menu_configuration ;;
+            5 ) create_free_subdomain ;;
             6 )
                 {
                     local remote_version=$(curl -s https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version)
@@ -385,33 +256,26 @@ option_menu() {
                     fi
                 }
                     ;;
-            "cls" | "CLS")
-                clear
-                main
-                ;;
-            [eEqQ])
-                exit 0
-                ;;
-            *) 
-                continue
-                ;;
+            "cls" | "CLS") clear && main ;;
+            [eEqQ]) exit 0 ;;
+            *)  tput cuu1 && tput el1 ;;
             esac
-        unset user_option
+        
         done
 }
 
 create_free_subdomain(){
-    info "Actualmente, no es posible crear un subdominio gratis desde Fenix."
-    info "Pero tranquilo, aqui te dejo una lista de sitios que ${GREEN}SI${WHITE} lo permiten:"
+    info "No es posible crear un subdominio gratis desde Fenix."
+    info "Lista de sitios que ${GREEN}SI${WHITE} lo permiten:"
     local sites=("www.jagoanssh.com" "serverssh.net" "www.fastssh.com" "hidessh.com" "www.pointdns.net" "www.premiumssh.net" "opentunnel.net")
     local sites_day_available=("15 dias" "30 dias" "3 meses" "30 dias" "30 dias" "30 dias" "10 dias")
     for ((i=0;i<${#sites[@]};i++));do
         local site=${sites[$i]}
         local days_=${sites_day_available[$i]}
-        [[ $columns -le 78 ]] && {
-            printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 73 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
-        } || {
+        [[ "${simple_ui}" == "false" ]] && {
             printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 87 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
+        } || {
+            printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 60 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
         }
         
     done
@@ -425,7 +289,7 @@ main(){
     local hidden_panel=0
     script_executed_with_root_privileges
     check_sqlite3
-    
+
     [[ "${show_fenix_banner}" == "false" ]] && {
         simple_text_fenix
     } || {
@@ -433,28 +297,49 @@ main(){
         }
     [[ "${hide_first_panel}" == "false" ]] && {
         show_first_panel
-        [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
         ((hidden_panel++))
     }
     if [[ -f "$user_db" ]];then
         [[ "${hide_second_panel}" == "false" ]] && {
             show_acc_ssh_info
-            [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+            [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
             ((hidden_panel++))
         }
     fi
     [[ "${hide_third_panel}" == "false" ]] && {
         show_network_stat
-        [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
         ((hidden_panel++))
     }
     [[ "${hide_ports_open_services_in_home_menu}" == 'false' ]] && {
         list_services_and_ports_used "table"
-        [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
         ((hidden_panel++))
     }
     [[ "${hidden_panel}" -eq 3 && "${hidden_panel}" -eq 1 ]] && {
-        [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+    }
+    [[ -z "${simple_ui}" ]] && {
+        while true;do
+            read -p "$(echo -e "${WHITE}[*] EL MENU ANTERIOR SE VISUALIZO DE MANERA CORRECTA ?. (S)i / (N)o ${WHITE} ")" opt
+            case $opt in
+                s|S|Y|y|yes|YES|si|SI)
+                    echo "simple_ui=false" >> "/etc/FenixManager/preferences.bash"
+                    break
+                    ;;
+                n|N|N|no|NO)
+                    echo "simple_ui=true" >> "/etc/FenixManager/preferences.bash"
+                    info "Vuelve a ejecutar Fenix Manager,para que se visualice correctamente."
+                    exit 0
+                    ;;
+                *)
+                    error "Opcion no valida"
+                    info "Porfavor, selecciona una opcion valida."
+                    continue
+                    ;;
+            esac
+        done
     }
     option_menu
 
