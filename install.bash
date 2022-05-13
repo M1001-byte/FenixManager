@@ -145,17 +145,13 @@ install_python3_package(){
 
 config_bashrc(){
     local bashrc_banner='YmFubmVyPSdHMXN4T3pNeGJRb2dJQ0FnSUNBZ0lDQWdJQ0FnWHk5OElDQWdJQ0FnSUh4Y1h3b2dJQ0FnSUNBZ0lDQWdJQ0F2SUNCOElDQWdJQ0FnSUh3Z0lGd2dDaUFnSUNBZ0lDQWdJQ0FnZkNBZ0lDQmNJQ0FnSUNBdklDQWdJSHdLSUNBZ0lDQWdJQ0FnSUNCOElDQmNJQzhnSUNBZ0lGd2dMeUFnZkFvZ0lDQWdJQ0FnSUNBZ0lId2dYQ0FnZkNBZ0lDQWdmQ0FnTHlCOENpQWdJQ0FnSUNBZ0lDQWdmQ0JjSUY5Y1h5OWVYRjh2WHlBdklId0tJQ0FnSUNBZ0lDQWdJQ0I4SUNBZ0lDMHRYQzh2TFMwZ0lDQWdmQW9nSUNBZ0lDQWdJQ0FnSUNCY1h5QWdYQ0FnSUNBZ0x5QWdYeThLSUNBZ0lDQWdJQ0FnSUNBZ0lDQmNYMThnSUh3Z0lGOWZMd29nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJRndnWHlBdkNpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCZkx5QWdJRnhmRzF0dElCdGJNek50SUNBZ0lFMWhkR2hwZFdVZ01UQXdNUnRiYlFvZ0lDQWdJQ0FnSUNBZ0lDQWdJQnRiTVRzek1XMGdMeUJmTDN4Y1h5QmNJQnRiYlNBYld6TXpiU0FnUm1WdWFYZ2dUV0Z1WVdkbGNodGJiUW9nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWJXekU3TXpGdElDOGdJSHdnSUZ3Z0lDQWJXek16YlNBZ1ZtVnljMmx2YmpvZ01TNHdMakFiVzIwS0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUJ0Yk1Uc3pNVzBnTHlCMklGd2dDZz09JwplY2hvIC1lICRiYW5uZXIgfCBiYXNlNjQgLS1kZWNvZGUKZWNobyAtZSAiIFxcMDMzWzE7MzdtQmllbnZlbmlkbyBhIFxcMDMzWzE7MzNtRmVuaXggTWFuYWdlclxcMDMzW20iCmVjaG8gLWUgIlxcMDMzWzE7MzdtIFBhcmEgdGVybWluYXIgZWwgcHJvY2VzbyBkZSBpbnN0YWxhY2lvbixlamVjdXRhciBlbCBzaWd1aWVudGUgY29tYW5kbzpcXDAzM1ttIFxcMDMzWzE7MzJtZmVuaXhcXDAzM1ttICIK'
-    local fenix_function="ZmVuaXgoKXsKICAgICAgICAgICAgbG9jYWwgdWlfbW9kZT0iJDEiCiAgICAgICAgICAgIGxvY2FsIGZlbml4X3NjcmlwdF9kaXI9Ii9ldGMvRmVuaXhNYW5hZ2VyIgogICAgICAgICAgICBsb2NhbCBmZW5peF9tZW51PSIke2Zlbml4X3NjcmlwdF9kaXJ9L2Zlbml4LW1lbnUuYmFzaCIKCiAgICAgICAgICAgIFtbIC1uICIke3VpX21vZGV9IiB8fCAiJHt1aV9tb2RlfSIgPT0gInNpbXBsZSIgfHwgIiR7dWlfbW9kZX0iID09ICJmdWxsIiBdXSAmJiB7CiAgICAgICAgICAgICAgICBpZiBbWyAiJHt1aV9tb2RlfSIgPT0gInNpbXBsZSIgXV07dGhlbgogICAgICAgICAgICAgICAgICAgIHNlZCAtaSAicy9zaW1wbGVfdWk9Liovc2ltcGxlX3VpPSd0cnVlJy9nIiAiJHtmZW5peF9zY3JpcHRfZGlyfS9wcmVmZXJlbmNlcy5iYXNoIiAKICAgICAgICAgICAgICAgIGVsaWYgW1sgIiR7dWlfbW9kZX0iID09ICJmdWxsIiBdXTt0aGVuCiAgICAgICAgICAgICAgICAgICAgc2VkIC1pICJzL3NpbXBsZV91aT0uKi9zaW1wbGVfdWk9J2ZhbHNlJy9nIiAiJHtmZW5peF9zY3JpcHRfZGlyfS9wcmVmZXJlbmNlcy5iYXNoIgogICAgICAgICAgICAgICAgZmkKICAgICAgICAgICAgfQogICAgICAgICAgICBzdWRvICIke2Zlbml4X3NjcmlwdF9kaXJ9L2Zlbml4LW1lbnUuYmFzaCIKICAgCiAgICAgICAgfQ=="
     
     [[ "${user}" != "root" ]] && {
-        mv /etc/skel/.bashrc "/home/${user}/.bashrc" 2>/dev/null 
         echo -e $bashrc_banner | base64 -d >> "/home/${user}/.bashrc"
-        echo -e $fenix_function | base64 -d >> "/home/${user}/.bashrc"
-    
+        echo "alias fenix='sudo $script_folder/main.bash'" >> "/home/${user}/.bashrc"
     } || {
-        grep -q "alias fenix" ~/.bashrc &&  mv /etc/skel/.bashrc "$userfolder/.bashrc" 2>/dev/null  
-        echo -e $bashrc_banner | base64 -d >> $userfolder/.bashrc
-        echo "alias fenix='sudo $script_folder/main.bash'" >> $userfolder/.bashrc
+        echo -e $bashrc_banner | base64 -d >> "$userfolder/.bashrc"
+        echo "alias fenix='sudo $script_folder/main.bash'" >> "$userfolder/.bashrc"
     
     }
 }
