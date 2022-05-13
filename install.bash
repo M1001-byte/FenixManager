@@ -189,7 +189,7 @@ clone_fenix(){
     elif [ "${branch}" == "2" ]; then
         local branch='dev'
     elif [ "${branch}" == "3" ]; then
-        local branch='simple_ui'
+        local branch='simple-ui'
     else
         local branch='master'
     fi
