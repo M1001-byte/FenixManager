@@ -94,18 +94,16 @@ change_dns(){
 update_system(){
     echo -e "\\033[34m〢───────────────〢 \\033[1;37mACTUALIZANDO EL SISTEMA \\033[34m〢────────────────〢"
     for i in "${updates_command[@]}" ; do 
-        bar "apt-get $i -y"
-    
-        if [ $? -eq 130 ];then
-            error 'Se ha cancelado la actualizacion del sistema.'
-            exit 130
-        fi
-        if [ $? -ne 0 ];then
-            error 'Fallo al actualizar el sistema'
-            info 'Pruebe ejecutando manualmente: sudo dpkg --configure -a '
-            exit $?
+        bar "apt-get $i -y" || {
+           if [ $? -eq 130 ];then
+               error 'Accion cancelada.'
+                exit 130
+           else
+               error "Fallo al instalar $packets."
+               info 'Pruebe ejecutando manualmente: sudo dpkg --configure -a '
+                exit $?
             fi
-
+        }
     done
 }
 
@@ -129,15 +127,15 @@ install_packets(){
 install_python3_package(){
     echo -e "\\033[34m〢───────────〢 \\033[1;37mINSTALANDO PAQUETES DE PYTHON3 \\033[34m〢─────────────〢"
     for i in "${pip_packages[@]}" ; do
-        bar "pip3 install $i"
-        if [ $? -eq 130 ];then
-            error 'Accion cancelada.'
-            exit 130
+        bar "$i" "pip3 install $i" || {
+           if [ $? -eq 130 ];then
+               error 'Accion cancelada.'
+                exit 130
+           else
+               error "Fallo al instalar $packets."
+                exit $?
             fi
-        if [ $? -ne 0 ];then
-            error "Fallo al instalar $i."
-            exit $?
-            fi
+        }
     done
 }
 
