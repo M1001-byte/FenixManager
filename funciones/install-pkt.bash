@@ -156,6 +156,7 @@ install_slowdns() {
     else
         error 'Error al iniciar slowdns.'
     fi
+    rm "${pub}" &>/dev/null
     read -p "$(echo -e "$YELLOW[*] Presione enter para continuar.${endcolor}") " option
     cfg_slowdns
 
