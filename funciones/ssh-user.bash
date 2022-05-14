@@ -303,7 +303,7 @@ option_menu_ssh() {
             1 ) create_ssh_user_input && clo ;;
             2 ) delete_user ;;
             3 ) edit_user ;;
-            4 ) [[ ${simple_ui} == "true" ]] && list_user || backup_user ;;
+            4 ) [[ ${simple_ui} == "true" ]] && list_user  || backup_user ;;
             5 ) [[ ${simple_ui} == "true" ]] && monitor_users || restore_backup ;;
             6 ) [[ ${simple_ui} == "true" ]] && backup_user || delete_all_users ;;
             7 ) restore_backup ;;
@@ -586,6 +586,7 @@ restore_backup () {
 }
 
 show_acc_ssh_info(){
+    local sp="${1:-66}"
     local user_db="/etc/FenixManager/database/usuarios.db"
     local get_total_users=$(sqlite3 "$user_db" "SELECT COUNT(*) FROM ssh" 2> /dev/null || echo "error")
     if [[ "${get_total_users}" == "error" ]];then
@@ -612,7 +613,7 @@ show_acc_ssh_info(){
     [[ -z "${get_total_users}" ]] && get_total_users=0
     
     [[ "${simple_ui}" == "false" ]] && {
-        printf "${WHITE}〢 %20s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#online_user}s ${WHITE}%16s ${RED}%-${#offline_users}s ${WHITE}%-$(echo 75 - 20 - 12 - 16 - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${online_user} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
+        printf "${WHITE}〢 %20s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#online_user}s ${WHITE}%16s ${RED}%-${#offline_users}s ${WHITE}%-$((${sp} - 22 - 12 - 16 - ${#get_total_users} - ${#online_user} - ${#offline_users} ))s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${online_user} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
     } || {
         printf "${WHITE}〢 %13s ${YELLOW}%-${#get_total_users}s ${WHITE} %-10s ${GREEN}%-${#online_user}s ${WHITE}%12s ${RED}%${#offline_users}s${WHITE}%-$(echo 60 - 16 - 35  - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s〢\n" "USUARIOS-SSH:" "[${get_total_users}]" "CONECTADOS:" "[${online_user}]" "DESCONECTADOS:" "[${offline_users}]"
     }
@@ -623,7 +624,7 @@ clo() {
         clear
         list_user  
         line_separator 96
-        show_acc_ssh_info
+        show_acc_ssh_info "77"
         line_separator 96
         option_menu_ssh
     } || {

@@ -23,7 +23,7 @@ line_separator() {
     length_line=$1
     color_=$2
     [ -z $color_ ] && color_="${BLUE}"
-    if [[ $length_line -lt 0 ]];then  length_line=50 ; fi
+    if [[ "$length_line" -lt 0 ]];then  length_line=50 ; fi
     for i in $(seq 1 $length_line);do  str+="─" ; done
     echo -e "${BLUE}${str}〢${WHITE}"
 }
@@ -569,17 +569,10 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
                 ;;
         esac
-        [[ "${print_format}" == "table" ]] && {
-            [[ $columns -le 78 ]] && {
-                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 66 - 20 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
-            } || {
-                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 20 - 30 - 12  | bc )s\n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
-            }
+        [[ "${simple_ui}" == "false" ]] && {
+            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 22 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
         } || {
-            # ! 76
-            [[ -z "${port_listen}" ]] && continue || {
-            printf "${WHITE} ${color_} %-20s %20s ${WHITE} %$(echo 72 - 40  | bc)s\n" "${services_^^}" "${port_listen}"
-            }
+            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 20 - 30 - 12  | bc )s\n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
         }
     done
 }

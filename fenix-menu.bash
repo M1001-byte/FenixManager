@@ -14,8 +14,8 @@ source "/etc/FenixManager/preferences.bash"
 simple_text_fenix(){
     if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
         line_separator 85
-        printf "${GREEN}〢 ─────────── 〢${WHITE}%-10s${GREEN}〢──────────〢${WHITE}%-14s${GREEN}〢─────────〢${WHITE}%${#version}s${GREEN}〢 ────────── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
-        line_separator 85=
+        printf "${GREEN}〢 ─────────── 〢${WHITE}%-10s${GREEN}〢──────────〢${WHITE}%-16s${GREEN}〢─────────〢${WHITE}%${#version}s${GREEN}〢 ────────── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
+        line_separator 85
     else
         line_separator 60
         printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
@@ -47,12 +47,12 @@ show_first_panel() {
     cpu_used=$(top -b -n1 | grep 'Cpu(s)' | awk '{print $2 + $4}')
     
     if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
-        printf "${WHITE}〢 ${RED}%-7s ${WHITE}%-${#distro}s ${RED}%-7s ${WHITE}%-${#kernel}s ${RED}%13s ${WHITE}%-${#arch}s %$(echo 68 - 27 - ${#distro} - ${#kernel} - ${#arch} | bc)s\n" "DISTRO:" "$distro" "KERNEL:" "$kernel" "ARQUITECTURA:" "${arch^^}" "〢"
-        printf "${WHITE}〢 ${RED}%-4s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%5s %$(echo 68 - 4 - 11 - 11 - 18  - 3 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} | bc)s\n" "RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_available}" "〢" 
+        printf "${WHITE}〢 ${RED}%10s ${WHITE}%-${#distro}s ${RED}%10s ${WHITE}%${#kernel}s  ${RED}%13s ${WHITE}%${#arch}s %$((81 - 34 - ${#distro} - ${#kernel} - ${#arch} ))s\n" "DISTRO:" "$distro" "KERNEL:" "$kernel" "ARQUITECTURA:" "${arch^^}" "〢"
+        printf "${WHITE}〢 ${RED}%10s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%5s %$((81 - 57 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} ))s\n" "RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_available}" "〢" 
         if [[ ! -z "${swap}" ]];then
-            printf "${WHITE}〢 ${RED}%-8s ${WHITE}%-${#swap_total}s  ${RED}%14s ${WHITE}%-${#swap_used}s ${RED}%11s ${WHITE}%-${#swap_free}s %$(echo 68 - 12 - 11 - ${#swap_total} - ${#swap_used} - ${#swap_free} | bc)s\n" "SWAP:" "$swap_total" "EN USO:" "$swap_used" "LIBRE:" "$swap_free" "〢"
+            printf "${WHITE}〢 ${RED}%-8s ${WHITE}%-${#swap_total}s  ${RED}%14s ${WHITE}%-${#swap_used}s ${RED}%11s ${WHITE}%-${#swap_free}s %$((80 - 12 - 11 - ${#swap_total} - ${#swap_used} - ${#swap_free} ))s\n" "SWAP:" "$swap_total" "EN USO:" "$swap_used" "LIBRE:" "$swap_free" "〢"
         fi
-        printf "${WHITE}〢 ${RED}%-6s ${WHITE}%-${#cpu_core}s ${RED}%-7s ${WHITE}%-${#cpu_model}s ${RED}%-7s ${WHITE}%${#cpu_used}s %$(echo 68 - 6 - 16 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} | bc)s\n" "CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
+        printf "${WHITE}〢${RED}%10s ${WHITE}%-${#cpu_core}s ${RED}%-7s ${WHITE}%-${#cpu_model}s ${RED}%-7s ${WHITE}%${#cpu_used}s %$(( 81 - 9 - 16 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} ))s\n" "CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
     else
         printf "${WHITE}〢 ${WHITE}%-3s${RED}%-${#distro}s${WHITE}%-7s${RED}%-${#arch}s ${WHITE}%-9s${RED}%-${#kernel}s${WHITE}%$(echo 60 - 19 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
         printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
@@ -80,7 +80,7 @@ show_network_stat(){
     local net_up_stat=${default_iface_network_stat[3]}
     local net_up_stat="$(echo $net_up_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
     [[ "${simple_ui}" == "false" ]] && {
-        printf "${WHITE}〢 ${RED}%-9s ${WHITE}%-15s ${RED}%-7s ${WHITE} %-15s ${RED}%-9s ${WHITE}%-${#default_iface}s ${GREEN}%${#public_ip}s ${WHITE}%$(echo 78 - 9 - 15 - 7 - 15 - 9 - ${#default_iface} - ${#public_ip} | bc)s〢\n" "DESCARGA:" "$net_down_stat MB" "SUBIDA:" "$net_up_stat MB" "INTERFAZ:" "${default_iface}" "${public_ip}"
+        printf "${WHITE}〢 ${RED}%-9s ${WHITE}%-15s ${RED}%-7s ${WHITE} %-15s ${RED}%-9s ${WHITE}%-${#default_iface}s ${GREEN}%${#public_ip}s ${WHITE}%$(echo 81 - 14 - 15 - 7 - 15 - 9 - ${#default_iface} - ${#public_ip} | bc)s〢\n" "DESCARGA:" "$net_down_stat MB" "SUBIDA:" "$net_up_stat MB" "INTERFAZ:" "${default_iface}" "${public_ip}"
     } || {
         printf "${WHITE}〢 ${RED}%-10s ${WHITE}%-${#net_down_stat}s ${RED}%10s ${WHITE}%-${#net_up_stat}s ${RED}%12s ${WHITE}%-${#default_iface}s %$(echo 56 - 32 - ${#net_down_stat} - ${#net_up_stat} - ${#default_iface} | bc)s\n" "DESCARGA:" "${net_down_stat}" "SUBIDA:" "${net_up_stat}" "INTERFAZ:" "${default_iface}" "〢"
         printf "${WHITE}〢 ${RED}%25s ${GREEN}%-15s ${WHITE}%$(echo 60 - 40 | bc)s \n" "DIRECCION IP:" "${public_ip}" "〢"
@@ -320,27 +320,7 @@ main(){
     [[ "${hidden_panel}" -eq 3 && "${hidden_panel}" -eq 1 ]] && {
         [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
     }
-    [[ -z "${simple_ui}" ]] && {
-        while true;do
-            read -p "$(echo -e "${WHITE}[*] EL MENU ANTERIOR SE VISUALIZO DE MANERA CORRECTA ?. (S)i / (N)o ${WHITE} ")" opt
-            case $opt in
-                s|S|Y|y|yes|YES|si|SI)
-                    echo "simple_ui=false" >> "/etc/FenixManager/preferences.bash"
-                    break
-                    ;;
-                n|N|N|no|NO)
-                    echo "simple_ui=true" >> "/etc/FenixManager/preferences.bash"
-                    info "Vuelve a ejecutar Fenix Manager,para que se visualice correctamente."
-                    exit 0
-                    ;;
-                *)
-                    error "Opcion no valida"
-                    info "Porfavor, selecciona una opcion valida."
-                    continue
-                    ;;
-            esac
-        done
-    }
+    
     option_menu
 
 }
