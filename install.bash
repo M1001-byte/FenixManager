@@ -7,7 +7,6 @@ ctrl_c() {
 
 info(){ echo -e "\\033[1;33m[INFO]\\033[m \\033[1;37m$*\\033[m";}
 error() { echo -e "\\033[1;31m[ERROR]\\033[m \\033[1;37m$*\\033[m";}
-space() { echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢─────────────────── 〢\\033[m";}
 
 bar() {
     local str="###############"
@@ -93,7 +92,7 @@ change_dns(){
 }
 
 update_system(){
-    space 'ACTUALIZANDO EL SISTEMA'
+    echo -e "\\033[34m〢───────────────〢 \\033[1;37mACTUALIZANDO EL SISTEMA \\033[34m〢────────────────〢"
     for i in "${updates_command[@]}" ; do 
         bar "apt-get $i -y"
     
@@ -111,15 +110,15 @@ update_system(){
 }
 
 install_packets(){
-    space 'INSTALANDO PAQUETES NECESARIOS'
+    echo -e "\\033[34m〢────────────〢 \\033[1;37mINSTALANDO PAQUETES NECESARIOS \\033[34m〢────────────〢"rm 
     for packets in "${packets_to_install[@]}" ; do
-        bar "apt-get install $packets -y"
+        bar "$packets" "apt-get install $packets -y" 
         
         if [ $? -eq 130 ];then
             error 'Accion cancelada.'
             exit 130
             fi
-        if [ $? -ne 0 ];then
+        elif [ $? -ne 0 ];then
             error "Fallo al instalar $packets."
             exit $?
             fi
@@ -129,7 +128,7 @@ install_packets(){
 }
 
 install_python3_package(){
-    space 'INSTALANDO PAQUETES PYTHON3'
+    echo -e "\\033[34m〢───────────〢 \\033[1;37mINSTALANDO PAQUETES DE PYTHON3 \\033[34m〢─────────────〢"
     for i in "${pip_packages[@]}" ; do
         bar "pip3 install $i"
         if [ $? -eq 130 ];then
@@ -158,7 +157,7 @@ config_bashrc(){
 
 add_basic_ufw_rules(){
     trap "exit 130" SIGINT SIGTERM
-    space 'AGREGANDO REGLAS UFW'
+    echo -e "\\033[34m〢────────────────〢 \\033[1;37mAGREGANDO REGLAS UFW \\033[34m〢──────────────────〢"
     info "Agregando reglas basicas: ssh (22), http (80), https (443), dns (53/udp)"
     bar "ufw allow ssh"
     bar "ufw allow http"
@@ -173,7 +172,7 @@ add_basic_ufw_rules(){
 
 clone_fenix(){
     trap "exit 130" SIGINT SIGTERM
-    space 'CLONANDO FENIXMANAGER'
+    echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
     
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
     echo -e "Ingrese la rama a usar:\n1) \\033[32mmaster\\033[m\n2) \\033[33mdev\\033[m\n3) \\033[32msimple ui\\033[mLa opcion por defecto es \\033[32mmaster\\033[m.La rama \\033[33mdev\\033[m es una rama de desarrollo."
