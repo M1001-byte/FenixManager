@@ -13,7 +13,7 @@ script_executed_with_root_privileges
 squid_proxy_install () {
     trap "exit 130" SIGINT SIGTERM
     clear
-    separator "INSTALANDO SQUID-PROXY"
+    echo -e  "${BLUE}〢─────────────〢${WHITE} CONFIGURANDO SQUID-PROXY ${BLUE}〢─────────────────〢${WHITE}"
     bar 'apt-get install squid -y'
     if [[ $? != 0 ]];then
         error "Error al instalar Squid-Proxy"

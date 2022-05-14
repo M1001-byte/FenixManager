@@ -16,6 +16,10 @@ cfg_squid_proxy(){
     echo -e  "${BLUE}〢─────────────〢${WHITE} CONFIGURANDO SQUID-PROXY ${BLUE}〢─────────────────〢${WHITE}"
     show_info(){
         # 70
+        if [[ ! -f $squid_file_config ]];then
+            error "El archivo de configuracion de squid no existe."
+            exit 1
+        fi
         local _color_ips _color_dominios squid_is_running _squid_run_color one_length two_length three_length four_length
         local ports_squid=$(cat $squid_file_config | grep http_port | awk '{print $2}' | tr "\n" " ")
         
@@ -82,7 +86,7 @@ cfg_squid_proxy(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option
+        read -r -p "$(printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : ")" option
         case $option in
             1) # Agregar puertos
                 {
@@ -333,6 +337,7 @@ cfg_squid_proxy(){
                 # Menu principal
                 fenix
                 ;;
+            *) tput cuu1 && tput el1 ;;
         esac
     done
 }
