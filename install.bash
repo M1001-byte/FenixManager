@@ -117,7 +117,8 @@ install_packets(){
         if [ $? -eq 130 ];then
             error 'Accion cancelada.'
             exit 130
-        elif [ $? -ne 0 ];then
+        fi
+        if [ $? -ne 0 ];then
             error "Fallo al instalar $packets."
             exit $?
         fi
