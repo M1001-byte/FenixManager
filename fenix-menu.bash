@@ -15,7 +15,7 @@ simple_text_fenix(){
     if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
         line_separator 85
         printf "${GREEN}〢 ─────────── 〢${WHITE}%-10s${GREEN}〢──────────〢${WHITE}%-14s${GREEN}〢─────────〢${WHITE}%${#version}s${GREEN}〢 ────────── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
-        line_separator 85
+        line_separator 85=
     else
         line_separator 60
         printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
@@ -54,7 +54,7 @@ show_first_panel() {
         fi
         printf "${WHITE}〢 ${RED}%-6s ${WHITE}%-${#cpu_core}s ${RED}%-7s ${WHITE}%-${#cpu_model}s ${RED}%-7s ${WHITE}%${#cpu_used}s %$(echo 68 - 6 - 16 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} | bc)s\n" "CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
     else
-        printf "${WHITE}〢 ${WHITE}%-4s${RED}%-${#distro}s ${WHITE}%-6s ${RED}%-${#arch}s ${WHITE}%-8s ${RED}%-${#kernel}s ${WHITE}%-$(echo 60 - 18 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-3s${RED}%-${#distro}s${WHITE}%-7s${RED}%-${#arch}s ${WHITE}%-9s${RED}%-${#kernel}s${WHITE}%$(echo 60 - 19 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
         printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
         
         printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'

@@ -85,17 +85,18 @@ sqlite3_config () {
 
 add_alias_to_fenix () {
     trap "exit 130" SIGINT SIGTERM
-    local fenix_function="ZmVuaXgoKXsKICAgICAgICAgICAgbG9jYWwgdWlfbW9kZT0iJDEiCiAgICAgICAgICAgIGxvY2FsIGZlbml4X3NjcmlwdF9kaXI9Ii9ldGMvRmVuaXhNYW5hZ2VyIgogICAgICAgICAgICBsb2NhbCBmZW5peF9tZW51PSIke2Zlbml4X3NjcmlwdF9kaXJ9L2Zlbml4LW1lbnUuYmFzaCIKCiAgICAgICAgICAgIFtbIC1uICIke3VpX21vZGV9IiB8fCAiJHt1aV9tb2RlfSIgPT0gInNpbXBsZSIgfHwgIiR7dWlfbW9kZX0iID09ICJmdWxsIiBdXSAmJiB7CiAgICAgICAgICAgICAgICBpZiBbWyAiJHt1aV9tb2RlfSIgPT0gInNpbXBsZSIgXV07dGhlbgogICAgICAgICAgICAgICAgICAgIHNlZCAtaSAicy9zaW1wbGVfdWk9Liovc2ltcGxlX3VpPSd0cnVlJy9nIiAiJHtmZW5peF9zY3JpcHRfZGlyfS9wcmVmZXJlbmNlcy5iYXNoIiAKICAgICAgICAgICAgICAgIGVsaWYgW1sgIiR7dWlfbW9kZX0iID09ICJmdWxsIiBdXTt0aGVuCiAgICAgICAgICAgICAgICAgICAgc2VkIC1pICJzL3NpbXBsZV91aT0uKi9zaW1wbGVfdWk9J2ZhbHNlJy9nIiAiJHtmZW5peF9zY3JpcHRfZGlyfS9wcmVmZXJlbmNlcy5iYXNoIgogICAgICAgICAgICAgICAgZmkKICAgICAgICAgICAgfQogICAgICAgICAgICBzdWRvICIke2Zlbml4X3NjcmlwdF9kaXJ9L2Zlbml4LW1lbnUuYmFzaCIKICAgCiAgICAgICAgfQ=="
+    local fenix_function="ZnVuY3Rpb24gZmVuaXgoKSB7CiAgICAgICAgICAgIGxvY2FsIHVpX21vZGU9IiQxIgogICAgICAgICAgICBsb2NhbCBmZW5peF9zY3JpcHRfZGlyPSIvZXRjL0Zlbml4TWFuYWdlciIKICAgICAgICAgICAgbG9jYWwgZmVuaXhfbWVudT0iJHtmZW5peF9zY3JpcHRfZGlyfS9mZW5peC1tZW51LmJhc2giCgogICAgICAgICAgICBbWyAtbiAiJHt1aV9tb2RlfSIgfHwgIiR7dWlfbW9kZX0iID09ICJzaW1wbGUiIHx8ICIke3VpX21vZGV9IiA9PSAiZnVsbCIgXV0gJiYgewogICAgICAgICAgICAgICAgaWYgW1sgIiR7dWlfbW9kZX0iID09ICJzaW1wbGUiIF1dO3RoZW4KICAgICAgICAgICAgICAgICAgICBzZWQgLWkgInMvc2ltcGxlX3VpPS4qL3NpbXBsZV91aT0ndHJ1ZScvZyIgIiR7ZmVuaXhfc2NyaXB0X2Rpcn0vcHJlZmVyZW5jZXMuYmFzaCIgCiAgICAgICAgICAgICAgICBlbGlmIFtbICIke3VpX21vZGV9IiA9PSAiZnVsbCIgXV07dGhlbgogICAgICAgICAgICAgICAgICAgIHNlZCAtaSAicy9zaW1wbGVfdWk9Liovc2ltcGxlX3VpPSdmYWxzZScvZyIgIiR7ZmVuaXhfc2NyaXB0X2Rpcn0vcHJlZmVyZW5jZXMuYmFzaCIKICAgICAgICAgICAgICAgIGZpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgc3VkbyAiJHtmZW5peF9zY3JpcHRfZGlyfS9mZW5peC1tZW51LmJhc2giCiAgIAogICAgICAgIH0="
     separator 'INSTALANDO  FENIXMANAGER'
     
     str_replace='Para terminar el proceso de instalacion.*'
     str_new='Para mostrar el panel de administracion,ejecutar el siguiente comando : \\033[32mfenix \\033[m"'
     sed -i "s/$str_replace/$str_new/" $user_folder/.bashrc
+    sed -i '/alias fenix=/d' "$user_folder/.bashrc"
     base64 -d <<< "${fenix_function}" >> "$user_folder/.bashrc"
-    #sed -i "s|alias fenix=.*|alias fenix='sudo bash /etc/FenixManager/fenix-menu.bash'|" $user_folder/.bashrc
+    
 
     
-    local preferences_var=("show_fenix_banner=tue" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
+    local preferences_var=("show_fenix_banner=true" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
     for i in "${preferences_var[@]}"; do echo "$i" >> "/etc/FenixManager/preferences.bash" ; done
 }
 

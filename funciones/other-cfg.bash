@@ -365,16 +365,18 @@ cfg_fenix_settings(){
         printf "${WHITE}〢%-18s ${WHITE}%$(echo 60 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
     }
     
-    local home_var_val=("show_fenix_banner" "hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
+    [[ "${show_fenix_banner}" == 'false' ]] && {
+        option_color 0 "${GREEN}MOSTAR${WHITE} BANNER DE FENIX-MANAGER ( OCULTAR TEXTO )"
+    } || {
+        option_color 0 "${GREEN}MOSTAR${WHITE} TEXTO DE FENIX-MANAGER ( OCULTAR BANNER )"   
+    }
+
+    local home_var_val=("hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
     local home_var_desc=("banner de Fenix-Manager" "panel de informacion (os,etc)" "panel de usuarios ssh" "panel de adaptadores de red" "panel de puertos abiertos")
-    for ((i=0;i<${#home_var_val[@]};i++));do
+    for ((i=1;i<${#home_var_val[@]};i++));do
         local var_name="${home_var_val[$i]}"
         local var_value=$(set -o posix ; set | grep -o "${var_name}=.*" | cut -d "=" -f 2 ) # get value of var_name
-        if [[ "${var_name}" == "show_fenix_banner" ]];then
-            [[ "${var_value}" == "true" ]] && local var_desc="TEXTO SOBRE DE FENIX-MANAGER" || local var_desc="TEXTO ( MOSTRAR BANNER )"
-        else
-            local var_desc="${home_var_desc[$i]}"        
-        fi
+        local var_desc="${home_var_desc[$i]}"        
         [[ "${var_value}" == "false" ]] && option_color "$i" "${RED}OCULTAR${WHITE} ${var_desc^^}" || option_color $i "${GREEN}MOSTRAR${WHITE} ${var_desc^^}"
     done
 
