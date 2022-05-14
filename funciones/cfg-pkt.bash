@@ -1164,8 +1164,6 @@ cgf_openvpn(){
                 {
                     if [[ $oppenvpn_is_running -eq 0 ]];then
                         remove_openvpn
-                        clear
-                        fenix
                     else
                         bar "systemctl stop openvpn@server"
                         sleep 1.5
@@ -1180,8 +1178,6 @@ cgf_openvpn(){
                 ;;
             8) # REMOVER OPENVPN    
                 remove_openvpn
-                clear
-                fenix
                 ;;
             "cls" | "CLS")
                 clear
@@ -1531,7 +1527,7 @@ cfg_ssh_dropbear(){
             local dropbear_banner=$(grep -o "^DROPBEAR_BANNER=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s|${user_folder}|~|g" | xargs)
         
             # ! dropbear status
-            printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$(echo 60 - 10 - ${#drop_str} | bc )s\n" "DROPBEAR:" "${drop_str}" '〢'
+            printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$((60 - 10 - ${#drop_str} ))s\n" "DROPBEAR:" "${drop_str}" '〢'
             [ -z "${dropbear_ports}" ] && dropbear_ports="No se pudieron obtener los puertos."
             # ! dropbear ports
             printf "${WHITE}〢 %8s ${color_1}%${#dropbear_ports}s ${WHITE}%$((60 - 12 - ${#dropbear_ports} | bc))s 〢\n" "PUERTOS:" "${dropbear_ports}"
@@ -1540,7 +1536,7 @@ cfg_ssh_dropbear(){
             
         } || {
             dropbear_is_installed=1
-            printf "${WHITE}〢 %9s ${RED}%16s ${WHITE} %$(echo 76 - 9 - 16 | bc )s\n" "DROPBEAR:" "[ NO INSTALADO ]" '〢'
+            printf "${WHITE}〢 %9s ${RED}%16s ${WHITE} %$((60 - 10 - 16 ))s\n" "DROPBEAR:" "[ NO INSTALADO ]" '〢'
         }
         line_separator 60
     }
