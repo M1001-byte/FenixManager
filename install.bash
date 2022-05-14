@@ -110,18 +110,17 @@ update_system(){
 }
 
 install_packets(){
-    echo -e "\\033[34m〢────────────〢 \\033[1;37mINSTALANDO PAQUETES NECESARIOS \\033[34m〢────────────〢"rm 
+    echo -e "\\033[34m〢────────────〢 \\033[1;37mINSTALANDO PAQUETES NECESARIOS \\033[34m〢────────────〢"
     for packets in "${packets_to_install[@]}" ; do
         bar "$packets" "apt-get install $packets -y" 
         
         if [ $? -eq 130 ];then
             error 'Accion cancelada.'
             exit 130
-            fi
         elif [ $? -ne 0 ];then
             error "Fallo al instalar $packets."
             exit $?
-            fi
+        fi
     done
     sed -i /etc/hosts -e "s/^127.0.0.1 localhost$/127.0.0.1 localhost $(hostname)/" &>/dev/null
 
