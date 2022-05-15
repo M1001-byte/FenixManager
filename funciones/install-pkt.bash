@@ -67,7 +67,8 @@ install_stunnel4() {
 
     clear
     # check if stunnel is installed
-    separator "INSTALANDO STUNNEL"  
+    separator "INSTALANDO STUNNEL" 
+ 
     bar 'apt-get install stunnel4 -y'
     if [[ $? != 0 ]];then  error 'No se pudo instalar stunnel4' ; exit $? ; fi
 

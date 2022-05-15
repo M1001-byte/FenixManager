@@ -1230,7 +1230,7 @@ cfg_python3_proxy(){
         printf "${WHITE}〢 ${color_1}%-10s ${color_2}%26s ${color_3}%20s ${WHITE}%$((60 - 10 - 26 - 20))s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
         
         if [[ -z "${custom_quantity}" ]];then
-            line_separator 70
+            line_separator 60
             return 0
         else
             for count in ${custom_quantity};do
@@ -1252,7 +1252,7 @@ cfg_python3_proxy(){
                 printf "${WHITE}〢 ${color_1}%5s ${color_2}%31s ${color_3}%20s ${WHITE}%$((60 - 5 - 31 - 20))s\n" "${array_cfg[0]}" "${array_cfg[2]}" "${array_cfg[1]}" '〢'
             done
         fi
-        line_separator 61
+        line_separator 60
         
     }
     show_info
