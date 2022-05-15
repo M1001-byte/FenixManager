@@ -1,0 +1,18 @@
+squid proxy install
+shadowsocks-libev install
+
+Menu's que fueron adaptados para dispositivo moviles:
+	* Menu de usuarios ssh
+	* Menu principal
+	* Menu de usuarios openvpn
+	* Menu de stunnel4
+	* Menu de v2ray / x-ui
+	* Menu de shadowsocks
+	* Menu de Openssh / dropbear
+	* Menu de slowdns
+	* Menu de Openvpn
+	* Menu de squid
+	* Menu de proxy python
+
+
+

@@ -5,15 +5,9 @@ source "/etc/FenixManager/preferences.bash"
 
 script_executed_with_root_privileges
 
-# colors
-
-red='\033[31m'
-blue='\033[34m'
-reset='\033[0m'
-
 config_sshd () {
     trap "exit 130" SIGINT SIGTERM
-    space 'CONFIGURANDO SSHD'
+    echo -e "${BLUE}〢────────────────────〢 ${WHITE}CONFIGURANDO SSHD${BLUE} 〢─────────────────〢"
     mkdir "$user_folder/FenixManager/banner" &> /dev/null
     ssh_banner="$user_folder/FenixManager/banner/fenix.html"
     sshd_file="/etc/ssh/sshd_config"
@@ -25,13 +19,13 @@ config_sshd () {
     
     echo -e $config_sshd | base64 -d > $sshd_file || error "No se pudo crear/modificar el archivo $sshd_file."  && echo "Banner $ssh_banner" >> $sshd_file
     systemctl restart sshd
-    info "SSHD Configurado con exito."
+    info "${GREEN}SSHD Configurado con exito."
 
 }
 
 fail2ban_config () {
     trap "exit 130" SIGINT SIGTERM
-    separator 'FAIL2BAN'
+    echo -e "${BLUE}〢──────────────────〢 ${WHITE}CONFIGURANDO FAIL2BAN${BLUE} 〢───────────────〢"
     local fail2ban_dir_config='/etc/fail2ban'
     info "Configurando fail2ban ${GREEN}$fail2ban_dir_config/jail.conf/"
 
@@ -41,13 +35,13 @@ fail2ban_config () {
 
     echo -e "$fai2lban_config" > "$fail2ban_dir_config/jail.conf" || error "No se pudo crear/modificar el archivo $fail2ban_dir_config/jail.conf."
     service fail2ban restart
-    info "Configuracion de fail2ban finalizada."
+    info "${GREEN}FAIL2BAN configurado con exito."
 }
 
 config_bbr() {
     trap "exit 130" SIGINT SIGTERM
     local sysctl_file='/etc/sysctl.conf'
-    separator 'SYSCTL "TWEAKS"'
+    echo -e "${BLUE}〢────────────────────〢 ${WHITE}SYSCTL 'TWEAKS'${BLUE} 〢───────────────────〢"
 
     cp $sysctl_file "$sysctl_file.bak" # backup
     modprobe tcp_bbr
@@ -55,9 +49,9 @@ config_bbr() {
     echo "tcp_bbr" >> /etc/modules-load.d/modules.conf
     echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
     echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-    info 'BBR habilitado con exito.'
+    info "${GREEN}BBR ${WHITE}habilitado con exito."
     echo "net.ipv4.tcp_fastopen=3" >> /etc/sysctl.conf
-    info "TCP Fast Open habilitado con exito."
+    info "${GREEN}TCP FAST OPEN${WHITE} habilitado con exito."
 }
 
 sqlite3_config () {
@@ -66,9 +60,9 @@ sqlite3_config () {
     usuariosdb='/etc/FenixManager/database/usuarios.db'
     logfile='/var/log/FenixManager/sqlite.log'
 
-    separator 'CONFIGURANDO SQLITE3'
+    echo -e "${BLUE}〢───────────────────〢 ${WHITE}CONFIGURANDO SQLITE3${BLUE} 〢───────────────〢"
 
-    info "Creando base de datos con el nombre de 'usuarios'"
+    info "Creando base de datos con el nombre de '${YELLOW}usuarios${WHITE}'"
     rm /etc/FenixManager/database/usuarios.db &>/dev/null
     touch $usuariosdb &>/dev/null
     if [[ $status -eq 0 ]];then
@@ -78,20 +72,20 @@ sqlite3_config () {
         exit 1
     fi
 
-    info 'Creando la tabla "ssh" dentro de la base de datos "usuarios"'
+    info "Creando la tabla '${YELLOW}ssh${WHITE}' dentro de la base de datos '${YELLOW}usuarios${WHITE}'"
     sqlite3 $usuariosdb  'CREATE TABLE ssh (nombre VARCHAR(32) NOT NULL, alias VARCHAR(15), password VARCHAR(20), exp_date DATETIME, max_conn INT NOT NULL );'
-    info 'Sqlite3 configurada con exito.'
+    info "${GREEN}SQLITE3${WHITE} configurada con exito."
 }
 
 add_alias_to_fenix () {
     trap "exit 130" SIGINT SIGTERM
-    separator 'INSTALANDO  FENIXMANAGER'
+    echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
     str_replace='Para terminar el proceso de instalacion.*'
     str_new='Para mostrar el panel de administracion,ejecutar el siguiente comando : \\033[32mfenix \\033[m"'
     sed -i "s/$str_replace/$str_new/" $user_folder/.bashrc
     sed -i '/alias fenix=/d' "$user_folder/.bashrc"
-    mv "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
+    cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     
 
     
@@ -101,12 +95,12 @@ add_alias_to_fenix () {
 
 fenix_create_cfg_dir(){
     trap "exit 130" SIGINT SIGTERM
-    separator 'CREANDO DIRECTORIOS'
-    info "${GREEN}${user_folder}/FenixManager/${WHITE} : Es el directorio donde se guardaran todos los archivos de configuracion. ( pysocks,slowdns_pub, etc )"
-    info "${GREEN}${user_folder}/FenixManager/banner${WHITE} : Es el directorio donde se almacenaran los banners de ssh/dropbear."
-    info "${GREEN}${user_folder}/FenixManager/cert-ssl${WHITE} : Es el directorio donde se almacenaran los certificados SSL."
-    info "${GREEN}/etc/FenixManager/${WHITE} : Directorio root de FenixManager. ( ${RED}No modificar ningun archivo${WHITE} )"
-    info "${GREEN}/etc/FenixManager/database/usuarios.db${WHITE} : Es la base de datos donde se almacenaran los usuarios. ( SSH , OVPN, ETC )"
+    echo -e "${BLUE}〢──────────────────〢 ${WHITE}CREANDO DIRECTORIOS${BLUE} 〢─────────────────〢"
+    echo -e "${GREEN}${user_folder}/FenixManager/${WHITE} : Archivos de configuracion. ( pysocks,slowdns_pub, etc )"
+    echo -e  "${GREEN}${user_folder}/FenixManager/banner${WHITE} : Banners de ssh/dropbear."
+    echo -e  "${GREEN}${user_folder}/FenixManager/cert-ssl${WHITE} : Certificados SSL."
+    echo -e  "${GREEN}/etc/FenixManager/${WHITE} : Directorio root de FenixManager. ( ${RED}NO MODIFICAR NINGUN ARCHIVO${WHITE} )"
+    echo -e  "${GREEN}/etc/FenixManager/database/usuarios.db${WHITE} : Archivo de la base de datos. ( SSH , OVPN, ETC )"
     mkdir -p ${user_folder}/FenixManager/{banner,cert-ssl} & > /dev/null
     
     local user_login=$(logname)
@@ -130,7 +124,7 @@ main(){
     add_cron_job_for_udpgw
     separator "FIN DE LA INSTALACION"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
-
+    info "Se cerra la  session actual de tu usuario usuario.(${RED}NO SE REINICIARA SU VPS${WHITE} )"
     read -p 'Presione enter para continuar...'
     sleep 1.5
     clear

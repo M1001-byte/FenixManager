@@ -579,22 +579,22 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
 
 add_cron_job_for_hitman(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
-    info "Agregando tarea crontab para hitman."
+    info "Agregando tarea crontab para ${GREEN}hitman${WHITE}."
     info "Se crea el archivo ${GREEN}${fenixmanager_crontab}."
     echo "#!/bin/bash" > "${fenixmanager_crontab}"
-    info "Se agrega la tarea crontab para hitman."
+    info "Se agrega la tarea crontab para ${GREEN}hitman${WHITE}."
     local str_cront="@daily root $script_dir/funciones/hitman.bash 1"
     local str_cront+="\n*/15 * * * * root $script_dir/funciones/hitman.bash 2 "
     echo -e "$str_cront" >> "${fenixmanager_crontab}"
-    info "Los usuarios vencidos se eliminan a las 00:00 ( Hora local )."
-    info "Cada 15 minutos, hitman comprobara si los usuarios superaron el maximo de conexiones permitidas, si es asi, se eliminaran."
+    info "Los usuarios vencidos se eliminan a las ${YELLOW}00:00${WHITE} ( Hora local )."
+    info "Cada ${YELLOW}15 minutos${WHITE}, hitman comprobara si los usuarios superaron el maximo de conexiones permitidas, si es asi, se ${RED}eliminaran.${WHITE}"
 }
 
 add_cron_job_for_udpgw(){
     local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw"
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
-    info "Se agrega la tarea crontab para badvpn-udpgw."
-    info "Por defecto,updgw escuchara en la direccion 127.0.0.1:7300 ."
+    info "Se agrega la tarea crontab para ${YELLOW}badvpn-udpgw."
+    info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
     echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300" >> "${fenixmanager_crontab}"
 
 }
