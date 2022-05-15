@@ -6,9 +6,9 @@ function fenix() {
     
     [[ -n "${ui_mode}" || "${ui_mode}" == "simple" || "${ui_mode}" == "full" ]] && {
         if [[ "${ui_mode}" == "simple" ]];then
-            sed -i "s/simple_ui=.*/simple_ui='true'/g" "${fenix_script_dir}/preferences.bash" 
+            sudo sed -i "s/simple_ui=.*/simple_ui='true'/g" "${fenix_script_dir}/preferences.bash" 
         elif [[ "${ui_mode}" == "full" ]];then
-            sed -i "s/simple_ui=.*/simple_ui='false'/g" "${fenix_script_dir}/preferences.bash"
+            sudo sed -i "s/simple_ui=.*/simple_ui='false'/g" "${fenix_script_dir}/preferences.bash"
         fi
     }
     sudo "${fenix_script_dir}/fenix-menu.bash"
