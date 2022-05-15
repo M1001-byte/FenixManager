@@ -514,16 +514,8 @@ list_banners(){
 
 
 list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
-    # * print_format :
-    # *  0 | table = table mode
-    # *  1 | simple = simple for used in templates user
-
-    local print_format="${1}"
-    [[ "${print_format}" == "table" ]] && {
-        local list_services=(sshd dropbear stunnel4 squid shadowsocks-libev pysocks openvpn x-ui)
-    } || {
-        local list_services=(sshd dropbear stunnel4 squid pysocks)
-    }
+    local list_services=(sshd dropbear stunnel4 squid shadowsocks-libev pysocks openvpn x-ui)
+    
     for services_ in "${list_services[@]}";do
         if [[ "${services_}" == "pysocks" ]];then
             systemctl status "fenixmanager-pysocks" &>/dev/null
@@ -571,7 +563,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         [[ "${simple_ui}" == "false" ]] && {
             printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 22 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
         } || {
-            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 20 - 30 - 12  | bc )s\n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
+            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
         }
     done
 }

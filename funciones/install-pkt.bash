@@ -8,8 +8,6 @@ source "/etc/FenixManager/funciones/cfg-pkt.bash"
 
 script_executed_with_root_privileges
 
-
-
 squid_proxy_install () {
     trap "exit 130" SIGINT SIGTERM
     clear
@@ -60,14 +58,14 @@ squid_proxy_install () {
         info 'Squid instalado y configurado correctamente.'
     fi
 
-    read -p "$(echo -e "$YELLOW[*] Presione enter para continuar.${endcolor}") " option
+    read -p "$(echo -e "$YELLOW[*] Presione enter para continuar.${endcolor}") "
+    clear
+    fenix
 }
 
 install_stunnel4() {
-
     clear
-    # check if stunnel is installed
-    separator "INSTALANDO STUNNEL" 
+    echo -e "${BLUE}〢──────────────────〢 ${WHITE}INSTALANDO STUNNEL4${BLUE} 〢─────────────────〢"
  
     bar 'apt-get install stunnel4 -y'
     if [[ $? != 0 ]];then  error 'No se pudo instalar stunnel4' ; exit $? ; fi
@@ -76,27 +74,28 @@ install_stunnel4() {
     
     ssl_port=()
     # stunnel listen port
-    until [[ $ssl_port =~ ^[0-9]+$ ]] && [[ $ssl_port -ge 1 ]] && [[ $ssl_port -le 65535 ]];do
-        trap ctrl_c SIGINT SIGTERM SIGKILL
-        read -p "$(echo -e "$BLUE[*] Ingrese el puerto para stunnel4 ${endcolor}") : " ssl_port
-        if [[ -z $ssl_port ]] ;then error 'El puerto ingresado esta vacio.'; continue ; fi
+    # until [[ $ssl_port =~ ^[0-9]+$ ]] && [[ $ssl_port -ge 1 ]] && [[ $ssl_port -le 65535 ]] && [[ -n "${ssl_port}"]];do
+        # trap ctrl_c SIGINT SIGTERM SIGKILL
+        # read -p "$(echo -e "${WHITE}[*] Ingrese el puerto para stunnel4 ${endcolor}") : " ssl_port
+        # if [[ -z $ssl_port ]] ;then error 'El puerto ingresado esta vacio.'; continue ; fi
         
-        IFS=' ' read -r -a ssl_port <<< "$ssl_port"
-        ssl_port_array=()
-        for i in "${ssl_port[@]}";do
-            if [[ ! $(grep -E '^[0-9]+$' <<< $i) ]] ;then error "El puerto ($i) no es un numero" ; continue ; fi
-            if [[ $i -lt 1 ]] || [[ $i -gt 65535 ]] ;then error 'El puerto ingresado no es valido.' ; continue ; fi
-            check_if_port_is_open $i
+        # IFS=' ' read -r -a ssl_port <<< "$ssl_port"
+        # ssl_port_array=()
+        # for i in "${ssl_port[@]}";do
+            # if [[ ! $(grep -E '^[0-9]+$' <<< $i) ]] ;then error "El puerto ($i) no es un numero" ; continue ; fi
+            # if [[ $i -lt 1 ]] || [[ $i -gt 65535 ]] ;then error 'El puerto ingresado no es valido.' ; continue ; fi
+            # check_if_port_is_open $i
             
-            if [[ $? != 1 ]];then
-                ssl_port_array+=($i)
-                ufw allow $i &> /dev/null
+            # if [[ $? != 1 ]];then
+                # ssl_port_array+=($i)
+                # ufw allow $i &> /dev/null
 
-            else
-                error "Omitiendo el puerto ($i), no esta disponible."
-            fi
-        done
-    done
+            # else
+                # error "Omitiendo el puerto ($i), no esta disponible."
+            # fi
+        # done
+    # done
+    port_input
     # service port
     while true;do
         redirect_to_service
@@ -165,7 +164,7 @@ install_slowdns() {
 
 install_shadowsocks() {
     clear
-    separator "INSTALANDO SHADOWSOCKS"
+    echo -e "${BLUE}〢─────────────────〢 ${WHITE}INSTALANDO SHADOWSOCKS ${BLUE}〢───────────────〢"
     trap ctrl_c SIGINT SIGTERM SIGKILL
     bar "apt-get install shadowsocks-libev --install-suggests -y" && systemctl stop shadowsocks-libev.service
     if [[ $? != 0 ]];then
@@ -233,7 +232,6 @@ install_python3_proxy(){
     clear
     separator "INSTALANDO PYTHON3-PROXY"
     
-    # Bueno, ahora no lo hago. Pero despues tendre que verificar si esta instalado: python3 pip3 y los modulos necesarios.
     info "Agregado un servicio a systemd."
     sed -i "s|user_dir_replace_with_sed|${user_folder}/|g" "${script_dir}/funciones/py-proxy/main_service.py"
     cp "${script_dir}/funciones/py-proxy/fenixmanager-pysocks.service" /etc/systemd/system/fenixmanager-pysocks.service

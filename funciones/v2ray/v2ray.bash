@@ -20,8 +20,9 @@ des_install_v2ray_core() {
     local opt="$1"
     clear
     if [[ $opt == "1" ]];then
-        separator "INSTALANDO V2RAY-CORE"
+        echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO V2RAY-CORE${BLUE} 〢──────────────────〢"
         bash -c "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
+        cfg_v2ray
     else
         separator "DESINSTALANDO V2RAY-CORE"
         bash -c "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove"
@@ -32,10 +33,9 @@ des_install_v2ray_core() {
 install_v2ray_web_manager(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    separator "INSTALANDO V2RAY-WEB-MANAGER"
+    echo -e "${BLUE}〢───────────〢 ${WHITE}INSTALANDO V2RAY-WEB-MANAGER${BLUE} 〢───────────────〢"
     bash <(curl -L -s https://raw.githubusercontent.com/M1001-byte/x-ui-spanish/main/install.sh)
     read -r -p "Presione una tecla para continuar..."
-
 }
 
 cfg_v2ray(){
