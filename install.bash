@@ -219,7 +219,7 @@ clone_fenix(){
 
 initial(){
     change_dns
-    #update_system
+    update_system
     install_packets
     install_python3_package
     clone_fenix
