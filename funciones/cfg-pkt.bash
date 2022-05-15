@@ -1230,6 +1230,7 @@ cfg_python3_proxy(){
         printf "${WHITE}〢 ${color_1}%-10s ${color_2}%26s ${color_3}%20s ${WHITE}%$((60 - 10 - 26 - 20))s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
         
         if [[ -z "${custom_quantity}" ]];then
+            [[ -f "${config_file}" ]] || touch "${config_file}"
             line_separator 60
             return 0
         else
