@@ -331,8 +331,7 @@ redirect_to_service() {
         if [[ $service_number -lt 1 ]] || [[ $service_number -gt 10 ]]; then continue ; fi
         local port_number
         local port_list=(${array_service[$service_number-1]})
-        local port_random=${port_list[0]}
-        port_number=$(echo "${port_random}" | awk -F ":" '{print $2}')
+        local port_number="$(awk -F ":" '{print $2}' <<< "${port_list[0]}" )"
         break
         
     done
