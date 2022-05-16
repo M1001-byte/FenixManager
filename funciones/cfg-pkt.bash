@@ -1580,6 +1580,7 @@ cfg_ssh_dropbear(){
                     info "Puerto ${dropbear_new_port[@]} agregado correctamente."
                     sleep 2
                 } || { # INSTALL DROPBER
+                    echo "/bin/false" >> /etc/shells # add /bin/false to shells, and prevent dropbear reject user with invalid shell
                     bar "apt-get install dropbear -y"
                     [[ $? -ne 0 ]] && {
                         error "No se pudo instalar dropbear."
