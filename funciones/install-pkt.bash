@@ -95,7 +95,10 @@ install_stunnel4() {
             # fi
         # done
     # done
-    port_input
+    port_input && {
+        local ssl_port=${puertos_array[0]}
+        unset puertos_array
+    }
     # service port
     while true;do
         redirect_to_service
@@ -110,7 +113,7 @@ install_stunnel4() {
         cfg+="cert = $CERT_FILE\n"
         cfg+="key = $KEY_FILE\n"
     fi
-    local sshd_cfg="\n[custom#1]\naccept = $ssl_port_array\nconnect = $service_port\n"
+    local sshd_cfg="\n[custom#1]\naccept = ${ssl_port}\nconnect = ${service_port}\n"
     
     echo -e $cfg > "/etc/stunnel/stunnel.conf"
     echo -e $sshd_cfg >> "/etc/stunnel/stunnel.conf"

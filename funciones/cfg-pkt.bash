@@ -346,10 +346,10 @@ cfg_stunnel4() {
     unistall_stunnel4() {
         bar "service stunnel4 stop"
         killall stunnel4 &>/dev/null
-        rm -rf /etc/stunnel4 
-        rm -rf /etc/stunnel
         bar "apt-get remove stunnel4 -y"
         if [[ $? -eq 0 ]];then
+            rm -rf /etc/stunnel4 
+            rm -rf /etc/stunnel
             info "Stunnel4 desinstalado correctamente."
             sleep 1.5
         fi

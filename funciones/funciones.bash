@@ -364,8 +364,8 @@ list_certs() {
         [[ "${i}" =~ ".pem"|".crt"|".cert" ]] && local color_="${GREEN}" || local color_="${RED}"
 
         date_=$(date -r "$cert_dir$i" +"%d/%m/%Y")
-        local length_=$(echo 54 - ${#count_} - ${#i} - ${#date_} | bc)
-        printf "〢 ${blue}%-2s ${color_}%-30s ${yellow}%-25s${WHITE}〢\n" "$count_" "$i" "$date_"
+        local length_=$(echo 60 - ${#count_} - 30 - ${#date_} | bc)
+        printf "〢 ${blue}%-2s ${color_}%-40s ${yellow}%-15s${WHITE}〢\n" "$count_" "$i" "$date_"
     done
     line_separator 60
     

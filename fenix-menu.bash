@@ -101,11 +101,9 @@ option_menu_software () {
     }
     
     [[ "${hide_ports_open_services_in_protocol_menu=}" == 'false' ]] && {
-        list_services_and_ports_used "table"
-        [[ $columns -le 78 ]] && line_separator 72 || line_separator 85
+        list_services_and_ports_used
+        [[ "${simple_ui}" == "true" ]] && line_separator 60 || line_separator 85
     }
-    # list_services_and_ports_used 
-    # line_separator 85
     option_color 0 'CONFIGURAR OPENSSH / DROPBEAR'
     tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
