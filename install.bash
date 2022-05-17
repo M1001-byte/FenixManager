@@ -226,7 +226,10 @@ clone_fenix(){
         chmod 777 $file &>/dev/null
     done
     sudo rm -rf /tmp/FenixManager/
-    echo "user_folder='${userfolder}'" > "/etc/FenixManager/preferences.bash"
+    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> /etc/bash.bashrc
+    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
+    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
+    echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
     echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
     local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
