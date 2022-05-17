@@ -519,8 +519,11 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     for services_ in "${list_services[@]}";do
         if [[ "${services_}" == "pysocks" ]];then
             systemctl status "fenixmanager-pysocks" &>/dev/null
+        elif [[ "${services_}" == "openvpn" ]];then
+                systemctl status "openvpn@server" &>/dev/null
         else
-            systemctl status "$services_" &>/dev/null
+            systemctl status "${services_}" &>/dev/null
+            
         fi
         [[ $? -eq  0 ]] && {
             local color_="${GREEN}"
@@ -534,23 +537,26 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(cat /etc/ssh/sshd_config | grep -o "^Port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "dropbear")
-                local port_listen=$(service dropbear status 2>/dev/null | grep -Eo " -p [0-9]{0,9}" |  sed "s/-p/ /g" | xargs)
+                local file="/etc/default/dropbear"
+                local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
+                local dropbear_extra_arg_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_EXTRA_ARGS=.*" | awk '{split($0,a,"-p"); print a[2]}')
+                local port_listen="$dropbear_port $dropbear_extra_arg_port"
                 ;;
             "stunnel4")
-                local port_listen=$(service stunnel4 status 2>/dev/null | grep -Eo ":::[0-9]{0,9}" | tr ":::" " " | xargs )
+                local port_listen=$(cat /etc/stunnel/stunnel.conf 2>/dev/null | grep "^accept .*" | awk '{split($0,a,"="); print a[2]}' | xargs)
                 ;;
             "squid")
-                local port_listen=$(service squid status  2>/dev/null | grep -Eo "local=.*" | grep -Eo ":[0-9]{0,9}" | sed "s/:/ /g" | xargs)
+                local port_listen=$(cat /etc/squid/squid.conf | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "pysocks")
                 local port_listen=$(systemctl status fenixmanager-pysocks 2>/dev/null | grep -Eo "\[#[0-9]\].*" | cut -d: -f3 | awk '{split($0,a," "); print a[1]}' | xargs)
                 ;;
             "shadowsocks-libev")
-                local port_listen=$(service shadowsocks-libev status 2>/dev/null | grep -Eo "tcp server .*" | awk '{split($0,a,":"); print a[2]}' | xargs )
+                local port_listen=$(cat /etc/shadowsocks-libev/config.json | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
                 ;;
             "openvpn")
-                local is_running=$(service openvpn@server status &>/dev/null;echo $?)
-                [[ "${is_running}" == 0 ]] && local port_listen=$(cat /etc/openvpn/server.conf | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs )  || local port_listen="" 
+                #local is_running=$(service openvpn@server status &>/dev/null;echo $?)
+                local port_listen=$(cat /etc/openvpn/server.conf | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs)
                 ;;
             "v2ray")
                 local is_running=$(service v2ray status &>/dev/null;echo $?)
@@ -567,6 +573,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         }
     done
 }
+
 
 add_cron_job_for_hitman(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
