@@ -193,7 +193,7 @@ clone_fenix(){
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
     
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    echo -e "Ingrese la rama a usar:\n1) \\033[32mmaster\\033[m\n2) \\033[33mdev\\033[m\n3) \\033[32msimple ui\\033[mLa opcion por defecto es \\033[32mmaster\\033[m.La rama \\033[33mdev\\033[m es una rama de desarrollo."
+    echo -e "Ingrese la rama a usar:\n1) \\033[32mmaster\\033[m\n2) \\033[33mdev\\033[m\\033[mLa opcion por defecto es \\033[32mmaster\\033[m.La rama \\033[33mdev\\033[m es una rama de desarrollo."
     read -p "[*] Desde que rama deseas clonar el repositorio: " branch
     if [ -z "${branch}" ]; then
         local branch='master'
@@ -201,8 +201,6 @@ clone_fenix(){
         local branch='master'
     elif [ "${branch}" == "2" ]; then
         local branch='dev'
-    elif [ "${branch}" == "3" ]; then
-        local branch='simple-ui'
     else
         local branch='master'
     fi
