@@ -164,7 +164,7 @@ config_bashrc(){
         }
         print_fenix_banner
 '
-    if  grep -q "print_fenix_banner" <<< "$(declare -F)";then
+    if  ! grep -q "print_fenix_banner" <<< "$(declare -F)";then
         [[ "${user}" != "root" ]] && {
             echo -e "${print_fenix_banner}" >> "/home/${user}/.bashrc"
         } || {
