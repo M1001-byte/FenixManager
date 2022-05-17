@@ -83,7 +83,7 @@ add_alias_to_fenix () {
     
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     local alias_line=$(grep --line-number "alias fenix=" "${user_folder}/.bashrc" 2>/dev/null | cut -d: -f1)
-    if [[ -n "${alias_line}"]];then
+    if [[ -n "${alias_line}" ]];then
         sed -i "${alias_line}d" "${user_folder}/.bashrc" 2>/dev/null
     fi
     

@@ -546,17 +546,17 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(cat /etc/stunnel/stunnel.conf 2>/dev/null | grep "^accept .*" | awk '{split($0,a,"="); print a[2]}' | xargs)
                 ;;
             "squid")
-                local port_listen=$(cat /etc/squid/squid.conf | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
+                local port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "pysocks")
                 local port_listen=$(systemctl status fenixmanager-pysocks 2>/dev/null | grep -Eo "\[#[0-9]\].*" | cut -d: -f3 | awk '{split($0,a," "); print a[1]}' | xargs)
                 ;;
             "shadowsocks-libev")
-                local port_listen=$(cat /etc/shadowsocks-libev/config.json | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
+                local port_listen=$(cat /etc/shadowsocks-libev/config.json 2>/dev/null | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
                 ;;
             "openvpn")
                 #local is_running=$(service openvpn@server status &>/dev/null;echo $?)
-                local port_listen=$(cat /etc/openvpn/server.conf | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs)
+                local port_listen=$(cat /etc/openvpn/server.conf 2>/dev/null  | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs)
                 ;;
             "v2ray")
                 local is_running=$(service v2ray status &>/dev/null;echo $?)
