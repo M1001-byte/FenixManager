@@ -124,7 +124,7 @@ main(){
     add_cron_job_for_udpgw
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
-    info "Se cerra la  session actual de tu usuario usuario.(${RED}NO SE REINICIARA SU VPS${WHITE} )"
+    info "Ahora se cerrará la sesión de tu usuario actual, y así terminar el proceso de instalación.(${RED}NO SE REINICIARA SU VPS${WHITE} )"
     read -p 'Presione enter para continuar...'
     sleep 1.5
     clear

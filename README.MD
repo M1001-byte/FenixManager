@@ -1,4 +1,4 @@
-# FénixManager (Simple UI)
+# FénixManager
 
 ![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)
 ![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)
@@ -58,6 +58,7 @@ sudo bash /tmp/install-fenix.bash # Instalar
 ## ✏️ Características Futuras
  - [ ] Administrar vps desde un bot de Telegram
  - [ ] Panel de administracion via web
+
 
 ## Contribuir
 1. Bifurcar este  repositorio
