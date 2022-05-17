@@ -48,7 +48,7 @@ sudo bash /tmp/install-fenix.bash # Instalar
         * Activas/Desactivar
         * Permitir/bloquear puertos
     * Cambiar zona horaria ( Disponibles solo las de habla-hispana )
-    * Activar / Desactivar bloqueador de anuncios ( Lista de host bloqueados desde AdAway )
+    * Activar / Desactivar bloqueador de anuncios ( Misma lista de hosts que AdAway )
     * Bloquear / Desbloquear P2P ( Torrents, etc )
     * Cambiar ajustes de Fénix
         * Mostar / Ocultar Paneles
