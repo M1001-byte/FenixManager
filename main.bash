@@ -82,8 +82,10 @@ add_alias_to_fenix () {
     echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
-    local alias_line=$(grep --line-number "alias fenix=" "${user_folder}/.bashrc" | cut -d: -f1)
-    sed -i "${alias_line}d" "${user_folder}/.bashrc" 2>/dev/null
+    local alias_line=$(grep --line-number "alias fenix=" "${user_folder}/.bashrc" 2>/dev/null | cut -d: -f1)
+    if [[ -n "${alias_line}"]];then
+        sed -i "${alias_line}d" "${user_folder}/.bashrc" 2>/dev/null
+    fi
     
     local preferences_var=("show_fenix_banner=true" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
     for i in "${preferences_var[@]}"; do echo "$i" >> "/etc/FenixManager/preferences.bash" ; done
