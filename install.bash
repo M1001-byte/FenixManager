@@ -140,7 +140,7 @@ install_python3_package(){
 
 config_bashrc(){
     local print_fenix_banner='print_fenix_banner () {
-        local version="${cat /etc/FenixManager/version 2>/dev/null}"
+        local version="$(cat /etc/FenixManager/version 2>/dev/null)"
         local GREEN="\\033[32m"
         local RED="\\033[1;31m"
         local YELLOW="\\033[33m"
