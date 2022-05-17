@@ -589,7 +589,12 @@ add_cron_job_for_hitman(){
 }
 
 add_cron_job_for_udpgw(){
-    local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw"
+    local OS=$(uname -m)
+    [[ "${OS}" == "x86_64" ]] && {
+        local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw64"
+    } ||  [
+        local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw"
+    ]
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Se agrega la tarea crontab para ${YELLOW}badvpn-udpgw."
     info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
@@ -601,11 +606,11 @@ show_users_and_port_template(){
     local user_data usuario passwd exp_date max_conn
     local head_banner="╔══════════════════║${RED}FENIX-MANAGER-V1.0${WHITE}║══════║${RED}@M1001-BYTE${WHITE}║════════════════╗"
     
-    user_data=("${@}")
-    usuario="${user_data[0]}"
-    passwd="${user_data[1]}"
-    exp_date="${user_data[2]}"
-    max_conn="${user_data[3]}"
+    local user_data=("${@}")
+    local usuario="${user_data[0]}"
+    local passwd="${user_data[1]}"
+    local exp_date="${user_data[2]}"
+    local max_conn="${user_data[3]}"
     
     echo -e "${head_banner}"
     #printf "║%76s\n" "║"

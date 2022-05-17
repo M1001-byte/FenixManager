@@ -1,7 +1,6 @@
 #!/bin/bash
 clear
 ctrl_c() {
-        kill -9 $!
         exit 130
 }
 
@@ -140,16 +139,38 @@ install_python3_package(){
 }
 
 config_bashrc(){
-    local bashrc_banner='YmFubmVyPSdHMXN4T3pNeGJRb2dJQ0FnSUNBZ0lDQWdJQ0FnWHk5OElDQWdJQ0FnSUh4Y1h3b2dJQ0FnSUNBZ0lDQWdJQ0F2SUNCOElDQWdJQ0FnSUh3Z0lGd2dDaUFnSUNBZ0lDQWdJQ0FnZkNBZ0lDQmNJQ0FnSUNBdklDQWdJSHdLSUNBZ0lDQWdJQ0FnSUNCOElDQmNJQzhnSUNBZ0lGd2dMeUFnZkFvZ0lDQWdJQ0FnSUNBZ0lId2dYQ0FnZkNBZ0lDQWdmQ0FnTHlCOENpQWdJQ0FnSUNBZ0lDQWdmQ0JjSUY5Y1h5OWVYRjh2WHlBdklId0tJQ0FnSUNBZ0lDQWdJQ0I4SUNBZ0lDMHRYQzh2TFMwZ0lDQWdmQW9nSUNBZ0lDQWdJQ0FnSUNCY1h5QWdYQ0FnSUNBZ0x5QWdYeThLSUNBZ0lDQWdJQ0FnSUNBZ0lDQmNYMThnSUh3Z0lGOWZMd29nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWdJRndnWHlBdkNpQWdJQ0FnSUNBZ0lDQWdJQ0FnSUNCZkx5QWdJRnhmRzF0dElCdGJNek50SUNBZ0lFMWhkR2hwZFdVZ01UQXdNUnRiYlFvZ0lDQWdJQ0FnSUNBZ0lDQWdJQnRiTVRzek1XMGdMeUJmTDN4Y1h5QmNJQnRiYlNBYld6TXpiU0FnUm1WdWFYZ2dUV0Z1WVdkbGNodGJiUW9nSUNBZ0lDQWdJQ0FnSUNBZ0lDQWJXekU3TXpGdElDOGdJSHdnSUZ3Z0lDQWJXek16YlNBZ1ZtVnljMmx2YmpvZ01TNHdMakFiVzIwS0lDQWdJQ0FnSUNBZ0lDQWdJQ0FnSUJ0Yk1Uc3pNVzBnTHlCMklGd2dDZz09JwplY2hvIC1lICRiYW5uZXIgfCBiYXNlNjQgLS1kZWNvZGUKZWNobyAtZSAiIFxcMDMzWzE7MzdtQmllbnZlbmlkbyBhIFxcMDMzWzE7MzNtRmVuaXggTWFuYWdlclxcMDMzW20iCmVjaG8gLWUgIlxcMDMzWzE7MzdtIFBhcmEgdGVybWluYXIgZWwgcHJvY2VzbyBkZSBpbnN0YWxhY2lvbixlamVjdXRhciBlbCBzaWd1aWVudGUgY29tYW5kbzpcXDAzM1ttIFxcMDMzWzE7MzJtZmVuaXhcXDAzM1ttICIK'
-    
-    [[ "${user}" != "root" ]] && {
-        echo -e $bashrc_banner | base64 -d >> "/home/${user}/.bashrc"
-        echo "alias fenix='sudo $script_folder/main.bash'" >> "/home/${user}/.bashrc"
-    } || {
-        echo -e $bashrc_banner | base64 -d >> "$userfolder/.bashrc"
-        echo "alias fenix='sudo $script_folder/main.bash'" >> "$userfolder/.bashrc"
-    
-    }
+    local print_fenix_banner='print_fenix_banner () {
+        local version="${cat /etc/FenixManager/version 2>/dev/null}"
+        local GREEN="\\033[32m"
+        local RED="\\033[1;31m"
+        local YELLOW="\\033[33m"
+        banner="${RED}
+             _/|       |\_
+            /  |       |  \ 
+           |    \     /    |
+           |  \ /     \ /  |
+           | \  |     |  / |
+           | \ _\_/^\_/_ / |
+           |    --\//--    |
+            \_  \     /  _/
+              \__  |  __/
+                 \ _ /
+                _/   \_  ${YELLOW} Mathiue 1001${RED}
+               / _/|\_ \ ${YELLOW} Fenix Manager${RED}
+               /   |  \   ${YELLOW}Version: ${GREEN}${version}${RED}
+                 / v \ 
+"
+        echo -e "$banner"
+        }
+        print_fenix_banner
+'
+    if  grep -q "print_fenix_banner" <<< "$(declare -F)";then
+        [[ "${user}" != "root" ]] && {
+            echo -e "${print_fenix_banner}" >> "/home/${user}/.bashrc"
+        } || {
+            echo -e "${print_fenix_banner}" >> "$userfolder/.bashrc"
+        }
+    fi
 }
 
 add_basic_ufw_rules(){
@@ -205,8 +226,8 @@ clone_fenix(){
         chmod 777 $file &>/dev/null
     done
     sudo rm -rf /tmp/FenixManager/
-    echo "#!/bin/bash" > "/etc/FenixManager/fenixmanager.bash"
-    echo "# No modificar " >> "/etc/FenixManager/fenixmanager.bash"
+    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
+    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
     echo "user_folder='${userfolder}'" > "/etc/FenixManager/preferences.bash"
     echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"

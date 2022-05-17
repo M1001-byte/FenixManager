@@ -59,9 +59,6 @@ sudo bash /tmp/install-fenix.bash # Instalar
  - [ ] Administrar vps desde un bot de Telegram
  - [ ] Panel de administracion via web
 
-## 📸 Screenshots
-
-
 ## Contribuir
 1. Bifurcar este  repositorio
 2. Crea tu rama de característica (`git checkout -b feature/CaracteristicaIncreible`)
