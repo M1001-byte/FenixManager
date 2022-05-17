@@ -161,6 +161,7 @@ config_bashrc(){
                  / v \ 
 "
         echo -e "$banner"
+        echo -e "Para mostrar el panel de administracion,ejecutar el siguiente comando : \\033[32mfenix \\033[m"
         }
         print_fenix_banner
 '
@@ -224,8 +225,6 @@ clone_fenix(){
         chmod 777 $file &>/dev/null
     done
     sudo rm -rf /tmp/FenixManager/
-    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
-    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
     echo "user_folder='${userfolder}'" > "/etc/FenixManager/preferences.bash"
     echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"

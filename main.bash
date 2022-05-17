@@ -81,14 +81,10 @@ add_alias_to_fenix () {
     trap "exit 130" SIGINT SIGTERM
     echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
-    str_replace='Para terminar el proceso de instalacion.*'
-    str_new='Para mostrar el panel de administracion,ejecutar el siguiente comando : \\033[32mfenix \\033[m"'
-    sed -i "s/$str_replace/$str_new/" $user_folder/.bashrc
-    sed -i '/alias fenix=/d' "$user_folder/.bashrc"
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     
-
-    
+    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
+    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
     local preferences_var=("show_fenix_banner=true" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
     for i in "${preferences_var[@]}"; do echo "$i" >> "/etc/FenixManager/preferences.bash" ; done
 }
