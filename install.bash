@@ -226,7 +226,7 @@ clone_fenix(){
         chmod 777 $file &>/dev/null
     done
     sudo rm -rf /tmp/FenixManager/
-    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${user_folder}/.bashrc"
+    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
     echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
     echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
     echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"

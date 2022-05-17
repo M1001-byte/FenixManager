@@ -592,9 +592,9 @@ add_cron_job_for_udpgw(){
     local OS=$(uname -m)
     [[ "${OS}" == "x86_64" ]] && {
         local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw64"
-    } ||  [
+    } ||  {
         local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw"
-    ]
+    }
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Se agrega la tarea crontab para ${YELLOW}badvpn-udpgw."
     info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
