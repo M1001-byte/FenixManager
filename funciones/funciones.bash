@@ -549,7 +549,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "pysocks")
-                local port_listen=$(systemctl status fenixmanager-pysocks 2>/dev/null | grep -Eo "\[#[0-9]\].*" | cut -d: -f3 | awk '{split($0,a," "); print a[1]}' | xargs)
+                local port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
             "shadowsocks-libev")
                 local port_listen=$(cat /etc/shadowsocks-libev/config.json 2>/dev/null | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
@@ -566,11 +566,13 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
                 ;;
         esac
-        [[ "${simple_ui}" == "false" ]] && {
-            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 22 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
-        } || {
-            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
-        }
+        if [[ ! "${status}" =~ "INACTIVO" && -n "${port_listen}" ]];then
+            [[ "${simple_ui}" == "false" ]] && {
+                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 22 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
+            } || {
+                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
+            }  
+        fi
     done
 }
 
