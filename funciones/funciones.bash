@@ -3,8 +3,8 @@
 # get terminal size
 columns=$(tput cols) 
 
-source "/etc/FenixManager/funciones/color.bash"
-source "/etc/FenixManager/preferences.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
+source "/etc/FenixManager/preferences.bash" 2>/dev/null
 
 info(){ echo -e "\\033[1;33m[INFO]\\033[m \\033[1;37m$*\\033[m";}
 error() { echo -e "\\033[1;31m[ERROR]\\033[m \\033[1;37m$*\\033[m";}
@@ -35,31 +35,47 @@ fenix() {
 }
 
 check_and_veriy_preferences_integrity(){
+    local file_restored=0
+    # ! check integrity of preferences.bash
     local file="/etc/FenixManager/preferences.bash"
-    local file_linenumber=$(wc -l ${file} | awk '{print $1}')
+    local file_linenumber=$(wc -l ${file} 2> /dev/null| awk '{print $1}')
     if [ ! -f "$file" ] || [ "$file_linenumber" -eq "1" ];then
         error "El archivo de preferencias no existe o esta alterado."
         local user_=$(logname)
         [[ "${user}" == "root" ]] && local user_folder="/root" || local user_folder="/home/${user_}"
-        grep "#dev" "/etc/FenixManager/preferences.bash" &> /dev/null && {
+        grep "#dev" "/etc/FenixManager/version" &> /dev/null && {
             local branch_clone="dev"
-            local version=$(cat "/etc/FenixManager/preferences.bash" | cut -d "#" -f 1)
+            local version=$(cat "/etc/FenixManager/version" | cut -d "#" -f 1)
         } || {
             local branch_clone="master"
-            local version=$(cat "/etc/FenixManager/preferences.bash" )
+            local version=$(cat "/etc/FenixManager/version" )
         }
-        local preferences_var=("user_folder='${user_folder}'" "script_dir='/etc/FenixManager'" "version='1.0'" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
+        local preferences_var=("show_fenix_banner=true" "simple_ui='true'" "user_folder='${user_folder}'" "script_dir='/etc/FenixManager'" "version='1.0'" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
         for i in "${preferences_var[@]}"; do
             echo "$i" >> "$file"
         done
+        ((file_restored++))
         info "Se creo el archivo de preferencias."
     fi
-
+    # ! check integrity of color.bash
+    local file_color="/etc/FenixManager/funciones/color.bash"
+    local file_linenumber=$(wc -l ${file_color} 2> /dev/null| awk '{print $1}')
+    if [ ! -f "${file}" ] || [ -z "${file_linenumber}" ] || [ "${file_linenumber}" -eq "1" ];then
+        error "El archivo de color no existe o esta alterado."
+        local color_content="IyEvdXNyL2Jpbi9iYXNoCgoKR1JFRU49IlxcMDMzWzMybSIKI1dISVRFPSJcXDAzM1szN20iCldISVRFPSJcXDAzM1sxOzM3bSIKRU5EX0NPTE9SPSJcXDAzM1ttIgpZRUxMT1c9IlxcMDMzWzMzbSIKTUFHRU5UQT0iXFwwMzNbMzVtIgpCTFVFPSJcXDAzM1szNG0iCkJCTFVFPSJcXDAzM1sxOzM0bSIKI1JFRD0iXFwwMzNbMzFtIgpSRUQ9IlxcMDMzWzE7MzFtIgpncmVlbj0iXFwwMzNbMzJtIgp3aGl0ZT0iXFwwMzNbMTszN20iCmVuZF9jb2xvcj0iXFwwMzNbbSIKeWVsbG93PSJcXDAzM1szM20iCm1hZ2VudGE9IlxcMDMzWzM1bSIKYmx1ZT0iXFwwMzNbMzRtIgpyZWQ9IlxcMDMzWzMxbSI="
+        base64 -d <<< "${color_content}" > "${file_color}"
+        info "Se creo el archivo de color."
+        ((file_restored++))
+    fi
+    [ "${file_restored}" -gt "0" ] && {
+        echo -e "Vuelva a ejecutar el script para continuar."
+        read -p "Presione [Enter] para continuar..."
+        exit 0
+    }
 }
 
 ctrl_c() {
-    # Esto solo es valido para "software"/"programas" que no tienen un demonio habilitado en systemd.
-    exit
+    exit 130
 }
 
 port_input() {

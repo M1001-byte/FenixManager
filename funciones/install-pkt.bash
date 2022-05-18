@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
-source "/etc/FenixManager/preferences.bash"
+source "/etc/FenixManager/preferences.bash" 2>/dev/null
 source "/etc/FenixManager/funciones/funciones.bash"
-source "/etc/FenixManager/funciones/color.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
 source "/etc/FenixManager/funciones/ovpn.bash"
 source "/etc/FenixManager/funciones/cfg-pkt.bash"
 

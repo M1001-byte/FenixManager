@@ -2,13 +2,13 @@
 
 source "/etc/FenixManager/funciones/funciones.bash"
 source "/etc/FenixManager/funciones/ssh-user.bash"
-source "/etc/FenixManager/funciones/color.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
 source "/etc/FenixManager/funciones/install-pkt.bash"
-source "/etc/FenixManager/funciones/cfg-pkt.bash"
+source "/etc/FenixManager/funciones/cfg-pkt.bash" 
 source "/etc/FenixManager/funciones/v2ray/v2ray.bash"
-source "/etc/FenixManager/funciones/other-cfg.bash"
+source "/etc/FenixManager/funciones/other-cfg.bash" 
 
-source "/etc/FenixManager/preferences.bash"
+source "/etc/FenixManager/preferences.bash" 2>/dev/null
 
 
 simple_text_fenix(){

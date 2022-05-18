@@ -25,7 +25,7 @@ JSON_PATH=${JSON_PATH:-/usr/local/etc/v2ray}
 
 
 source "/etc/FenixManager/funciones/funciones.bash"
-source "/etc/FenixManager/funciones/color.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
 
 curl() {
   $(type -P curl) -L -q --retry 5 --retry-delay 10 --retry-max-time 60 "$@"

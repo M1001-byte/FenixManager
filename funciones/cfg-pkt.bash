@@ -1,10 +1,8 @@
 #!/usr/bin/bash
 
-script_dir="/etc/FenixManager"
-
-source "$script_dir/funciones/funciones.bash"
-source "$script_dir/funciones/color.bash"
-source "$script_dir/funciones/ovpn.bash"
+source "/etc/FenixManager/funciones/funciones.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
+source "/etc/FenixManager/funciones/ovpn.bash"
 
 script_executed_with_root_privileges
 

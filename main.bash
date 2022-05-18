@@ -1,7 +1,11 @@
 #!/usr/bin/bash
 
 source "/etc/FenixManager/funciones/funciones.bash"
-source "/etc/FenixManager/preferences.bash"
+source "/etc/FenixManager/preferences.bash" || {
+    echo "No se pudo cargar el archivo de preferencias."
+    echo "Vuelva a instalar FenixManager."
+    exit 1
+}
 
 script_executed_with_root_privileges
 
@@ -84,8 +88,16 @@ add_alias_to_fenix () {
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     unalias fenix &>/dev/null
     
-    local preferences_var=("show_fenix_banner=true" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
-    for i in "${preferences_var[@]}"; do echo "$i" >> "/etc/FenixManager/preferences.bash" ; done
+    local preferences_var="
+    show_fenix_banner='true'
+    hide_first_panel='false'
+    hide_second_panel='false'
+    hide_third_panel='false'
+    hide_fourth_panel='false'
+    hide_ports_open_services_in_home_menu='false'
+    hide_ports_open_services_in_protocol_menu='false'
+    "
+    echo -e "$preferences_var" > "/etc/FenixManager/preferences.bash"
 }
 
 fenix_create_cfg_dir(){
