@@ -88,8 +88,8 @@ add_alias_to_fenix () {
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     echo -e "unalias fenix" >> "${user_folder}/.bashrc"
     
-    local preferences_var="\nshow_fenix_banner='true'\nhide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
-    echo -e "$preferences_var" > "/etc/FenixManager/preferences.bash"
+    local preferences_var="simple_ui='true'\nshow_fenix_banner='true'\nhide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
+    echo -e "$preferences_var" >> "/etc/FenixManager/preferences.bash"
 }
 
 fenix_create_cfg_dir(){
