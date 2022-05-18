@@ -86,17 +86,9 @@ add_alias_to_fenix () {
     echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
-    unalias fenix &>/dev/null
+    unalias -a fenix 
     
-    local preferences_var="
-    show_fenix_banner='true'
-    hide_first_panel='false'
-    hide_second_panel='false'
-    hide_third_panel='false'
-    hide_fourth_panel='false'
-    hide_ports_open_services_in_home_menu='false'
-    hide_ports_open_services_in_protocol_menu='false'
-    "
+    local preferences_var="\nshow_fenix_banner='true'\nhide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
     echo -e "$preferences_var" > "/etc/FenixManager/preferences.bash"
 }
 
