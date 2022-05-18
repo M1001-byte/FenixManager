@@ -15,4 +15,4 @@ function fenix() {
    
 }
 
-fenix "$1"
+fenix "$@"
