@@ -169,7 +169,8 @@ install_shadowsocks() {
     clear
     echo -e "${BLUE}〢─────────────────〢 ${WHITE}INSTALANDO SHADOWSOCKS ${BLUE}〢───────────────〢"
     trap ctrl_c SIGINT SIGTERM SIGKILL
-    bar "apt-get install shadowsocks-libev --install-suggests -y" && systemctl stop shadowsocks-libev.service
+    [[ "${simple_ui}" == "true"  ]] && local extra_="hidden_et"
+    bar "apt-get install shadowsocks-libev --install-suggests -y" "${extra_}" && systemctl stop shadowsocks-libev.service
     if [[ $? != 0 ]];then
         error 'No se pudo instalar shadowsocks-libev'
         exit $?
@@ -206,10 +207,8 @@ install_shadowsocks() {
     local tmp_file=$(mktemp)
     jq -n --argjson port $port --arg passwd "$passwd"  '{"server":["0.0.0.0"],"mode":"tcp_and_udp","server_port":$port,"local_port":1080,"password":$passwd,"timeout":60,"method":"chacha20-ietf-poly1305"}' &> $tmp_file
     mv $tmp_file /etc/shadowsocks-libev/config.json && chmod 644 /etc/shadowsocks-libev/config.json
-    update_config_uri
     bar "systemctl enable shadowsocks-libev.service"
     info 'ShadowSocks configurado correctamente.'
-    info "Shadowsocks uri: ${GREEN}$uri_shadowsocks${WHITE}"
     setup_fail2ban(){
         info "Agregando reglas para fail2ban"
         local filer_cfg="W0lOQ0xVREVTXQpiZWZvcmUgPSBjb21tb24uY29uZgpbRGVmaW5pdGlvbl0KX2RhZW1vbiA9IHNzLXNlcnZlcgpmYWlscmVnZXggPSBeXHcrXHMrXGQrIFxkKzpcZCs6XGQrXHMrJShfX3ByZWZpeF9saW5lKXNFUlJPUjpccytmYWlsZWQgdG8gaGFuZHNoYWtlIHdpdGggPEhPU1Q+OiBhdXRoZW50aWNhdGlvbiBlcnJvciQKaWdub3JlcmVnZXggPSAKZGF0ZXBhdHRlcm4gPSAlJVktJSVtLSUlZCAlJUg6JSVNOiUlUwo="
@@ -224,9 +223,7 @@ install_shadowsocks() {
         fi
     }
     setup_fail2ban
-
-
-    read
+    cfg_shadowsocks
 
 }
 
