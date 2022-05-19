@@ -356,6 +356,8 @@ cfg_stunnel4() {
         stunnel4_whats_cert_to_use
         if [[  $CERT_FILE =~ ".pem" ]];then
             sed -i "s\cert =.*\cert = ${CERT_FILE}\g" /etc/stunnel/stunnel.conf
+            # check if key exist in /etc/stunnel/stunnel.conf, if exist : delete
+            grep -q "key =" /etc/stunnel/stunnel.conf && sed -i "/key =/d" /etc/stunnel/stunnel.conf
             
         else
             sed -i "s\cert =.*\cert = $CERT_FILE\g" /etc/stunnel/stunnel.conf
@@ -392,17 +394,17 @@ cfg_stunnel4() {
             for i in {1..2};do
                 ((line_number++))
                 if [[ $i -eq 1 ]];then
-                    accept_conn_ports+="$(sed -n "${line_number}p" ${file_conf} | grep -E "[0-9]{1,}" -o):"
+                    local accept_conn_ports+="$(sed -n "${line_number}p" ${file_conf} | grep -E "[0-9]{1,}" -o):"
                 else
-                    accept_conn_ports+="$(sed -n "${line_number}p" ${file_conf} | grep -E "[0-9]{1,}" -o) "
+                    local accept_conn_ports+="$(sed -n "${line_number}p" ${file_conf} | grep -E "[0-9]{1,}" -o) "
                 fi
             done
         done
         
         if [[ $(service  stunnel4 status &>/dev/null;echo $?) -eq 0 ]];then
-            _color=( ${YELLOW} ${GREEN} )
+            local _color=( ${YELLOW} ${GREEN} )
         else
-            _color=( ${RED} ${RED} )
+            local _color=( ${RED} ${RED} )
         fi
         printf "〢 ${_color[0]}%20s ${_color[1]}%20s ${WHITE}%20s\n" "ACCEPT" "CONNECT" '〢'
         
