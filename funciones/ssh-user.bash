@@ -559,7 +559,7 @@ restore_backup () {
     
     while true;do
         read -p "$(echo -e $GREEN'[*] ID de la copia de seguridad a restaurar : ' )" id_backup
-        if grep '[Aa-Zz]' <<< $id_backup > /dev/null;then
+        if grep '[Aa-Zz]' <<< $id_backup &> /dev/null;then
             error 'Solo valores numericos.'
             continue
         fi
