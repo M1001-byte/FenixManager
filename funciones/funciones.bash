@@ -530,13 +530,15 @@ list_banners(){
 
 
 list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
-    local list_services=(sshd dropbear stunnel4 squid shadowsocks-libev pysocks openvpn x-ui)
+    local list_services=(sshd dropbear stunnel4 squid shadowsocks-libev pysocks openvpn x-ui udpgw)
     
     for services_ in "${list_services[@]}";do
         if [[ "${services_}" == "pysocks" ]];then
             systemctl status "fenixmanager-pysocks" &>/dev/null
         elif [[ "${services_}" == "openvpn" ]];then
-                systemctl status "openvpn@server" &>/dev/null
+            systemctl status "openvpn@server" &>/dev/null
+        elif [[ "${services_}" == "udpgw" ]];then
+            pgrep badvpn-udpgw &> /dev/null
         else
             systemctl status "${services_}" &>/dev/null
             
@@ -582,6 +584,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 ;;
             "x-ui")
                 local port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
+                ;;
+            "udpgw")
+                local port_listen=$(cat "/proc/$(pgrep badvpn-udpgw)/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs)
                 ;;
         esac
         if [[ ! "${status}" =~ "INACTIVO" && -n "${port_listen}" ]];then
