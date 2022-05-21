@@ -269,7 +269,9 @@ monitor_users(){
 }
 
 list_id_user_simple(){
+    local count_=0
     for i in $(sqlite3 $userdb "select rowid, * from ssh");do
+        ((count_++))
         IFS='|' read -r -a var_val <<< "$i"
         local id=${var_val[0]}
         local username=${var_val[1]}
@@ -277,6 +279,11 @@ list_id_user_simple(){
         
         printf  "${WHITE}%-5s [ ${GREEN}${id}${WHITE} ] ${RED}${username} ${YELLOW}${alias_}${WHITE}\n"
     done
+    [[ "${count_}" -eq 0 ]] && {
+        error 'No hay usuarios registrados en la base de datos'.
+        sleep 1.5
+        fenix
+    }
 }
 
 option_menu_ssh() {
@@ -320,7 +327,7 @@ option_menu_ssh() {
 
 delete_user () {
     [[ "${simple_ui}" == "true" ]] && {
-        list_id_user_simple
+        list_id_user_simple 
     }
     read -p "$(echo -e $WHITE'[*] Ingrese el id del usuario a eliminar : ' )" id_user
     local user_name=$(sqlite3 $userdb "select rowid,nombre from ssh where rowid = $id_user" 2>/dev/null| awk '{split($0,a,"|");print a[2]}')
@@ -377,7 +384,9 @@ delete_all_users() {
 
 edit_user () {
     all_ids=$(sqlite3 $userdb "select rowid,nombre from ssh" | awk '{split($0,a,"|");print a[1]}')
-    list_id_user_simple
+    [[ "${simple_ui}" == "true" ]] && {
+        list_id_user_simple
+    }
     read -p "$(echo -e $GREEN'[*] Ingrese el id del usuario a editar : ' )" id_user
     
     if [[ ! $all_ids =~ $id_user ]];then
@@ -467,8 +476,8 @@ edit_user () {
             s | S )
                 sqlite3 $userdb "update ssh set nombre = '$new_name', password = '$password', exp_date = '$exp_date', max_conn = '$max_conn' where rowid = $id_user"
                 pkill -9 -u $name &>/dev/null && userdel $name &>/dev/null
-                pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
-                useradd -g "ssh_user" --no-create-home --shell /bin/false --gid $group_ssh  -p "$pass" "$new_name"
+                local pass=$(perl -e 'print crypt($ARGV[0], "password")' $password)
+                useradd -g "ssh_user" --no-create-home --shell /bin/false --gid "ssh_user"  -p "$pass" "$new_name"
                 info "El usuaio $new_name ha sido editado con exito."
                 read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
                 clo
