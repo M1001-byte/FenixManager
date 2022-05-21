@@ -88,7 +88,9 @@ create_ssh_user_input() {
                 else
                     str=""
                 fi
-                read -p "$(echo -e $YELLOW"[*] Contraseña para $user $str: " )" passwd
+                # if lenght of user is greater than 18
+                [[ ${#user} -gt 18 ]] && local user_tmp="${user:0:17}(~)" || local user_tmp="${user}"
+                read -p "$(echo -e $YELLOW"[*] Contraseña para ${user_tmp} $str: " )" passwd
                 if [[ ${#passwd} -gt 20 ]];then
                     error 'La contraseña no puede tener mas de 20 caracteres.'
                     continue
