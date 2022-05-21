@@ -552,7 +552,7 @@ restore_backup () {
         [[ "${simple_ui}" == "false" ]] && {
             printf "〢${WHITE} [%-${#id}s] ${YELLOW}%-38s${WHITE} %15s %$(echo 93 - 38 - 15 - ${#id} | bc)s \n" "${count_}" "${file}" "${file_size}" "〢"
         } || {
-            printf "〢${WHITE} [%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((61 -  4 -  -${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
+            printf "〢${WHITE}[%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((62 -  4 -  - ${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
         }
     done
     [[ "${simple_ui}" == "false" ]] && line_separator 96 || line_separator 60
