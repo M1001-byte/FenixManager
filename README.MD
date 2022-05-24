@@ -9,7 +9,7 @@
 
 
 <p align="center">
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/PT5Bcvg/fenixmanager.png" alt="fenixmanager" border="0"></a>
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/2WMKqT8/fenix-menu.png" alt="fenix-menu" border="0"></a>
 </p>
 
 ## 💻 Requisitos
@@ -54,6 +54,8 @@ sudo bash /tmp/install-fenix.bash # Instalar
         * Mostar / Ocultar Paneles
 
 ### **Y mas por venir :)**
+
+## 📸 Screenshots
 
 ## ✏️ Características Futuras
  - [ ] Administrar vps desde un bot de Telegram

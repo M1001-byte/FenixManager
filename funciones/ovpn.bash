@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # Este script,es una copia del siguiente repositorio: https://github.com/angristan/openvpn-install
 # Yo,simplemente lo he modificado para adaptarlo para FenixManager.(Ademas de pequeños cambios/traducciones)

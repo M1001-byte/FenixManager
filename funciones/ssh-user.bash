@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 current_dir=$(pwd)
 userdb='/etc/FenixManager/database/usuarios.db'

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 source "/etc/FenixManager/funciones/funciones.bash"
 source "/etc/FenixManager/funciones/color.bash" 2>/dev/null

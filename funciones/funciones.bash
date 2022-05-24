@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # get terminal size
 columns=$(tput cols) 

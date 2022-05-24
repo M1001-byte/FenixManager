@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # The URL of the script project is:
 # https://github.com/v2fly/fhs-install-v2ray

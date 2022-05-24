@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 fenixmanager_crontab="/etc/cron.d/fenixmanager"
 log_file="/var/log/FenixManager/hitman.log"

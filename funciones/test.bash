@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 function show_time () {
     num=$1

@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 source "/etc/FenixManager/funciones/funciones.bash"
 source "/etc/FenixManager/funciones/ssh-user.bash"

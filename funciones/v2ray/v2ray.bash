@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 source "/etc/FenixManager//preferences.bash" 2>/dev/null
 source "/etc/FenixManager/funciones/funciones.bash"
