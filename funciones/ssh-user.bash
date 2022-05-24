@@ -362,24 +362,30 @@ delete_all_users() {
     case $confirm in
         S | s | y | y )
             info "Eliminando todos los usuarios.Esta accion no se puede deshacer."
-            read -p "$(echo -e $MAGENTA'[*] Desea respaldar los usuarios (S)i (N)o': )" bak
-            case $bak in
-                S | s | y | Y )
-                    backup_user
-                esac
-            
-            for user in $(sqlite $userdb "select nombre from ssh" &>/dev/null);do
-                userdel $user &>/dev/null
+            line_separator 51
+            printf "${WHITE}〢 %-30s${YELLOW}%-20s${WHITE}〢\n" 'USUARIO' 'ESTADO'
+            line_separator 51
+            for user in $(sqlite3 $userdb "select nombre from ssh");do
+                printf "${WHITE}〢 ${YELLOW}%-30s${WHITE}" "${user}"
+                local user_del_sterr=$(userdel "${user}" 2>&1)
+                [ -z "${user_del_sterr}" ] && {
+                    printf "${GREEN}%-20s${WHITE}\n" '[ ELIMINADO ]'
+                } || {
+                    printf "${RED}%-20s${WHITE}\n" "[ $(grep -o "${user}.*" <<< "${user_add_stderr}" | cut -d "'" -f 2 | xargs) ]"
+                }
             done
             sqlite3 $userdb "delete from ssh"
             info "Todos los usuarios han sido eliminados."
             read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
             clo
             ;;
-        m | M )
-            fenix
+        *)
+            info "Operacion cancelada."
+            read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
+            clo
             ;;
-        esac
+    esac
+
 }
 
 edit_user () {
@@ -533,19 +539,18 @@ restore_backup () {
         read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
         clo
     fi
-    
-    count_=0
+    if [[ $(sqlite3 $userdb "select count(*) from ssh") -gt 0 ]];then
+        error 'La base de datos no esta vacia.'
+        info "Elimine todos los usuarios primero."
+        return 1
+    fi
+    local count_=0
 
-    [[ "${simple_ui}" == "false" ]] && {
-        line_separator 96
-        printf "〢${WHITE} %-4s ${YELLOW}%-38s${WHITE} %15s %39s\n" 'ID' 'NOMBRE DEL ARCHIVO' "TAMAÑO" "〢"
-        line_separator 96
-    } || {
-        line_separator 60
-        printf "〢${WHITE} %-4s ${YELLOW}%-30s${WHITE} %26s\n" 'ID' 'NOMBRE DEL ARCHIVO' "〢"
-        line_separator 60
-    }
+    line_separator 60
+    printf "〢${WHITE} %-4s ${YELLOW}%-30s${WHITE} %26s\n" 'ID' 'NOMBRE DEL ARCHIVO' "〢"
+    line_separator 60
     
+    # * LIST FILES
     for file in $backup_files;do
         count_=$(expr $count_ + 1)
         local file_size=$(du -h $backup_dir/$file | awk '{print $1}')
@@ -555,15 +560,13 @@ restore_backup () {
             printf "〢${WHITE}[%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((62 -  4 -  - ${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
         }
     done
-    [[ "${simple_ui}" == "false" ]] && line_separator 96 || line_separator 60
+    
+    line_separator 60
     
     while true;do
         read -p "$(echo -e $GREEN'[*] ID de la copia de seguridad a restaurar : ' )" id_backup
-        if grep '[Aa-Zz]' <<< $id_backup &> /dev/null;then
+        if grep '[Aa-Zz]' <<< $id_backup &> /dev/null || [ -z $id_backup ];then
             error 'Solo valores numericos.'
-            continue
-        fi
-        if [[ -z $id_backup ]];then
             continue
         fi
         if [[ $id_backup -le $count_ ]];then
@@ -576,24 +579,28 @@ restore_backup () {
     done
     bak_file=$(find $backup_dir/*.db  -printf "%f\n" | sed -n $id_backup'p')
     info "Restaurando la copia de seguridad '$bak_file' ."
-    info 'Esta operacion,sobreescribira los datos actuales de los usuarios.'
-    read -p "$(echo -e $GREEN'[*] Desea continuar (S)i (N)o : ' )" confirm
-    case $confirm in
-        s | S )
-            rm $userdb &>/dev/null
-            sqlite3 $userdb < $backup_dir/$bak_file
-            if [[ $status -eq 0 ]];then
-                info 'La copia de seguridad se ha restaurado con exito.'
-            else
-                error 'Fallo la restauracion de la copia de seguridad.'
-            fi
-            read -p "$(echo -e $GREEN'[*] Presione enter para continuar.': )"
-            clo
-            ;;
-        n | N )
-            clo
-            ;;
-        esac
+    
+    rm $userdb &>/dev/null
+    sqlite3 $userdb < $backup_dir/$bak_file
+    line_separator 60
+    printf "${WHITE}〢 %-30s${YELLOW}%-20s${WHITE}%-10s〢\n" 'USUARIO' 'CONTRASEÑA' 'ESTADO'
+    line_separator 60
+    for user in $(sqlite3 $userdb "select * from ssh");do
+        IFS='|' read -r -a user_array <<< "$user"
+        local user="${user_array[0]}"
+        local pass="${user_array[2]}"
+        local password=$(perl -e 'print crypt($ARGV[0], "password")' $pass)
+        printf "${WHITE} %-32s${YELLOW}%-20s" "${user}" "${pass}" && tput sc
+        local user_add_stderr=$(useradd -g "ssh_user" --no-create-home --shell /bin/false --gid "ssh_user"  -p "$pass" "$user" 2>&1)
+        [ -z "$user_add_stderr" ] && {
+            printf "${GREEN}%-10s${WHITE}" "[ OK ]" && tput cud1
+        } || {
+            printf "${RED}%-10s${WHITE}" "[ $(grep -o "${user}.*" <<< "${user_add_stderr}" | cut -d "'" -f 2 | xargs) ]" && tput cud1
+        }
+    done
+
+    read -p "$(echo -e $GREEN'[*] Presione enter para continuar.')"
+    clo
 }
 
 show_acc_ssh_info(){
