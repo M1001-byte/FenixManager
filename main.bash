@@ -13,17 +13,22 @@ config_sshd () {
     trap "exit 130" SIGINT SIGTERM
     echo -e "${BLUE}〢────────────────────〢 ${WHITE}CONFIGURANDO SSHD${BLUE} 〢─────────────────〢"
     mkdir "$user_folder/FenixManager/banner" &> /dev/null
-    ssh_banner="$user_folder/FenixManager/banner/fenix.html"
-    sshd_file="/etc/ssh/sshd_config"
+    local ssh_banner="$user_folder/FenixManager/banner/fenix.html"
+    local sshd_file="/etc/ssh/sshd_config"
     echo "<strong>FenixManager V1.0</strong>" > $ssh_banner
 
-    config_sshd='SW5jbHVkZSAvZXRjL3NzaC9zc2hkX2NvbmZpZy5kLyouY29uZgpQb3J0IDIyCkFkZHJlc3NGYW1pbHkgaW5ldApMaXN0ZW5BZGRyZXNzIDAuMC4wLjAKTG9naW5HcmFjZVRpbWUgMm0KUGVybWl0Um9vdExvZ2luIHllcwpNYXhBdXRoVHJpZXMgMwpQYXNzd29yZEF1dGhlbnRpY2F0aW9uIHllcwpQZXJtaXRFbXB0eVBhc3N3b3JkcyBubwpDaGFsbGVuZ2VSZXNwb25zZUF1dGhlbnRpY2F0aW9uIG5vClVzZVBBTSB5ZXMKQWxsb3dUY3BGb3J3YXJkaW5nIHllcwpLZXhBbGdvcml0aG1zIGN1cnZlMjU1MTktc2hhMjU2QGxpYnNzaC5vcmcsZWNkaC1zaGEyLW5pc3RwNTIxLGVjZGgtc2hhMi1uaXN0cDM4NCxlY2RoLXNoYTItbmlzdHAyNTYsZGlmZmllLWhlbGxtYW4tZ3JvdXAtZXhjaGFuZ2Utc2hhMjU2CkNpcGhlcnMgY2hhY2hhMjAtcG9seTEzMDVAb3BlbnNzaC5jb20sYWVzMjU2LWdjbUBvcGVuc3NoLmNvbSxhZXMxMjgtZ2NtQG9wZW5zc2guY29tLGFlczI1Ni1jdHIsYWVzMTkyLWN0cixhZXMxMjgtY3RyCk1BQ3MgaG1hYy1zaGEyLTUxMi1ldG1Ab3BlbnNzaC5jb20saG1hYy1zaGEyLTI1Ni1ldG1Ab3BlbnNzaC5jb20sdW1hYy0xMjgtZXRtQG9wZW5zc2guY29tLGhtYWMtc2hhMi01MTIsaG1hYy1zaGEyLTI1Nix1bWFjLTEyOEBvcGVuc3NoLmNvbQpYMTFGb3J3YXJkaW5nIG5vClgxMURpc3BsYXlPZmZzZXQgMApYMTFVc2VMb2NhbGhvc3Qgbm8KUHJpbnRNb3RkIG5vClByaW50TGFzdExvZyBubwpUQ1BLZWVwQWxpdmUgeWVzCkNvbXByZXNzaW9uIGRlbGF5ZWQKVXNlRE5TIHllcwpQZXJtaXRUdW5uZWwgeWVzCkFjY2VwdEVudiBMQU5HIExDXyoKWDExRm9yd2FyZGluZyBubwpBbGxvd1RjcEZvcndhcmRpbmcgeWVzCkRlYmlhbkJhbm5lciBubwo='
+    config_sshd='UG9ydCAyMgpQcm90b2NvbCAyCktleVJlZ2VuZXJhdGlvbkludGVydmFsIDM2MDAKU2VydmVyS2V5Qml0cyAxMDI0ClN5c2xvZ0ZhY2lsaXR5IEFVVEgKTG9nTGV2ZWwgSU5GTwpMb2dpbkdyYWNlVGltZSAxMjAKUGVybWl0Um9vdExvZ2luIHllcwpTdHJpY3RNb2RlcyB5ZXMKUlNBQXV0aGVudGljYXRpb24geWVzClB1YmtleUF1dGhlbnRpY2F0aW9uIHllcwpJZ25vcmVSaG9zdHMgeWVzClJob3N0c1JTQUF1dGhlbnRpY2F0aW9uIG5vCkhvc3RiYXNlZEF1dGhlbnRpY2F0aW9uIG5vClBlcm1pdEVtcHR5UGFzc3dvcmRzIG5vCkNoYWxsZW5nZVJlc3BvbnNlQXV0aGVudGljYXRpb24gbm8KUGFzc3dvcmRBdXRoZW50aWNhdGlvbiB5ZXMKUGVybWl0VHVubmVsIHllcwpYMTFGb3J3YXJkaW5nIHllcwpYMTFEaXNwbGF5T2Zmc2V0IDEwClByaW50TW90ZCBubwpQcmludExhc3RMb2cgbm8KRGViaWFuQmFubmVyIG5vClRDUEtlZXBBbGl2ZSB5ZXMKQ2lwaGVycyBjaGFjaGEyMC1wb2x5MTMwNUBvcGVuc3NoLmNvbSxhZXMyNTYtZ2NtQG9wZW5zc2guY29tLGFlczEyOC1nY21Ab3BlbnNzaC5jb20sYWVzMjU2LWN0cixhZXMxOTItY3RyLGFlczEyOC1jdHIKTUFDcyBobWFjLXNoYTItNTEyLWV0bUBvcGVuc3NoLmNvbSxobWFjLXNoYTItMjU2LWV0bUBvcGVuc3NoLmNvbSx1bWFjLTEyOC1ldG1Ab3BlbnNzaC5jb20saG1hYy1zaGEyLTUxMixobWFjLXNoYTItMjU2LHVtYWMtMTI4QG9wZW5zc2guY29tCktleEFsZ29yaXRobXMgY3VydmUyNTUxOS1zaGEyNTZAbGlic3NoLm9yZyxlY2RoLXNoYTItbmlzdHAyNTYsZWNkaC1zaGEyLW5pc3RwMzg0LGVjZGgtc2hhMi1uaXN0cDUyMSxkaWZmaWUtaGVsbG1hbi1ncm91cDE0LXNoYTEKVXNlTG9naW4gbm8KQWNjZXB0RW52IExBTkcgTENfKgpTdWJzeXN0ZW0gc2Z0cCAvdXNyL2xpYi9vcGVuc3NoL3NmdHAtc2VydmVyClVzZVBBTSB5ZXMKCg=='
 
     info "Agregando configuracion al archivo ${GREEN}$sshd_file"
-    
+    cp "$sshd_file" "$sshd_file.bak" 2> /dev/null
     echo -e $config_sshd | base64 -d > $sshd_file || error "No se pudo crear/modificar el archivo $sshd_file."  && echo "Banner $ssh_banner" >> $sshd_file
-    systemctl restart sshd
-    info "${GREEN}SSHD Configurado con exito."
+    systemctl restart sshd || {
+        error "No se pudo reiniciar el servicio sshd."
+        info "Restaurando el archivo $sshd_file.bak"
+        cp "$sshd_file.bak" "$sshd_file" 2> /dev/null
+        info "SSHD no se pudo configurar correctamente."
+        exit 1
+    } && info "${GREEN}SSHD Configurado con exito."
 
 }
 
