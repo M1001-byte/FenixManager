@@ -614,14 +614,22 @@ add_cron_job_for_hitman(){
 }
 
 add_cron_job_for_udpgw(){
-    local OS=$(uname -m)
-    [[ "${OS}" == "x86_64" ]] && {
-        local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw64"
-    } ||  {
-        local badvpn_udpgw="/etc/FenixManager/bin/badvpn-udpgw"
-    }
+    local badvpn_git="https://github.com/ambrop72/badvpn"
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
-    info "Se agrega la tarea crontab para ${YELLOW}badvpn-udpgw."
+    local badvpn_udpgw="/bin/badvpn-udpgw"
+    git clone "${badvpn_git}" "/tmp/badvpn" &>/dev/null || {
+        error "No se pudo descargar el repositorio ${badvpn_git}."
+        return 1
+    } && {
+        cd "/tmp/badvpn" 
+        mkdir "build" && cd "build"
+        cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/ && {
+            make install 2>/dev/null
+        } || {
+            error "No se pudo compilar el repositorio ${badvpn_git}."
+            return 1
+        }
+    }
     info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
     echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300" >> "${fenixmanager_crontab}"
 
