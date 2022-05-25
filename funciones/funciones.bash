@@ -211,14 +211,43 @@ check_user_exist () {
 }
 
 bar() {
-    # $1 el comando a ejecutar
+    help_msg() {
+        error "Parametros desconocidos."
+        info "$0 --cmd <comando> --text-show <texto> --show-eta <true|false>"
+        info "$0 <comando>"
+        info "Al parametro --cmd se le pasa el comando a ejecutar, codificado en base64. Solamente si no se utiliza otro argumento."
+        exit 1
+    }
+    while [[ $# -gt 0 ]]; do
+        [[ ! $# =~ "^--" ]] && {
+            local cmd_="$@"
+            shift ; break
+        }
+        case $1 in 
+            "--cmd")
+                local cmd_=$(base 64 -d <<< "${2}" || echo "${2}")
+                shift ; shift
+                ;;
+            "--text-show")
+                local text_show_="${2}"
+                shift ; shift
+                ;;
+            "--show-eta")
+                local show_eta_="${2}"
+                shift ; shift
+                ;;
+            *|"--help")
+                help_msg
+                ;;
+            
+        esac
+    done
+    [[ -z "${cmd_}" ]] && help_msg
+     [ -z "${text_show_}" ] && local text_show_="${cmd_}"
+     local show_eta_=${show_eta_:-"true"}
     local str="###############"
     local s=0.25
-    local bg_process="$1"
-    local textshow="$1"
-    [[ "$3" == "hidden_et" || "$2" == "hidden_et" ]] && local hidden_time_execution='true' || local hidden_time_execution='false'
-    local tmpfile
-    tmpfile=$(mktemp -t progress.XXXXXXXX)
+    local tmpfile=$(mktemp -t progress.XXXXXXXX)
     
     # colors var
     local green='\033[32m'
@@ -232,38 +261,38 @@ bar() {
         for i in {1..14}; do
             sleep 0.25
             s=$(echo ${s} + 0.25| bc)
-            [[ "${hidden_time_execution}" == 'false' ]] && {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$textshow" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
+            [[ "${show_eta_=}" == "true" ]] && {
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
             } || {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$textshow" "${str:0:$i}]"  # save time 
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]"  # save time 
             }
             done
         done  & 
+    
     trap "blc_=1" SIGINT SIGTERM 
-    ${bg_process} &> /dev/null || STAT=$? && true
+    ${cmd_} &> /dev/null || STAT=$? && true
     trap '"(kill -9 $!)"' SIGINT SIGTERM 
     kill $! &> /dev/null
-    local endtime
-    endtime=$(awk '{split($0,a,"ET:");print a[2] }' < "$tmpfile" )
+    local endtime=$(awk '{split($0,a,"ET:");print a[2] }' < "$tmpfile" )
 
     
     # Depende el comando ejecutado,devuelve ok,instalado o error.
     if [[ $STAT -eq 0 ]];then
         local result='OK'
         local result_color=$green #green
-        if [[ $bg_process == "*install*" ]] ;then
-        local result='INSALADO'
-        local result_color=$green # green 
+        if [[ "${cmd_}" == "*install*" ]] ;then
+            local result='INSALADO'
+            local result_color=$green # green 
         fi
     else
         local result='FALLO !'${STAT}
         local result_color=$red #red
     fi
 
-    [[ "${hidden_time_execution}" == 'true' ]] && {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" 
+    [[ "${show_eta_}" == "true" ]] && {
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" 
     } || {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" " ET: ${endtime}"
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" " ET: ${endtime}"
     }
     rm -f "${tmpfile}"
     return $STAT
@@ -617,6 +646,7 @@ add_cron_job_for_udpgw(){
     local badvpn_git="https://github.com/ambrop72/badvpn"
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     local badvpn_udpgw="/bin/badvpn-udpgw"
+    info "Descargando badvpn-udpgw"
     git clone "${badvpn_git}" "/tmp/badvpn" &>/dev/null || {
         error "No se pudo descargar el repositorio ${badvpn_git}."
         return 1
