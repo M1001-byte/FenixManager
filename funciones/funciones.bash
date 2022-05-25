@@ -215,17 +215,17 @@ bar() {
         error "Parametros desconocidos."
         info "$0 --cmd <comando> --text-show <texto> --show-eta <true|false>"
         info "$0 <comando>"
-        info "Al parametro --cmd se le pasa el comando a ejecutar, codificado en base64. Solamente si no se utiliza otro argumento."
+        info "Al parametro --cmd y --text-show , se le pasan los argumentos codificado en base64."
         exit 1
     }
     while [[ $# -gt 0 ]]; do
-        [[ ! $# =~ "^--" ]] && {
+        [[ ! "$1" =~ ^-- ]] && {
             local cmd_="$@"
             shift ; break
         }
         case $1 in 
             "--cmd")
-                local cmd_=$(base 64 -d <<< "${2}" || echo "${2}")
+                local cmd_="${2}"
                 shift ; shift
                 ;;
             "--text-show")
@@ -243,8 +243,8 @@ bar() {
         esac
     done
     [[ -z "${cmd_}" ]] && help_msg
-     [ -z "${text_show_}" ] && local text_show_="${cmd_}"
-     local show_eta_=${show_eta_:-"true"}
+    [ -z "${text_show_}" ] && local text_show_="${cmd_}"
+    [ -z "${show_eta_+x}" ] && local show_eta_="true"
     local str="###############"
     local s=0.25
     local tmpfile=$(mktemp -t progress.XXXXXXXX)
@@ -261,7 +261,7 @@ bar() {
         for i in {1..14}; do
             sleep 0.25
             s=$(echo ${s} + 0.25| bc)
-            [[ "${show_eta_=}" == "true" ]] && {
+            [[ "${show_eta_}" == "true" ]] && {
                 printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
             } || {
                 printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]"  # save time 
@@ -289,7 +289,7 @@ bar() {
         local result_color=$red #red
     fi
 
-    [[ "${show_eta_}" == "true" ]] && {
+    [[ ! "${show_eta_}" == "true" ]] && {
         printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" 
     } || {
         printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" " ET: ${endtime}"
@@ -298,6 +298,7 @@ bar() {
     return $STAT
 
 }
+
 
 package_installed () {
     # 1 = not installed, 0 = installed
@@ -643,25 +644,26 @@ add_cron_job_for_hitman(){
 }
 
 add_cron_job_for_udpgw(){
-    local badvpn_git="https://github.com/ambrop72/badvpn"
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     local badvpn_udpgw="/bin/badvpn-udpgw"
     info "Descargando badvpn-udpgw"
-    git clone "${badvpn_git}" "/tmp/badvpn" &>/dev/null || {
+    bar  "git clone https://github.com/ambrop72/badvpn /tmp/badvpn" || {
+        rm "/tmp/badvpn" -rf &>/dev/null
         error "No se pudo descargar el repositorio ${badvpn_git}."
         return 1
     } && {
         cd "/tmp/badvpn" 
         mkdir "build" && cd "build"
-        cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/ && {
-            make install 2>/dev/null
+        bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/ --text-show cmake .. -DBUILD_UDPGW=1" --text-show "Construyendo badvpn-udpgw" && {
+            bar "make install"
+            info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
+            echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300 &>/dev/null" >> "${fenixmanager_crontab}"
         } || {
+            rm "/tmp/badvpn" -rf &>/dev/null
             error "No se pudo compilar el repositorio ${badvpn_git}."
-            return 1
+            read
         }
     }
-    info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
-    echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300" >> "${fenixmanager_crontab}"
 
 }
 
