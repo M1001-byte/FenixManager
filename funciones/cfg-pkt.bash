@@ -1347,9 +1347,9 @@ cfg_python3_proxy(){
                     echo -e "${base_cfg}" >> "${config_file}"
                     local service_status=$(systemctl status fenixmanager-pysocks &>/dev/null;echo $?)
                     if [[ $service_status -eq 0 ]];then
-                        bar "systemctl reload fenixmanager-pysocks" "hidden_et"
+                        bar "systemctl reload fenixmanager-pysocks"
                     else
-                        bar "systemctl restart fenixmanager-pysocks" "hidden_et"
+                        bar "systemctl restart fenixmanager-pysocks"
                     fi
                     if [[ $? -eq 0 ]];then
                         info "El puerto ${port} se ha agregado correctamente."
@@ -1392,17 +1392,17 @@ cfg_python3_proxy(){
                 systemctl status fenixmanager-pysocks
                 ;;
             4) # INICIAT/DETENER PYSOCKS
-                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" "hidden_et" || bar "systemctl start fenixmanager-pysocks" "hidden_et"
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" || bar "systemctl start fenixmanager-pysocks"
                 sleep 2
                 cfg_python3_proxy
                 ;;
             5) # REINICIAR/DESHABILIAR PYSOCKS
-                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-pysocks" "hidden_et" || bar "systemctl disable fenixmanager-pysocks" 'hidden_et'
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-pysocks"  || bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
                 cfg_python3_proxy
                 ;;
             6) #DESHABILITAR PYSOCKS
-                bar "systemctl disable fenixmanager-pysocks" "hidden_et"
+                bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
                 cfg_python3_proxy
                 ;;

@@ -207,7 +207,7 @@ install_openvpn() {
     fi
 
     if [[ !  -f /etc/openvpn/server.conf ]];then
-        bar "apt-get -y install ca-certificates gnupg" 'hidden_et'
+        bar "apt-get -y install ca-certificates gnupg"
         if [[ -d /etc/openvpn/easy-rsa/ ]];then
             rm -rf /etc/openvpn/easy-rsa/
         fi
