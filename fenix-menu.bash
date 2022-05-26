@@ -12,16 +12,10 @@ source "/etc/FenixManager/preferences.bash" 2>/dev/null
 
 
 simple_text_fenix(){
-    if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
-        line_separator 85
-        printf "${GREEN}〢 ─────────── 〢${WHITE}%-10s${GREEN}〢──────────〢${WHITE}%-16s${GREEN}〢─────────〢${WHITE}%${#version}s${GREEN}〢 ────────── 〢\n" "M1001-BYTE" "FENIX  MANAGER" "${version}"
-        line_separator 85
-    else
-        line_separator 60
-        printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
-        line_separator 60
+    line_separator 60
+    printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
+    line_separator 60
         
-    fi
 }
 
 show_first_panel() {
@@ -46,19 +40,11 @@ show_first_panel() {
     cpu_model=$(grep name < /proc/cpuinfo | uniq | awk '{ for(f=4; f<=NF; f++) { printf $f " "; } }')
     cpu_used=$(top -b -n1 | grep 'Cpu(s)' | awk '{print $2 + $4}')
     
-    if [[ "${simple_ui}" == "false" ]] || [[ -z ${simple_ui} ]];then
-        printf "${WHITE}〢 ${RED}%10s ${WHITE}%-${#distro}s ${RED}%10s ${WHITE}%${#kernel}s  ${RED}%13s ${WHITE}%${#arch}s %$((81 - 34 - ${#distro} - ${#kernel} - ${#arch} ))s\n" "DISTRO:" "$distro" "KERNEL:" "$kernel" "ARQUITECTURA:" "${arch^^}" "〢"
-        printf "${WHITE}〢 ${RED}%10s ${WHITE}%-${#mem_total}s ${RED}%11s ${WHITE}%-${#mem_used}s ${RED}%11s ${WHITE}%-${#mem_free}s ${RED}%18s ${WHITE}%5s %$((81 - 57 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_disp} ))s\n" "RAM:" "$mem_total" "EN USO:" "$mem_used" "LIBRE:" "$mem_free" "DISPONIBLE:" "${mem_available}" "〢" 
-        if [[ ! -z "${swap}" ]];then
-            printf "${WHITE}〢 ${RED}%-8s ${WHITE}%-${#swap_total}s  ${RED}%14s ${WHITE}%-${#swap_used}s ${RED}%11s ${WHITE}%-${#swap_free}s %$((80 - 12 - 11 - ${#swap_total} - ${#swap_used} - ${#swap_free} ))s\n" "SWAP:" "$swap_total" "EN USO:" "$swap_used" "LIBRE:" "$swap_free" "〢"
-        fi
-        printf "${WHITE}〢${RED}%10s ${WHITE}%-${#cpu_core}s ${RED}%-7s ${WHITE}%-${#cpu_model}s ${RED}%-7s ${WHITE}%${#cpu_used}s %$(( 81 - 9 - 16 - ${#cpu_core} - ${#cpu_model} - ${#cpu_used} ))s\n" "CORES:" "$cpu_core" "MODELO:" "$cpu_model" "EN USO:" "% $cpu_used" "〢"
-    else
-        printf "${WHITE}〢 ${WHITE}%-3s${RED}%-${#distro}s ${WHITE}%-6s${RED}%-${#arch}s ${WHITE}%-9s${RED}%-${#kernel}s${WHITE}%$(echo 60 - 19 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
-        printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
-        
-        printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'
-        printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"
+    printf "${WHITE}〢 ${WHITE}%-3s${RED}%-${#distro}s ${WHITE}%-6s${RED}%-${#arch}s ${WHITE}%-9s${RED}%-${#kernel}s${WHITE}%$(echo 60 - 19 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
+    printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
+    
+    printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'
+    printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"
         
     fi
 
@@ -79,30 +65,22 @@ show_network_stat(){
     local net_down_stat="$(echo $net_down_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
     local net_up_stat=${default_iface_network_stat[3]}
     local net_up_stat="$(echo $net_up_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
-    [[ "${simple_ui}" == "false" ]] && {
-        printf "${WHITE}〢 ${RED}%-9s ${WHITE}%-15s ${RED}%-7s ${WHITE} %-15s ${RED}%-9s ${WHITE}%-${#default_iface}s ${GREEN}%${#public_ip}s ${WHITE}%$(echo 81 - 14 - 15 - 7 - 15 - 9 - ${#default_iface} - ${#public_ip} | bc)s〢\n" "DESCARGA:" "$net_down_stat MB" "SUBIDA:" "$net_up_stat MB" "INTERFAZ:" "${default_iface}" "${public_ip}"
-    } || {
-        printf "${WHITE}〢 ${RED}%-10s ${WHITE}%-${#net_down_stat}s ${RED}%10s ${WHITE}%-${#net_up_stat}s ${RED}%12s ${WHITE}%-${#default_iface}s %$(echo 56 - 32 - ${#net_down_stat} - ${#net_up_stat} - ${#default_iface} | bc)s\n" "DESCARGA:" "${net_down_stat}" "SUBIDA:" "${net_up_stat}" "INTERFAZ:" "${default_iface}" "〢"
-        printf "${WHITE}〢 ${RED}%25s ${GREEN}%-15s ${WHITE}%$(echo 60 - 40 | bc)s \n" "DIRECCION IP:" "${public_ip}" "〢"
-    }
+    printf "${WHITE}〢 ${RED}%-10s ${WHITE}%-${#net_down_stat}s ${RED}%10s ${WHITE}%-${#net_up_stat}s ${RED}%12s ${WHITE}%-${#default_iface}s %$(echo 56 - 32 - ${#net_down_stat} - ${#net_up_stat} - ${#default_iface} | bc)s\n" "DESCARGA:" "${net_down_stat}" "SUBIDA:" "${net_up_stat}" "INTERFAZ:" "${default_iface}" "〢"
+    printf "${WHITE}〢 ${RED}%25s ${GREEN}%-15s ${WHITE}%$(echo 60 - 40 | bc)s \n" "DIRECCION IP:" "${public_ip}" "〢"
+    
 }
 
 option_menu_software () {
     clear
     local columns=$(tput cols)
-    [[ "${simple_ui}" == "false" ]] && {
-        line_separator 85
-        echo -e "${BLUE}〢───────────────────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢───────────────────────────────〢"
-        line_separator 85
-    } || {
-        line_separator 60
-        echo -e "${BLUE}〢───────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢──────────────────〢"
-        line_separator 60
-    }
+    line_separator 60
+    echo -e "${BLUE}〢───────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢──────────────────〢"
+    line_separator 60
+    
     
     [[ "${hide_ports_open_services_in_protocol_menu=}" == 'false' ]] && {
         list_services_and_ports_used
-        [[ "${simple_ui}" == "true" ]] && line_separator 60 || line_separator 85
+        line_separator 60
     }
     option_color 0 'CONFIGURAR OPENSSH / DROPBEAR'
     tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
@@ -139,15 +117,10 @@ option_menu_configuration(){
     local columns=$(tput cols)
     # relaod preferences.bash
     source "/etc/FenixManager/preferences.bash"
-    [[ "${simple_ui}" == 'false' ]] && {
-        line_separator 85
-        echo -e "${BLUE}〢───────────────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢──────────────────────────────────〢"
-        line_separator 85
-    } || {
-        line_separator 60
-        echo -e "${BLUE}〢─────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢───────────────────〢"
-        line_separator 60
-    }
+    line_separator 60
+    echo -e "${BLUE}〢─────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢───────────────────〢"
+    line_separator 60
+    
     
     option_color 1 "ADMINISTRAR HITMAN"
     option_color 2 "ADMINISTRAR FIREWALL ( UFW )"
@@ -270,11 +243,8 @@ create_free_subdomain(){
     for ((i=0;i<${#sites[@]};i++));do
         local site=${sites[$i]}
         local days_=${sites_day_available[$i]}
-        [[ "${simple_ui}" == "false" ]] && {
-            printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 87 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
-        } || {
-            printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 60 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
-        }
+        printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 60 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
+        
         
     done
 }
@@ -288,35 +258,32 @@ main(){
     script_executed_with_root_privileges
     check_sqlite3
 
-    [[ "${show_fenix_banner}" == "false" ]] && {
-        simple_text_fenix
-    } || {
-        print_banner
-        }
+    simple_text_fenix
+
     [[ "${hide_first_panel}" == "false" ]] && {
         show_first_panel
-        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+        line_separator 60
         ((hidden_panel++))
     }
     if [[ -f "$user_db" ]];then
         [[ "${hide_second_panel}" == "false" ]] && {
             show_acc_ssh_info
-            [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+            line_separator 60
             ((hidden_panel++))
         }
     fi
     [[ "${hide_third_panel}" == "false" ]] && {
         show_network_stat
-        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+        line_separator 60
         ((hidden_panel++))
     }
     [[ "${hide_ports_open_services_in_home_menu}" == 'false' ]] && {
         list_services_and_ports_used "table"
-        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+        line_separator 60
         ((hidden_panel++))
     }
     [[ "${hidden_panel}" -eq 3 && "${hidden_panel}" -eq 1 ]] && {
-        [[ "${simple_ui}" == "false" ]] && line_separator 85 || line_separator 60
+        line_separator 60
     }
     
     option_menu

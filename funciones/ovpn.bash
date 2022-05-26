@@ -641,10 +641,6 @@ list_users_ovpn() {
         user="${user_array[1]}"
         exp="${user_array[2]}"
         
-        # [[ ${#user} -gt 25 && ${simple_ui} == "true" ]] && {
-            # # ! (...)
-            # user="${user:0:20}(...)"
-        # }
         printf "${BLUE}〢${WHITE} [%-${#id}s] ${RED}%-32s ${YELLOW}%-10s ${BLUE}%14s\n" "${id}" "${user}" "${exp}" '〢'
     done
     line_separator 60

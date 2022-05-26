@@ -93,7 +93,7 @@ add_alias_to_fenix () {
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
     echo -e "unalias fenix" >> "${user_folder}/.bashrc"
     
-    local preferences_var="simple_ui='true'\nshow_fenix_banner='true'\nhide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
+    local preferences_var="hide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
     echo -e "$preferences_var" >> "/etc/FenixManager/preferences.bash"
 }
 
@@ -128,11 +128,9 @@ main(){
     add_cron_job_for_udpgw
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
-    info "Ahora se cerrará la sesión de tu usuario actual, y así terminar el proceso de instalación.(${RED}NO SE REINICIARA SU VPS${WHITE} )"
     read -p 'Presione enter para continuar...'
     sleep 1.5
-    clear
-    pkill -u $(logname)
+    clear ; source "${user_folder}/.bashrc"
 }
 
 main

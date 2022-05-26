@@ -50,7 +50,7 @@ check_and_veriy_preferences_integrity(){
             local branch_clone="master"
             local version=$(cat "/etc/FenixManager/version" )
         }
-        local preferences_var=("show_fenix_banner=true" "simple_ui='true'" "user_folder='${user_folder}'" "script_dir='/etc/FenixManager'" "version='1.0'" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
+        local preferences_var=("show_fenix_banner=true" "user_folder='${user_folder}'" "script_dir='/etc/FenixManager'" "version='1.0'" "hide_first_panel='false'" "hide_second_panel='false'" "hide_third_panel='false'" "hide_fourth_panel='false'" "hide_ports_open_services_in_home_menu='false'" "hide_ports_open_services_in_protocol_menu='false'")
         for i in "${preferences_var[@]}"; do
             echo "$i" >> "$file"
         done
@@ -620,11 +620,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 ;;
         esac
         if [[ ! "${status}" =~ "INACTIVO" && -n "${port_listen}" ]];then
-            [[ "${simple_ui}" == "false" ]] && {
-                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-30s ${WHITE}| ${color_}%-12s ${WHITE}%$(echo 81 - 22 - 30 - 12  | bc )s \n" "${services_^^}" "${port_listen}" "${status_^^}" "〢"   
-            } || {
-                printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
-            }  
+            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
         fi
     done
 }

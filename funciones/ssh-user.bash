@@ -192,16 +192,10 @@ list_user() {
 
     lop=$(sqlite3 $db "select rowid, * from ssh")
 
-    [[ "${simple_ui}" == "false" ]] && {
-        line_separator 96
-        printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-12s〢\n" 'ID' 'NOMBRE' 'ALIAS' 'CONTRASEÑA' 'EXPIRACION' 'CONEXIONES'
-        line_separator 96
-    } || {
-        line_separator 64
-        printf "${WHITE}〢${RED}%-32s${YELLOW}%-15s${BLUE}%12s${WHITE}%-6s〢\n" 'NOMBRE' 'CONTRASEÑA' 'EXPIRA'
-        line_separator 64
-    }
-    
+    line_separator 64
+    printf "${WHITE}〢${RED}%-32s${YELLOW}%-15s${BLUE}%12s${WHITE}%-6s〢\n" 'NOMBRE' 'CONTRASEÑA' 'EXPIRA'
+    line_separator 64
+
     for i in $lop;do
         IFS='|' read -r -a var_val <<< "$i"
         
@@ -219,24 +213,19 @@ list_user() {
 
         [[ -z ${var_val[2]} ]] && alias_='-' || alias_=${var_val[2]}
 
-        [[ ${#user} -gt 25 && ${simple_ui} == "true" ]] && user="${user:0:20}(~)" # ! (...)
+        [[ ${#user} -gt 25 ]] && user="${user:0:20}(~)" # ! (...)
         
         password=${var_val[3]}
         exp=${var_val[4]}
         conn="${number_session}/${var_val[5]}"
-        [[ "${simple_ui}" == "false" ]] && {
-            printf "${WHITE}〢 %-2s ${RED}%-32s ${RED}%-15s ${BLUE}%-20s ${MAGENTA}%-10s ${WHITE}%-8s %-2s〢\n" $id $user $alias_ $password $exp $conn
-        } || {
-            printf "${WHITE}〢${RED}%-25s${WHITE}[${alias_}]${YELLOW} %-15s${BLUE} %10s${WHITE}\n" "${user}"  $password $exp
-        }
+        printf "${WHITE}〢${RED}%-25s${WHITE}[${alias_}]${YELLOW} %-15s${BLUE} %10s${WHITE}\n" "${user}"  $password $exp
+        
     done
-    [[ "${simple_ui}" == "true" ]] && line_separator 64
+    line_separator 64
     local users_disconnected=$(($total_users - $users_connected))
     local total_openssh_connections=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | wc -l)
-    [[ "${simple_ui}" == "true" ]] && {
-        read -p "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
-        clo
-    }
+    read -p "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
+
 
 }
 
@@ -289,19 +278,13 @@ list_id_user_simple(){
 option_menu_ssh() {
     option_color '1' 'AGREGAR USUARIO'
     option_color '2' 'ELIMINAR USUARIO'
-    option_color '3' 'EDITAR USURIO'  
-    [[ ${simple_ui} == "true" ]] && {
-        option_color "4" "LISTAR TODOS LOS USUARIOS"
-        option_color "5" "MONITOR DE USUARIOS CONECTADOS"
-        option_color '6' 'CREAR UN BACKUP DE LA BASE DE DATOS'
-        option_color '7' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
-        option_color '8' "${RED}ELIMINAR TODOS LOS USUARIOS"
+    option_color '3' 'EDITAR USURIO'      
+    option_color "4" "LISTAR TODOS LOS USUARIOS"
+    option_color "5" "MONITOR DE USUARIOS CONECTADOS"
+    option_color '6' 'CREAR UN BACKUP DE LA BASE DE DATOS'
+    option_color '7' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
+    option_color '8' "${RED}ELIMINAR TODOS LOS USUARIOS"
 
-    } || {
-        option_color '4' 'CREAR UN BACKUP DE LA BASE DE DATOS'
-        option_color '5' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
-        option_color '6' "${RED}ELIMINAR TODOS LOS USUARIOS"
-    }
     option_color 'E' 'SALIR'
     option_color 'M' 'MENU PRINCIPAL'
     
@@ -312,9 +295,9 @@ option_menu_ssh() {
             1 ) create_ssh_user_input && clo ;;
             2 ) delete_user ;;
             3 ) edit_user ;;
-            4 ) [[ ${simple_ui} == "true" ]] && list_user  || backup_user ;;
-            5 ) [[ ${simple_ui} == "true" ]] && monitor_users || restore_backup ;;
-            6 ) [[ ${simple_ui} == "true" ]] && backup_user || delete_all_users ;;
+            4 ) list_user  ;;
+            5 ) monitor_users ;;
+            6 ) backup_user ;;
             7 ) restore_backup ;;
             8 ) delete_all_users ;;
             e | E | q | Q ) exit 0 ;;
@@ -326,9 +309,7 @@ option_menu_ssh() {
 }
 
 delete_user () {
-    [[ "${simple_ui}" == "true" ]] && {
-        list_id_user_simple 
-    }
+    list_id_user_simple 
     read -p "$(echo -e $WHITE'[*] Ingrese el id del usuario a eliminar : ' )" id_user
     local user_name=$(sqlite3 $userdb "select rowid,nombre from ssh where rowid = $id_user" 2>/dev/null| awk '{split($0,a,"|");print a[2]}')
     
@@ -353,7 +334,7 @@ delete_user () {
         info  "El Usuario ${RED}${user_name}${WHITE} eliminado con exito."
     fi
 
-    [[ "${simple_ui}" == "true" ]] && read -p "$(echo -e $WHITE'[*] Presione enter para continuar... ' )"
+    read -p "$(echo -e $WHITE'[*] Presione enter para continuar... ' )"
     clo
 }
 
@@ -390,9 +371,7 @@ delete_all_users() {
 
 edit_user () {
     all_ids=$(sqlite3 $userdb "select rowid,nombre from ssh" | awk '{split($0,a,"|");print a[1]}')
-    [[ "${simple_ui}" == "true" ]] && {
-        list_id_user_simple
-    }
+    list_id_user_simple
     read -p "$(echo -e $GREEN'[*] Ingrese el id del usuario a editar : ' )" id_user
     
     if [[ ! $all_ids =~ $id_user ]];then
@@ -519,7 +498,7 @@ backup_user () {
         echo -e "\n"
         echo -en "${GREEN} cd ~/FenixManager/backup/ && \n wget $url -O backup_usuarios_$date_.db -q "
         echo -e "\n"
-        [[ "${simple_ui}" == "true" ]] && database_file="${database_file//"$user_folder"/"~"}"
+        database_file="${database_file//"$user_folder"/"~"}"
         info "Copia de seguridad creada con exito. ${GREEN}$database_file${WHITE}"
         rm $mk_file
     else
@@ -554,11 +533,8 @@ restore_backup () {
     for file in $backup_files;do
         count_=$(expr $count_ + 1)
         local file_size=$(du -h $backup_dir/$file | awk '{print $1}')
-        [[ "${simple_ui}" == "false" ]] && {
-            printf "〢${WHITE} [%-${#id}s] ${YELLOW}%-38s${WHITE} %15s %$(echo 93 - 38 - 15 - ${#id} | bc)s \n" "${count_}" "${file}" "${file_size}" "〢"
-        } || {
-            printf "〢${WHITE}[%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((62 -  4 -  - ${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
-        }
+        printf "〢${WHITE}[%-${#id}s] ${YELLOW}%-${#file}s${WHITE} %$((62 -  4 -  - ${#id} - ${#file}))s \n" "${count_}" "${file}" "〢"
+        
     done
     
     line_separator 60
@@ -630,28 +606,15 @@ show_acc_ssh_info(){
     
     [[ -z "${get_total_users}" ]] && get_total_users=0
     
-    [[ "${simple_ui}" == "false" ]] && {
-        printf "${WHITE}〢 %20s ${YELLOW}%-${#get_total_users}s ${WHITE} %-12s ${GREEN}%-${#online_user}s ${WHITE}%16s ${RED}%-${#offline_users}s ${WHITE}%-$((${sp} - 22 - 12 - 16 - ${#get_total_users} - ${#online_user} - ${#offline_users} ))s 〢\n" "USUARIOS-SSH:" "[ ${get_total_users} ]" "CONECTADOS:" "[ ${online_user} ]" "DESCONECTADOS:" "[ ${offline_users} ]" 
-    } || {
-        printf "${WHITE}〢 %13s ${YELLOW}%-${#get_total_users}s ${WHITE} %-10s ${GREEN}%-${#online_user}s ${WHITE}%12s ${RED}%${#offline_users}s${WHITE}%-$(echo 60 - 16 - 35  - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s〢\n" "USUARIOS-SSH:" "[${get_total_users}]" "CONECTADOS:" "[${online_user}]" "DESCONECTADOS:" "[${offline_users}]"
-    }
+    printf "${WHITE}〢 %13s ${YELLOW}%-${#get_total_users}s ${WHITE} %-10s ${GREEN}%-${#online_user}s ${WHITE}%12s ${RED}%${#offline_users}s${WHITE}%-$(echo 60 - 16 - 35  - ${#get_total_users} - ${#online_user} - ${#offline_users} | bc)s〢\n" "USUARIOS-SSH:" "[${get_total_users}]" "CONECTADOS:" "[${online_user}]" "DESCONECTADOS:" "[${offline_users}]"
 }
 
 clo() {
-    [[ "${simple_ui}" == "false" ]] && {
-        clear
-        list_user  
-        line_separator 96
-        show_acc_ssh_info "77"
-        line_separator 96
-        option_menu_ssh
-    } || {
-        clear
-        line_separator 60
-        show_acc_ssh_info
-        line_separator 60
-        option_menu_ssh
-    }
+    clear
+    line_separator 60
+    show_acc_ssh_info
+    line_separator 60
+    option_menu_ssh
 }
 
 check_sqlite3() {

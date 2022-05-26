@@ -88,7 +88,7 @@ cfg_hitman(){
             1) # VER REGISTRO DE HITMAN
                 clear
                 [[ -f "${hitman_logfile}" ]] && {
-                    [[ "${simple_ui}" == "true" ]] && nano "${hitman_logfile}" ; cfg_hitman || less "${hitman_logfile}"
+                    nano "${hitman_logfile}" ; cfg_hitman
                 } || info "No hay registro de hitman."
                 ;;
             2) # CAMBIAR EL TIEMPO DE EJECUCIÓN; USUARIOS CON EXCEDENTE DE CONEXIONES
@@ -288,7 +288,7 @@ cfg_fail2ban(){
                 sleep 3
                 cfg_fail2ban
                 ;;
-            2) clear ; [[ "${simple_ui}" == "true" ]] && nano "${fail2ban_log_file}" || less "${fail2ban_log_file}" clear ; cfg_fail2ban ;;
+            2) clear ; nano "${fail2ban_log_file}"  ; cfg_fail2ban ;;
             3) # REINICIAR FAIL2BAN
                 bar "systemctl restart fail2ban"
                 sleep 4
@@ -359,18 +359,10 @@ cfg_fenix_settings(){
     local preferences="/etc/FenixManager/preferences.bash"
 
     [[ ! -f "${preferences}" ]] && touch "${preferences}"
-    [[ "${simple_ui}" == 'false' ]] && {
-        printf "${WHITE}〢%-18s ${WHITE}%$(echo 72 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
-    } || {
-        printf "${WHITE}〢%-18s ${WHITE}%$(echo 60 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
-    }
+    printf "${WHITE}〢%-18s ${WHITE}%$(echo 60 - 18 | bc )s\n" " MENU DE INCIO: " "〢"
     
-    # [[ "${show_fenix_banner}" == 'false' ]] && {
-        # option_color 0 "${GREEN}MOSTAR${WHITE} BANNER DE FENIX-MANAGER ( OCULTAR TEXTO )"
-    # } || {
-        # option_color 0 "${GREEN}MOSTAR${WHITE} TEXTO DE FENIX-MANAGER ( OCULTAR BANNER )"   
-    # }
-
+    
+    
     local home_var_val=("show_fenix_banner" "hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
     local home_var_desc=("banner de Fenix-Manager" "panel de informacion (os,etc)" "panel de usuarios ssh" "panel de adaptadores de red" "panel de puertos abiertos")
     for ((i=0;i<${#home_var_val[@]};i++));do
@@ -380,13 +372,9 @@ cfg_fenix_settings(){
         [[ "${var_value}" =~ "false" ]] && option_color "$i" "${RED}OCULTAR${WHITE} ${var_desc^^}" || option_color $i "${GREEN}MOSTRAR${WHITE} ${var_desc^^}"
     done
 
-    [[ "${simple_ui}" == 'false' ]] && {
-        printf "${WHITE}〢%-21s ${WHITE}%$(echo 72 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
-    } || {
-        printf "${WHITE}〢%-21s ${WHITE}%$(echo 60 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
-    }
+    printf "${WHITE}〢%-21s ${WHITE}%$(echo 60 - 21 | bc )s\n" " MENU DE PROTOCOLOS: " "〢"
     [[ "${hide_ports_open_services_in_protocol_menu}" == "false" ]] && option_color 5 "${RED}OCULTAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )" || option_color 5 "${GREEN}MOSTRAR${WHITE} PUERTOS ABIERTOS ( DROPBEAR,SSH,ETC )"
-    [[ "${simple_ui}" == 'false' ]] && line_separator 68 || line_separator 58
+    line_separator 58
     option_color M "VOLVER AL MENU PRINCIPAL"
     option_color E "SALIR"
     
@@ -395,15 +383,6 @@ cfg_fenix_settings(){
         prompt=$(date "+%x %X")
         read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case ${opt} in
-            0)
-                [[ "${show_fenix_banner}" == "false" ]] && {
-                    sed -i "s/show_fenix_banner=.*/show_fenix_banner='true'/g" "${preferences}"
-                } || {
-                    sed -i "s/show_fenix_banner=.*/show_fenix_banner='false'/g" "${preferences}"
-                }
-                sleep 1.5
-                fenix
-                ;;
             1) # ! 
                 [[ "${hide_first_panel}" == "false" ]] && {
                     sed -i "s/hide_first_panel=.*/hide_first_panel='true'/g" "${preferences}"
