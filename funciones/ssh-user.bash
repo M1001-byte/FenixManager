@@ -295,8 +295,8 @@ option_menu_ssh() {
             1 ) create_ssh_user_input && clo ;;
             2 ) delete_user ;;
             3 ) edit_user ;;
-            4 ) list_user  ;;
-            5 ) monitor_users ;;
+            4 ) list_user ; clo ;;
+            5 ) monitor_users ; clo ;;
             6 ) backup_user ;;
             7 ) restore_backup ;;
             8 ) delete_all_users ;;
