@@ -961,7 +961,7 @@ cfg_shadowsocks(){
     
 }
 
-cgf_openvpn(){
+cfg_openvpn(){
     trap ctrl_c SIGINT SIGTERM
     clear
     [[ ! -f "/etc/openvpn/server.conf" ]] && {
@@ -1282,7 +1282,7 @@ cfg_python3_proxy(){
                     while true;do
                         read -p "$(echo -e "${WHITE}[*] Puerto a agregar :  ")" port
                         if [[ -z "$port" ]];then continue ; fi
-                        if [[ $port =~ ^[0-9]+$ ]];then
+                        if [[ $port =~ ^[1-9]+$ ]];then
                             local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
                             [[ $port_in_file -ne 0 ]] && {
                                 error "El puerto existe en el archivo de configuracion."
@@ -1296,8 +1296,8 @@ cfg_python3_proxy(){
                     done
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
-                    local number_of_custom_config=$(echo $(grep "CUSTOM#" -c ${config_file} 2>/dev/null) + 1 | bc)
-                    ((number_of_custom_config++))
+                    local number_of_custom_config=$(grep "CUSTOM#" py-socks.conf | cut -d '#' -f 2 | tr "]" " " | xargs)
+                    local number_of_custom_config=$((number_of_custom_config+1))
                     
                     select_status_code(){
                     
@@ -1380,7 +1380,8 @@ cfg_python3_proxy(){
                         for (( i=$line_of_port; i<$((line_of_port+4)); i++ ));do array_lines_delete+="${i}d;" ; done
                         sed -i "${array_lines_delete}" ${config_file}
                         fuser  ${port_to_delete}/tcp -k &>/dev/null
-                        bar "systemctl restart fenixmanager-pysocks" "hidden_et"
+                        sed '/^[[:space:]]*$/d' -i ${config_file} 
+                        bar "systemctl restart fenixmanager-pysocks"
                     else
                         error "Opcion invalida."
                     fi
@@ -1388,9 +1389,7 @@ cfg_python3_proxy(){
                 sleep 3
                 cfg_python3_proxy
                 ;;
-            3) # VER ESTADO DE PYSOCKS
-                systemctl status fenixmanager-pysocks
-                ;;
+            3) systemctl status fenixmanager-pysocks ;;
             4) # INICIAT/DETENER PYSOCKS
                 [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" || bar "systemctl start fenixmanager-pysocks"
                 sleep 2
@@ -1410,15 +1409,9 @@ cfg_python3_proxy(){
                 clear
                 cfg_python3_proxy
                 ;;
-            [bB])
-                option_menu_software
-                ;;
-            [Mm])
-                fenix
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
+            [bB]) option_menu_software ;;
+            [Mm]) fenix ;;
+            q|Q|e|E) exit 0 ;;
         esac
     done
 
