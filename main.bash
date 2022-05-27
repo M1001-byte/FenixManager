@@ -126,7 +126,7 @@ main(){
     sqlite3_config
     add_alias_to_fenix
     add_cron_job_for_hitman
-    add_cron_job_for_udpgw
+    install_badvpn_udpgw
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
     read -p 'Presione enter para continuar...'
