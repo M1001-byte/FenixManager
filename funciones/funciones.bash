@@ -605,7 +605,8 @@ list_banners(){
 
 
 list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
-    local list_services=(sshd dropbear stunnel4 squid shadowsocks-libev pysocks openvpn x-ui udpgw)
+    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw shadowsocks-libev)
+    local c=0    
     
     for services_ in "${list_services[@]}";do
         if [[ "${services_}" == "pysocks" ]];then
@@ -618,6 +619,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             systemctl status "${services_}" &>/dev/null
             
         fi
+
         [[ $? -eq  0 ]] && {
             local color_="${GREEN}"
             local status_="[ ACTIVO ]"
@@ -633,7 +635,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local file="/etc/default/dropbear"
                 local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
                 local dropbear_extra_arg_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_EXTRA_ARGS=.*" | awk '{split($0,a,"-p"); print a[2]}')
-                [[ ! -z "${dropbear_port}" || ! -z "${dropbear_extra_arg_port}" ]] && {
+                [[ -n "${dropbear_port}" ||  -n "${dropbear_extra_arg_port}" ]] && {
                     local port_listen="$dropbear_port $dropbear_extra_arg_port"
                 } || local port_listen=""
                 ;;
@@ -664,13 +666,14 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(cat "/proc/$(pgrep badvpn-udpgw)/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs)
                 ;;
         esac
-        if [[ ! "${status}" =~ "INACTIVO" && -n "${port_listen}" ]];then
-            printf "${WHITE}〢 ${color_}%-20s ${WHITE}|  ${YELLOW}%-34s ${WHITE}${WHITE}%0s\n" "${services_^^}" "${port_listen}" "〢"   
+        if [[ -n "${port_listen}" ]];then
+            printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
         fi
     done
 }
 
-
+#list_services_and_ports_used
+#exit 1
 add_cron_job_for_hitman(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Agregando tarea crontab para ${GREEN}hitman${WHITE}."
