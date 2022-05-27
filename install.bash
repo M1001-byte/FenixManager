@@ -162,7 +162,6 @@ config_bashrc(){
                  / v \ 
 "
         echo -e "$banner"
-        echo -e "${WHITE}Para mostrar el panel de administracion,ejecutar el siguiente comando : ${GREEN}fenix ${WHITE}"
         }
         print_fenix_banner
 '
