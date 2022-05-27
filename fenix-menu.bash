@@ -44,11 +44,7 @@ show_first_panel() {
     printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
     
     printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'
-    printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"
-        
-
-
-    
+    printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"    
     
 }
 
@@ -82,8 +78,7 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    option_color 0 'CONFIGURAR OPENSSH / DROPBEAR'
-    tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -95,14 +90,14 @@ option_menu_software () {
         printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
         
         case $option in 
-            0) cfg_ssh_dropbear && main ;;
-            1 ) [[ ${installed_packages[*]} =~ squid ]] && cfg_squid_proxy || squid_proxy_install ;;
-            2 ) [[ ${installed_packages[*]} =~ stunnel4 ]] && cfg_stunnel4 || install_stunnel4 ;;
-            3 ) [[ ${installed_packages[*]} =~ slowdns ]] && cfg_slowdns || install_slowdns ;;
-            4 ) [[ ${installed_packages[*]} =~ shadowsocks-libev ]] && cfg_shadowsocks || install_shadowsocks ;;
-            5 ) [[ ${installed_packages[*]} =~ openvpn ]] && cgf_openvpn || install_openvpn ;;
-            6) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
-            7) [[ ${installed_packages[*]} =~ python3-proxy ]] && cfg_python3_proxy || install_python3_proxy ;;
+            1) cfg_ssh_dropbear && main ;;
+            2 ) [[ ${installed_packages[*]} =~ squid ]] && cfg_squid_proxy || squid_proxy_install ;;
+            3 ) [[ ${installed_packages[*]} =~ stunnel4 ]] && cfg_stunnel4 || install_stunnel4 ;;
+            4 ) [[ ${installed_packages[*]} =~ slowdns ]] && cfg_slowdns || install_slowdns ;;
+            5 ) [[ ${installed_packages[*]} =~ shadowsocks-libev ]] && cfg_shadowsocks || install_shadowsocks ;;
+            6 ) [[ ${installed_packages[*]} =~ openvpn ]] && cgf_openvpn || install_openvpn ;;
+            7) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
+            8) [[ ${installed_packages[*]} =~ fenixmanager-pysocks ]] && cfg_python3_proxy || install_python3_proxy ;;
             
             "cls" | "CLS") clear && option_menu_software ;;
             [mM]) fenix  ;;

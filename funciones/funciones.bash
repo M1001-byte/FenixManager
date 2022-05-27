@@ -176,21 +176,66 @@ option_color () {
 
 option_menu_package(){
     # $2 = lista de paquetes
+    local GREEN=$(tput setaf 2)
+    local RED=$(tput setaf 1)
+    local WHITE=$(tput setaf 7)
+    local YELLOW=$(tput setaf 3)
+
     array_of_packages=("$@")
     option=0
 
     installed_packages=()
     if [[ -z "${array_of_packages}" ]] ;then error "Faltan parametros" ; return 1 ; fi
     
+    # ! 62
     for i in "${array_of_packages[@]}";do
         ((option++))
-        if ! package_installed "$i";then
-            option_color "$option" "INSTALAR ${i^^}"
-        else
-            # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
-            option_color "$option" "CONFIGURAR ${i^^}"
-            installed_packages+=($i)
-        fi
+        
+        [[ "${i}" =~ "OPENSSH / DROPBEAR" ]] && {
+            local str_="${WHITE}[ ${GREEN}INSTALADO ${WHITE}/"
+            
+            package_installed "dropbear" && {
+                local str_="${GREEN} INSTALADO ${WHITE}]"
+                installed_packages+=("dropbear")
+            
+            } || local str_+="${RED} NO INSTALADO${WHITE}]"
+        
+        } || {
+            if ! package_installed "$i";then
+                local str_="${WHITE}[${RED}NO INSTALADO${WHITE}]"
+            else
+                # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
+                # check if package is active
+                local i=${i//"python3-proxy"/"fenixmanager-pysocks"}
+                if [[ "${i}" == "slowdns" ]];then
+                    pgrep -f "slowdns" &>/dev/null && {
+                        local activo=0
+                        installed_packages+=($i)
+                        }  || local activo=1
+                else
+                    installed_packages+=($i)
+                    systemctl is-active "$i" &>/dev/null && {
+                        local activo=0
+                        
+                        local color_var="${GREEN}"
+                    } || {
+                        local activo=1
+                        local color_var="${RED}"
+                    }
+                fi
+                [[ ${activo} -eq 0 ]] && local str_="${WHITE}[ ${GREEN}ACTIVO ${WHITE}]" || local str_="${WHITE}[${RED} INACTIVO ${WHITE}]"
+            fi
+        }
+        local str_3="${str_}"
+        local str_rel="-"
+        
+        local length=$(( 65 - ${#i} - ${#str_3} ))
+        local length=${length//-/ } # negative number
+        for ((j=0;j<length;j++));do
+            str_rel+="-"
+        done
+        printf "%b [ %b${option}%b ]%b >>%b ${i^^} %b%s %b\n" "${WHITE}" "${GREEN}" "${WHITE}" "${YELLOW}" "${WHITE}" "${color_var}" "${str_rel}" "$str_3"
+        
     done
 
 }
@@ -307,7 +352,7 @@ package_installed () {
     
     if [[ "$package" == "v2ray" ]];then if [[ -f "/usr/local/bin/v2ray" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "python3-proxy" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
-    if [[ "$package" == "slowdns" ]];then if process_is_running "slowdns";then cmd=0 ; else cmd=1 ; fi ; fi
+    if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ $cmd == 1 ]]; then
         return 0
     else

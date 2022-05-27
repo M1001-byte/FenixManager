@@ -229,7 +229,7 @@ install_shadowsocks() {
 install_python3_proxy(){
     trap ctrl_c SIGINT SIGTERM SIGKILL
     clear
-    separator "INSTALANDO PYTHON3-PROXY"
+    echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO FENIXMANAGER-PYSOCKS ${BLUE}〢───────────〢"
     
     info "Agregado un servicio a systemd."
     sed -i "s|user_dir_replace_with_sed|${user_folder}/|g" "${script_dir}/funciones/py-proxy/main_service.py"
