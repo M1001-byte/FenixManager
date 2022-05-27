@@ -687,29 +687,6 @@ add_cron_job_for_hitman(){
     info "Cada ${YELLOW}15 minutos${WHITE}, hitman comprobara si los usuarios superaron el maximo de conexiones permitidas, si es asi, se ${RED}eliminaran.${WHITE}"
 }
 
-add_cron_job_for_udpgw(){
-    local fenixmanager_crontab="/etc/cron.d/fenixmanager"
-    local badvpn_udpgw="/bin/badvpn-udpgw"
-    info "Descargando badvpn-udpgw"
-    bar  "git clone https://github.com/ambrop72/badvpn /tmp/badvpn" || {
-        rm "/tmp/badvpn" -rf &>/dev/null
-        error "No se pudo descargar el repositorio ${badvpn_git}."
-        return 1
-    } && {
-        cd "/tmp/badvpn" 
-        mkdir "build" && cd "build"
-        bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/ --text-show cmake .. -DBUILD_UDPGW=1" --text-show "Construyendo badvpn-udpgw" && {
-            bar "make install"
-            info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
-            echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300 &>/dev/null" >> "${fenixmanager_crontab}"
-        } || {
-            rm "/tmp/badvpn" -rf &>/dev/null
-            error "No se pudo compilar el repositorio ${badvpn_git}."
-            read
-        }
-    }
-
-}
 
 show_users_and_port_template(){
     local user_data usuario passwd exp_date max_conn
@@ -722,7 +699,7 @@ show_users_and_port_template(){
     local max_conn="${user_data[3]}"
     
     echo -e "${head_banner}"
-    #printf "║%76s\n" "║"
+    
     printf " ${WHITE} USUARIO: ${YELLOW}%-${#usuario}s ${WHITE}\n" "${usuario^^}"
     printf " ${WHITE} CONTRASEÑA: ${YELLOW}%-${#passwd}s ${WHITE}\n" "${passwd^^}" 
     printf " ${WHITE} EXPIRACION: ${YELLOW}%-${#exp_date}s ${WHITE}\n" "${exp_date^^}" 
