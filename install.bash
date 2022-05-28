@@ -208,25 +208,26 @@ clone_fenix(){
     fi
 
     local url="https://github.com/M1001-byte/FenixManager"
-    rm /tmp/FenixManager &>/dev/null
-    git clone -b $branch $url /tmp/FenixManager
+    
+    git clone -b $branch $url /etc/FenixManager
+    
     if [ $? -ne 0 ];then
         error 'Fallo al clonar el repositorio.'
         info "Archivo de log: $gitlog/"
         exit $?
     fi
-    if [ -d /etc/FenixManager ];then
-        rm -rf /etc/FenixManager/ &>/dev/null
-    else
-        mkdir /etc/FenixManager/ &>/dev/null
-    fi
+    # if [ -d /etc/FenixManager ];then
+    #     rm -rf /etc/FenixManager/ &>/dev/null
+    # else
+    #     mkdir /etc/FenixManager/ &>/dev/null
+    # fi
     
     
     local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
     for file in $fenix_bash_files; do
         chmod 777 $file &>/dev/null
     done
-    sudo rm -rf /tmp/FenixManager/
+    # sudo rm -rf /tmp/FenixManager/
     
     [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
 
