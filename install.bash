@@ -211,6 +211,7 @@ clone_fenix(){
     if [ -d /etc/FenixManager ];then
         info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
         rm -rf /etc/FenixManager/ &>/dev/null
+    fi
     git clone -b $branch $url /etc/FenixManager
     
     if [ $? -ne 0 ];then
