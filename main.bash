@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source "/etc/FenixManager/funciones/funciones.bash"
+source "/etc/FenixManager/funciones/install-pkt.bash"
 source "/etc/FenixManager/preferences.bash" || {
     echo "No se pudo cargar el archivo de preferencias."
     echo "Vuelva a instalar FenixManager."
@@ -92,7 +93,7 @@ add_alias_to_fenix () {
     echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
-    echo -e "unalias fenix" >> "${user_folder}/.bashrc"
+    echo -e "unalias fenix" >> "${user_folder}/.bashrc 2>/dev/null"
     
     local preferences_var="hide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
     echo -e "$preferences_var" >> "/etc/FenixManager/preferences.bash"
@@ -130,6 +131,8 @@ main(){
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
     read -p 'Presione enter para continuar...'
+    clear && source "${user_folder}/.bashrc"
+    info "Para mostrar el panel de control de FenixManager, ejecute el comando '${GREEN}fenix${WHITE}'"
     
 }
 
