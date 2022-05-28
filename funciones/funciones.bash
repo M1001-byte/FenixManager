@@ -719,13 +719,13 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager")
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw" "v2ray")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
     for i in "${fenix_rm[@]}";do echo -e "${WHITE}${RED}  ${i}${WHITE}" ; done
     echo ""
-    info "${RED}TODOS${WHITE} los usuarios ${YELLOW}SSH ${WHITE}/${WHITE} ${YELLOW}OPENVPN${WHITE} sera eliminados."
+    info "${RED}TODOS${WHITE} los usuarios ${YELLOW}SSH ${WHITE}/${WHITE} ${YELLOW}OPENVPN${WHITE} / ${YELLOW}V2RAY${WHITE} seran eliminados."
     info "El archivo ${RED}${user_folder}/.bashrc${WHITE} sera restaurado por el original (${GREEN}/etc/skel/.bashrc${WHITE})."
     info "El archivo ${RED}/etc/ssh/sshd_config${WHITE} sera restaurado a su estado original."
     info "Eliminara la entrada ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells${WHITE}."
@@ -738,14 +738,29 @@ uninstall_fenixmanager(){
         for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
         # removed protocol
         for service in "${services_to_remove[@]}";do
+            # ! FENIXMANAGER PYSOCKS
             [ "${service}" == "pysocks" ] && {
                 bar "systemctl disable fenixmanager-pysocks"
                 rm "/etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
                 bar "systemctl daemon-reload"
+            # ! BADVPN
             } || [ "${service}" == "badvpn-udpgw" ] && {
                 bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
+            # ! V2RAY
+            } || [[ "${service}" == "v2ray" ]] && {
+                bar --cmd "bash -c /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove &>/dev/null" --title "Eliminando ${service}"
+            # ! V2RAY
+            } || [[ "${service}" == "x-ui"]] {
+                info "Eliminando ${service}..."
+                 bar "systemctl stop x-ui"
+                 bar "systemctl disable x-ui"
+                 bar "rm /etc/systemd/system/x-ui.service -f"
+                 bar "systemctl daemon-reload"
+                 bar "systemctl reset-failed"
+                 bar "rm /etc/x-ui/ -rf"
+                 bar "rm /usr/local/x-ui/ -rf"
             } || {
-                bar --cmd "apt-get --remove --purge ${service} -y" --title "Eliminando ${service}"
+                bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
             }
         done
         # delete /bin/false from /etc/shells
