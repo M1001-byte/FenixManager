@@ -606,6 +606,8 @@ list_banners(){
 
 
 list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
+    local get_actived_services="$1"
+    services_actived=()
     local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw shadowsocks-libev)
     local c=0    
     
@@ -668,7 +670,11 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then
-            printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
+            [[ "${get_actived_services}" == "get_actived_services" ]] && {
+                services_actived+=("${services_}")
+            } || {
+                printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
+            }
         fi
     done
 }
