@@ -208,6 +208,7 @@ clone_fenix(){
     fi
 
     local url="https://github.com/M1001-byte/FenixManager"
+    rm /tmp/FenixManager &>/dev/null
     git clone -b $branch $url /tmp/FenixManager
     if [ $? -ne 0 ];then
         error 'Fallo al clonar el repositorio.'
