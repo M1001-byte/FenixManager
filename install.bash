@@ -208,7 +208,9 @@ clone_fenix(){
     fi
 
     local url="https://github.com/M1001-byte/FenixManager"
-    
+    if [ -d /etc/FenixManager ];then
+        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
+        rm -rf /etc/FenixManager/ &>/dev/null
     git clone -b $branch $url /etc/FenixManager
     
     if [ $? -ne 0 ];then
