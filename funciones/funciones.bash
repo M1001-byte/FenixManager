@@ -745,6 +745,7 @@ uninstall_fenixmanager(){
         for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
         # removed protocol
         for service in "${services_to_remove[@]}";do
+            sleep 0.5
             if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
@@ -776,12 +777,15 @@ uninstall_fenixmanager(){
         # delete /bin/false from /etc/shells
         
         grep -q "/bin/false" /etc/shells && {
-            bar --cmd "sed -i '/\/bin\/false/d' /etc/shells" --title "Eliminando /bin/false del archivo /etc/shells"
+            sed -i '/\/bin\/false/d' "/etc/shells"
+            info "Eliminando /bin/false del archivo /etc/shells"
         }
         # restore /etc/ssh/sshd_config
-        bar --cmd "mv /etc/ssh/sshd_config.bak /etc/ssh/sshd_config" --title "Restaurando /etc/ssh/sshd_config"
+        info "Restaurando /etc/ssh/sshd_config"
+        mv "/etc/ssh/sshd_config.bak" "/etc/ssh/sshd_config"
         # restore .bashrc
-        bar --cmd "cp /etc/skel/.bashrc ${user_folder}/.bashrc" --title "Restaurando ${user_folder}/.bashrc"
+        info "Restaurando ${user_folder}/.bashrc"
+        cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
     else
         info "Cancelado por el usuario."
         exit 1

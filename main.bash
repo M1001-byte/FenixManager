@@ -130,10 +130,9 @@ main(){
     install_badvpn_udpgw
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
+    info "Su session de usuario se cerrara automaticamente,para terminar con el proceso de instalacion."
     read -p 'Presione enter para continuar...'
-    clear && source "$HOME/.bashrc"
-    info "Para mostrar el panel de control de FenixManager, ejecute el comando '${GREEN}fenix${WHITE}'"
-    
+    pkill -u "$(logname)"
 }
 
 main
