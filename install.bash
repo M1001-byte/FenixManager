@@ -162,7 +162,7 @@ config_bashrc(){
                  / v \ 
 "
         echo -e "$banner"
-        echo -e "Para mostrar el panel de control de FenixManager, ejecute el comando ${GREEN}fenix${WHITE}"
+        echo -e "${WHITE}Para mostrar el panel: ${GREEN}fenix${WHITE}"
         }
         print_fenix_banner
 '
@@ -221,7 +221,7 @@ clone_fenix(){
         mkdir /etc/FenixManager/ &>/dev/null
     fi
     
-    mv /tmp/FenixManager/* /etc/FenixManager/
+    
     local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
     for file in $fenix_bash_files; do
         chmod 777 $file &>/dev/null

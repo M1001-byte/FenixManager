@@ -750,7 +750,7 @@ uninstall_fenixmanager(){
             } || [[ "${service}" == "v2ray" ]] && {
                 bar --cmd "bash -c /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove &>/dev/null" --title "Eliminando ${service}"
             # ! V2RAY
-            } || [[ "${service}" == "x-ui" ]] {
+            } || [[ "${service}" == "x-ui" ]] && {
                 info "Eliminando ${service}..."
                  bar "systemctl stop x-ui"
                  bar "systemctl disable x-ui"
