@@ -741,33 +741,36 @@ uninstall_fenixmanager(){
     read -rp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
     [[ "${yes_no}" == [yYsS] ]] && {
         # removed dir
+        list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
         for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
         # removed protocol
         for service in "${services_to_remove[@]}";do
-            # ! FENIXMANAGER PYSOCKS
-            [ "${service}" == "pysocks" ] && {
-                bar "systemctl disable fenixmanager-pysocks"
-                rm "/etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
-                bar "systemctl daemon-reload"
-            # ! BADVPN
-            } || [ "${service}" == "badvpn-udpgw" ] && {
-                bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
-            # ! V2RAY
-            } || [[ "${service}" == "v2ray" ]] && {
-                bar --cmd "bash -c /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove &>/dev/null" --title "Eliminando ${service}"
-            # ! V2RAY
-            } || [[ "${service}" == "x-ui" ]] && {
-                info "Eliminando ${service}..."
-                 bar "systemctl stop x-ui"
-                 bar "systemctl disable x-ui"
-                 bar "rm /etc/systemd/system/x-ui.service -f"
-                 bar "systemctl daemon-reload"
-                 bar "systemctl reset-failed"
-                 bar "rm /etc/x-ui/ -rf"
-                 bar "rm /usr/local/x-ui/ -rf"
-            } || {
-                bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
-            }
+            if [[ "${services_actived[*]}" =~ "${service}"]];then
+                # ! FENIXMANAGER PYSOCKS
+                [ "${service}" == "pysocks" ] && {
+                    bar "systemctl disable fenixmanager-pysocks"
+                    rm "/etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
+                    bar "systemctl daemon-reload"
+                # ! BADVPN
+                } || [ "${service}" == "badvpn-udpgw" ] && {
+                    bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
+                # ! V2RAY
+                } || [[ "${service}" == "v2ray" ]] && {
+                    bar --cmd "bash -c /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove &>/dev/null" --title "Eliminando ${service}"
+                # ! V2RAY
+                } || [[ "${service}" == "x-ui" ]] && {
+                    info "Eliminando ${service}..."
+                    bar "systemctl stop x-ui"
+                    bar "systemctl disable x-ui"
+                    bar "rm /etc/systemd/system/x-ui.service -f"
+                    bar "systemctl daemon-reload"
+                    bar "systemctl reset-failed"
+                    bar "rm /etc/x-ui/ -rf"
+                    bar "rm /usr/local/x-ui/ -rf"
+                } || {
+                    bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
+                }
+            fi
         done
         # delete /bin/false from /etc/shells
         bar --cmd "sed -i '/\/bin\/false/d' /etc/shells" --title "Eliminando /bin/false del archivo /etc/shells"

@@ -131,7 +131,7 @@ main(){
     echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
     read -p 'Presione enter para continuar...'
-    clear && source "${user_folder}/.bashrc"
+    clear && source "$HOME/.bashrc"
     info "Para mostrar el panel de control de FenixManager, ejecute el comando '${GREEN}fenix${WHITE}'"
     
 }
