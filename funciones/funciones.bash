@@ -786,6 +786,11 @@ uninstall_fenixmanager(){
         # restore .bashrc
         info "Restaurando ${user_folder}/.bashrc"
         cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
+        info "Fenix-Manager desinstalado correctamente."
+        info "Por cualquier duda o sugerencias,podes contactarme por telegram:"
+        info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
+        info "${GRENE}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
+        info "Gracias por haber elegido FenixManager. :)"
     else
         info "Cancelado por el usuario."
         exit 1
