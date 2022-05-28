@@ -157,7 +157,7 @@ option_menu() {
     option_color 3 'MENU DE INSTALACION'
     option_color 4 'CONFIGURACIONES'
     option_color 5 "${YELLOW}CREAR UN SUBDOMINIO GRATIS${WHITE}"
-    option_color 6 "${GREEN}BUSCAR ACTUALIZACIONES${WHITE}"
+    option_color 6 "DESINSTALAR FENIX-MANAGER"
     option_color E "SALIR"
 
     while true;do
@@ -186,42 +186,7 @@ option_menu() {
             3 ) option_menu_configuration ;;
             4 ) option_menu_configuration ;;
             5 ) create_free_subdomain ;;
-            6 )
-                {
-                    local remote_version=$(curl -s https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version)
-                    local current_version=$(cat /etc/FenixManager/version)
-                    [[ -z "${current_version}" ]] && error "Fallo al obtener la version local."
-                    [[ -z "${remote_version}" ]] && error "Fallo al obtener la version remota. Comprueba tu conexion a internet."
-
-                    if [[ "${remote_version}" == "${current_version}" ]];then
-                        info "Tu version de Fenix Manager es la mas reciente"
-                    else
-                        info "Hay una ${GREEN}nueva version${WHITE} de Fenix Manager disponible"
-                        info "Tu version: ${current_version}"
-                        info "Nueva version: ${remote_version}"
-                        read -p "[*] Deseas actualizar? [Y/n] " opt
-                        case $opt in
-                            y|Y|S|s)
-                                info "Actualizando..."
-                                [[ -d "/tmp/FenixManager" ]] && rm -rf /tmp/FenixManager
-                                git clone "https://github.com/M1001-byte/FenixManager.git" /tmp/FenixManager && {
-                                    rsync -av --progress /tmp/FenixManager/ /etc/FenixManager/ --exclude .git
-                                    local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
-                                    for file in $fenix_bash_files; do chmod 777 $file &>/dev/null ; done
-                                    info "Fenix Manager se actualizo correctamente"
-                                    exit 0
-                                } || {
-                                    error "Ocurrio un error. La actualizacion no pudo ser completada."
-                                    exit $?
-                                }
-                                ;;
-                            *)
-                            info "Fenix Manager no se actualizo"
-                            ;;
-                        esac
-                    fi
-                }
-                    ;;
+            6 ) uninstall_fenixmanager ;;
             "cls" | "CLS") clear && main ;;
             [eEqQ]) exit 0 ;;
             *)  tput cuu1 && tput el1 ;;

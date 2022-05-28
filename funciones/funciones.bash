@@ -719,7 +719,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager")
-    local services_to_remove=("stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -727,10 +727,36 @@ uninstall_fenixmanager(){
     echo ""
     info "${RED}TODOS${WHITE} los usuarios ${YELLOW}SSH ${WHITE}/${WHITE} ${YELLOW}OPENVPN${WHITE} sera eliminados."
     info "El archivo ${RED}${user_folder}/.bashrc${WHITE} sera restaurado por el original (${GREEN}/etc/skel/.bashrc${WHITE})."
+    info "El archivo ${RED}/etc/ssh/sshd_config${WHITE} sera restaurado a su estado original."
+    info "Eliminara la entrada ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells${WHITE}."
     
     info "Los siguientes protocolos seran eliminados:"
-    for service in "${services_to_remove[@]}";do
-        bar --cmd "apt-get --remove --purge ${service} -y" --title "Eliminando ${service}"
-    done
-    read -rp "[*] Continuar con la desinstalacion ? [y/n]: " only_script
+    for service in "${services_to_remove[@]}";do echo -e "${WHITE}${RED}  ${service}${WHITE}" ; done
+    read -rp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
+    [[ "${yes_no}" == [yYsS] ]] && {
+        # removed dir
+        for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
+        # removed protocol
+        for service in "${services_to_remove[@]}";do
+            [ "${service}" == "pysocks" ] && {
+                bar "systemctl disable fenixmanager-pysocks"
+                rm "/etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
+                bar "systemctl daemon-reload"
+            } || [ "${service}" == "badvpn-udpgw" ] && {
+                bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
+            } || {
+                bar --cmd "apt-get --remove --purge ${service} -y" --title "Eliminando ${service}"
+            }
+        done
+        # delete /bin/false from /etc/shells
+        bar --cmd "sed -i '/\/bin\/false/d' /etc/shells" --title "Eliminando /bin/false del archivo /etc/shells"
+        # restore /etc/ssh/sshd_config
+        bar --cmd "mv /etc/ssh/sshd_config.bak /etc/ssh/sshd_config" --title "Restaurando /etc/ssh/sshd_config"
+        # restore .bashrc
+        bar --cmd "cp /etc/skel/.bashrc ${user_folder}/.bashrc" --title "Restaurando ${user_folder}/.bashrc"
+    } || {
+        info "Cancelado por el usuario."
+        exit 1
+    }
+    
 }

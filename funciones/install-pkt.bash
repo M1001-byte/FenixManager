@@ -73,28 +73,7 @@ install_stunnel4() {
     stunnel4_whats_cert_to_use
     
     ssl_port=()
-    # stunnel listen port
-    # until [[ $ssl_port =~ ^[0-9]+$ ]] && [[ $ssl_port -ge 1 ]] && [[ $ssl_port -le 65535 ]] && [[ -n "${ssl_port}"]];do
-        # trap ctrl_c SIGINT SIGTERM SIGKILL
-        # read -p "$(echo -e "${WHITE}[*] Ingrese el puerto para stunnel4 ${endcolor}") : " ssl_port
-        # if [[ -z $ssl_port ]] ;then error 'El puerto ingresado esta vacio.'; continue ; fi
-        
-        # IFS=' ' read -r -a ssl_port <<< "$ssl_port"
-        # ssl_port_array=()
-        # for i in "${ssl_port[@]}";do
-            # if [[ ! $(grep -E '^[0-9]+$' <<< $i) ]] ;then error "El puerto ($i) no es un numero" ; continue ; fi
-            # if [[ $i -lt 1 ]] || [[ $i -gt 65535 ]] ;then error 'El puerto ingresado no es valido.' ; continue ; fi
-            # check_if_port_is_open $i
-            
-            # if [[ $? != 1 ]];then
-                # ssl_port_array+=($i)
-                # ufw allow $i &> /dev/null
-
-            # else
-                # error "Omitiendo el puerto ($i), no esta disponible."
-            # fi
-        # done
-    # done
+    
     port_input && {
         local ssl_port=${puertos_array[0]}
         unset puertos_array
