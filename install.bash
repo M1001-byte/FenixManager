@@ -216,7 +216,7 @@ clone_fenix(){
         exit $?
     fi
     if [ -d /etc/FenixManager ];then
-        rm -rf /etc/FenixManager/ -rf
+        rm -rf /etc/FenixManager/ &>/dev/null
     else
         mkdir /etc/FenixManager/ &>/dev/null
     fi
