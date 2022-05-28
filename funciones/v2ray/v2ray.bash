@@ -287,8 +287,14 @@ show_status_v2ray_xui(){
 show_web_panel_info(){
     local log_cmd username password
     local port_to_bind=$(systemctl status x-ui 2>/dev/null | grep -o  "web server run http on .*" | awk '{split($0,a,":"); print a[4]}')
-    local username=$(sqlite3 /etc/x-ui/x-ui.db "select username from users" )
-    local password=$(sqlite3 /etc/x-ui/x-ui.db "select password from users" )
+    local username=$(sqlite3 /etc/x-ui/x-ui.db "select username from users" 2>/dev/null)
+    local password=$(sqlite3 /etc/x-ui/x-ui.db "select password from users" 2>/dev/null)
+    [[ -z "${username}" || -z "${password}" ]] && {
+        error "No se ha configurado el usuario y contraseña del panel web."
+        info "Tendra que configurarlo manualmente, ejecutando el comando de abajo."
+        info "sudo x-ui setting -username <username> -password <password>"
+        return 1
+    }
     local url_="http://$(curl -s ipinfo.io/ip):${port_to_bind}"
 
     one_length=$(echo 61 - $(echo "PUERTO DEL PANEL ${port_to_bind}" | wc -c ) | bc)
