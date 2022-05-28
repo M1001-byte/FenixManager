@@ -739,13 +739,13 @@ uninstall_fenixmanager(){
     info "Los siguientes protocolos seran eliminados:"
     for service in "${services_to_remove[@]}";do echo -e "${WHITE}${RED}  ${service}${WHITE}" ; done
     read -rp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
-    [[ "${yes_no}" == [yYsS] ]] && {
+    if [[ "${yes_no}" == [yYsS] ]];then
         # removed dir
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
         for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
         # removed protocol
         for service in "${services_to_remove[@]}";do
-            if [[ "${services_actived[*]}" =~ "${service}"]];then
+            if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
                     bar "systemctl disable fenixmanager-pysocks"
@@ -772,15 +772,19 @@ uninstall_fenixmanager(){
                 }
             fi
         done
+
         # delete /bin/false from /etc/shells
-        bar --cmd "sed -i '/\/bin\/false/d' /etc/shells" --title "Eliminando /bin/false del archivo /etc/shells"
+        
+        grep -q "/bin/false" /etc/shells && {
+            bar --cmd "sed -i '/\/bin\/false/d' /etc/shells" --title "Eliminando /bin/false del archivo /etc/shells"
+        }
         # restore /etc/ssh/sshd_config
         bar --cmd "mv /etc/ssh/sshd_config.bak /etc/ssh/sshd_config" --title "Restaurando /etc/ssh/sshd_config"
         # restore .bashrc
         bar --cmd "cp /etc/skel/.bashrc ${user_folder}/.bashrc" --title "Restaurando ${user_folder}/.bashrc"
-    } || {
+    else
         info "Cancelado por el usuario."
         exit 1
-    }
+    fi
     
 }
