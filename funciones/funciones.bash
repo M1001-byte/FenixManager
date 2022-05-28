@@ -718,7 +718,7 @@ show_users_and_port_template(){
 
 
 uninstall_fenixmanager(){
-    local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager")
+    local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "/usr/bin/fenix")
     local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw" "v2ray")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
