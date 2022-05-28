@@ -258,9 +258,10 @@ check_user_exist () {
 bar() {
     help_msg() {
         error "Parametros desconocidos."
-        info "$0 --cmd <comando> --text-show <texto> --show-eta <true|false>"
+        info "$0 --cmd <comando> --title <texto> --show-eta <true|false>"
         info "$0 <comando>"
-        info "Al parametro --cmd y --text-show , se le pasan los argumentos codificado en base64."
+        #
+        info "Al parametro --cmd y --title , se le pasan los argumentos codificado en base64."
         exit 1
     }
     while [[ $# -gt 0 ]]; do
@@ -273,8 +274,8 @@ bar() {
                 local cmd_="${2}"
                 shift ; shift
                 ;;
-            "--text-show")
-                local text_show_="${2}"
+            "--title")
+                local title="${2}"
                 shift ; shift
                 ;;
             "--show-eta")
@@ -288,7 +289,7 @@ bar() {
         esac
     done
     [[ -z "${cmd_}" ]] && help_msg
-    [ -z "${text_show_}" ] && local text_show_="${cmd_}"
+    [ -z "${title}" ] && local title="${cmd_}"
     [ -z "${show_eta_+x}" ] && local show_eta_="true"
     local str="###############"
     local s=0.25
@@ -307,9 +308,9 @@ bar() {
             sleep 0.25
             s=$(echo ${s} + 0.25| bc)
             [[ "${show_eta_}" == "true" ]] && {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
             } || {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$text_show_" "${str:0:$i}]"  # save time 
+                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]"  # save time 
             }
             done
         done  & 
@@ -335,9 +336,9 @@ bar() {
     fi
 
     [[ ! "${show_eta_}" == "true" ]] && {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" 
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$title" "${str}" "${result}" 
     } || {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$text_show_" "${str}" "${result}" " ET: ${endtime}"
+        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$title" "${str}" "${result}" " ET: ${endtime}"
     }
     rm -f "${tmpfile}"
     return $STAT
@@ -672,8 +673,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     done
 }
 
-#list_services_and_ports_used
-#exit 1
+
 add_cron_job_for_hitman(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Agregando tarea crontab para ${GREEN}hitman${WHITE}."
@@ -714,4 +714,23 @@ show_users_and_port_template(){
     list_services_and_ports_used
     printf "${WHITE}╚%73s╝\n" | sed 's/ /═/g'
 
+}
+
+
+uninstall_fenixmanager(){
+    local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager")
+    local services_to_remove=("stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw")
+    clear
+    echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
+    info "Los siguientes directorios/archivos seran eliminados:"
+    for i in "${fenix_rm[@]}";do echo -e "${WHITE}${RED}  ${i}${WHITE}" ; done
+    echo ""
+    info "${RED}TODOS${WHITE} los usuarios ${YELLOW}SSH ${WHITE}/${WHITE} ${YELLOW}OPENVPN${WHITE} sera eliminados."
+    info "El archivo ${RED}${user_folder}/.bashrc${WHITE} sera restaurado por el original (${GREEN}/etc/skel/.bashrc${WHITE})."
+    
+    info "Los siguientes protocolos seran eliminados:"
+    for service in "${services_to_remove[@]}";do
+        bar --cmd "apt-get --remove --purge ${service} -y" --title "Eliminando ${service}"
+    done
+    read -rp "[*] Continuar con la desinstalacion ? [y/n]: " only_script
 }
