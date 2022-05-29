@@ -209,7 +209,7 @@ option_menu_package(){
                 # check if package is active
                 local i=${i//"python3-proxy"/"fenixmanager-pysocks"}
                 local i=${i//"openvpn"/"openvpn@server"}
-                
+
                 if [[ "${i}" == "slowdns" ]];then
                     pgrep -f "slowdns" &>/dev/null && {
                         local activo=0
@@ -748,11 +748,6 @@ uninstall_fenixmanager(){
     if [[ "${yes_no}" == [yYsS] ]];then
         # removed dir
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
-        for i in "${fenix_rm[@]}";do
-            rm -rf "${i}" && {
-                info "Eliminado ${GREEN}${i}${WHITE}."
-            }
-        done
         # removed protocol
         for service in "${services_to_remove[@]}";do
             sleep 1
@@ -782,6 +777,11 @@ uninstall_fenixmanager(){
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
                 }
             fi
+        done
+        for i in "${fenix_rm[@]}";do
+            rm -rf "${i}" && {
+                info "Eliminado ${GREEN}${i}${WHITE}."
+            }
         done
         # remove badvpn-udpgw
         rm $(which badvpn-udpgw) && {
