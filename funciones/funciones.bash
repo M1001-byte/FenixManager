@@ -746,7 +746,7 @@ uninstall_fenixmanager(){
         for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
         # removed protocol
         for service in "${services_to_remove[@]}";do
-            sleep 0.5
+            sleep 1
             if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
@@ -758,15 +758,16 @@ uninstall_fenixmanager(){
                     bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
                 # ! V2RAY
                 } || [[ "${service}" == "v2ray" ]] && {
-                    bar --cmd "bash -c /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove &>/dev/null" --title "Eliminando ${service}"
+                    source "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
+                    remove_v2ray
                 # ! V2RAY
                 } || [[ "${service}" == "x-ui" ]] && {
                     info "Eliminando ${service}..."
-                    bar "systemctl stop x-ui"
-                    bar "systemctl disable x-ui"
-                    bar "rm /etc/systemd/system/x-ui.service -f"
+                    systemctl stop x-ui &>/dev/null
+                    systemctl disable x-ui &>/dev/null
+                    rm /etc/systemd/system/x-ui.service -f &>/dev/null
                     bar "systemctl daemon-reload"
-                    bar "systemctl reset-failed"
+                    systemctl reset-failed &>/dev/null
                     bar "rm /etc/x-ui/ -rf"
                     bar "rm /usr/local/x-ui/ -rf"
                 } || {
@@ -776,6 +777,7 @@ uninstall_fenixmanager(){
         done
 
         # delete /bin/false from /etc/shells
+        rm /etc/stunnel4 -rf &>/dev/null
         
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
