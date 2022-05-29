@@ -19,7 +19,7 @@ v2ray_and_x_ui_installed_or_running(){
 des_install_v2ray_core() {
     local opt="$1"
     clear
-    if [[ $opt == "1" ]];then
+    if [[ $opt -eq 1 ]];then
         echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO V2RAY-CORE${BLUE} 〢──────────────────〢"
         bash -c "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
         cfg_v2ray
