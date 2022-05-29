@@ -761,16 +761,10 @@ uninstall_fenixmanager(){
                     remove_openvpn "0"
                 # ! X-UI
                 elif [[ "${service}" == "x-ui" ]];then
-                     yes | x-ui uninstall
-                     rm $(which x-ui) -f &>/dev/null
-                    # info "Eliminando ${service}..."
-                    # systemctl stop x-ui &>/dev/null
-                    # systemctl disable x-ui &>/dev/null
-                    # rm /etc/systemd/system/x-ui.service -f &>/dev/null
-                    # systemctl daemon-reload
-                    # systemctl reset-failed &>/dev/null
-                    # rm /etc/x-ui/ -rf 2>/dev/null
-                    # rm /usr/local/x-ui/ -rf 2>/dev/null
+                     yes | x-ui uninstall &>/dev/null
+                     local x_ui_bin=$(which x-ui)
+                     info "Eliminando  ${GREEN}${x_ui_bin}."
+                     rm ${x_ui_bin} -f &>/dev/null
                 # ! V2RAY 
                 elif [[ "${service}" == "v2ray" ]];then
                     /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove
