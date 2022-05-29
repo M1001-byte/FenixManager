@@ -3,11 +3,13 @@ source "/etc/FenixManager/funciones/funciones.bash"
 
 function check_for_update(){
     local git_remote_version=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version" 2>/dev/null)
+    local url="https://github.com/M1001-byte/FenixManager/"
     local files_dir_=("preferences.bash" "ip" "database/")
     local local_version=$(cat /etc/FenixManager/version 2>/dev/null)
     
     if [ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]; then
-        local temp_dir="/tmp/FenixManager_cfg" && mkdir -p $temp_dir
+        local temp_dir="/tmp/FenixManager_cfg"
+        mkdir -p $temp_dir
         info "Hay una nueva version de FenixManager disponible."
         info "Version local: ${YELLOW}${local_version}"
         info "Version remota: ${YELLOW}${git_remote_version}"
@@ -16,6 +18,7 @@ function check_for_update(){
             sudo mv "${file}" "${temp_dir}/"
         done
         sudo rm -rf "/etc/FenixManager"
+        git clone "${url}" "/etc/FenixManager"
         sudo mv "${temp_dir}/*" "/etc/FenixManager"
         sudo rm -rf "${temp_dir}"
         info "Actualizacion completada."
