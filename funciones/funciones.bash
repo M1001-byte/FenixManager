@@ -750,16 +750,16 @@ uninstall_fenixmanager(){
         for service in "${services_to_remove[@]}";do
             if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
-                [ "${service}" == "pysocks" ] && {
+                if [[ "${service}" == "pysocks" ]];then
                     bar "systemctl disable fenixmanager-pysocks"
                     rm /etc/systemd/system/fenixmanager-pysocks.service &>/dev/null
                     bar "systemctl daemon-reload"
                 # ! OPENVPN
-                } || [[ "${service}" == "openvpn" ]] && {
+                elif [[ "${service}" == "openvpn" ]];then
                     /etc/FenixManager/funciones/ovpn.bash
                     remove_openvpn "0"
-                # ! V2RAY AND X-UI
-                } || [[ "${service}" == "v2ray" ]] && {
+                # ! X-UI
+                elif [[ "${service}" == "x-ui" ]];then
                     info "Eliminando ${service}..."
                     systemctl stop x-ui &>/dev/null
                     systemctl disable x-ui &>/dev/null
@@ -768,10 +768,12 @@ uninstall_fenixmanager(){
                     systemctl reset-failed &>/dev/null
                     rm /etc/x-ui/ -rf 2>/dev/null
                     rm /usr/local/x-ui/ -rf 2>/dev/null
+                # ! V2RAY 
+                elif [[ "${service}" == "v2ray" ]];then
                     /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove
-                } || {
+                else
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
-                }
+                fi
             fi
         done
         for i in "${fenix_rm[@]}";do
