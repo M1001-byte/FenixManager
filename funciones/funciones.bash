@@ -751,9 +751,10 @@ uninstall_fenixmanager(){
             if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
                 if [[ "${service}" == "pysocks" ]];then
-                    bar "systemctl disable fenixmanager-pysocks"
+                    systemctl disable fenixmanager-pysocks
                     rm /etc/systemd/system/fenixmanager-pysocks.service &>/dev/null
-                    bar "systemctl daemon-reload"
+                    systemctl daemon-reload
+                    info "Eliminando  FenixManager-pysocks"
                 # ! OPENVPN
                 elif [[ "${service}" == "openvpn" ]];then
                     /etc/FenixManager/funciones/ovpn.bash
@@ -764,7 +765,7 @@ uninstall_fenixmanager(){
                     systemctl stop x-ui &>/dev/null
                     systemctl disable x-ui &>/dev/null
                     rm /etc/systemd/system/x-ui.service -f &>/dev/null
-                    bar "systemctl daemon-reload"
+                    systemctl daemon-reload
                     systemctl reset-failed &>/dev/null
                     rm /etc/x-ui/ -rf 2>/dev/null
                     rm /usr/local/x-ui/ -rf 2>/dev/null
@@ -781,6 +782,7 @@ uninstall_fenixmanager(){
                 info "Eliminado ${GREEN}${i}${WHITE}."
             }
         done
+        cd /tmp &>/dev/null
         # remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)
         rm  "${badvpn_bin}" && {
