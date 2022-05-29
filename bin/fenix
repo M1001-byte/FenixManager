@@ -14,11 +14,11 @@ function check_for_update(){
         info "Version remota: ${YELLOW}${git_remote_version}"
         info "Actualizando..."
         for file in "${file_dir_[@]}"; do
-            sudo mv "/etc/FenixManager/${file}" "${temp_dir}/"
+            sudo mv "/etc/FenixManager/${file}" "${temp_dir}"
         done
         sudo rm -rf "/etc/FenixManager"
         sudo git clone "${url}" "/etc/FenixManager"
-        sudo mv "${temp_dir}/*" "/etc/FenixManager"
+        sudo mv "${temp_dir}/" "/etc/FenixManager"
         sudo rm -rf "${temp_dir}"
         info "Actualizacion completada."
         info "Nueva version: ${GREEN}$(cat /etc/FenixManager/version)"

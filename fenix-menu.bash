@@ -55,7 +55,7 @@ show_network_stat(){
     local net_down_stat=${default_iface_network_stat[1]}
     local public_ip=$(cat /etc/FenixManager/ip 2>/dev/null)
     if [[ -z "${public_ip}" ]];then
-        local public_ip=$(curl -s ipconfig.io/ip)
+        local public_ip=$(curl -s ipinfo.io/ip)
         echo "${public_ip}" > "${file_with_ip}"
     fi
     local net_down_stat="$(echo $net_down_stat | sed -e 's/^[()]//' -e 's/[()]$//')MB"
