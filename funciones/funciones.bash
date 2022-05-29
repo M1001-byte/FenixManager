@@ -779,12 +779,12 @@ uninstall_fenixmanager(){
                 fi
             fi
         done
+        cd /tmp &>/dev/null
         for i in "${fenix_rm[@]}";do
             rm -rf "${i}" && {
                 info "Eliminado ${GREEN}${i}${WHITE}."
             }
         done
-        cd /tmp &>/dev/null
         # remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)
         rm  "${badvpn_bin}" && {

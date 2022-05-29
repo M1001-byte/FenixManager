@@ -592,6 +592,7 @@ remove_openvpn() {
         fenix
     } || {
         info "OpenVPN ha sido eliminado."
+        cd /tmp &>/dev/null
     }
 }
 
