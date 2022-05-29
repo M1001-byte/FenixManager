@@ -226,7 +226,6 @@ install_python3_proxy(){
 
 install_badvpn_udpgw(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
-    local badvpn_udpgw="/bin/badvpn-udpgw"
     info "Descargando badvpn-udpgw"
     bar  "git clone https://github.com/ambrop72/badvpn /tmp/badvpn" || {
         rm "/tmp/badvpn" -rf &>/dev/null
@@ -238,7 +237,8 @@ install_badvpn_udpgw(){
         bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/" --title "Construyendo badvpn-udpgw" && {
             bar "make install"
             info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
-            echo -e "\n@reboot root ${badvpn_udpgw} --listen-addr 127.0.0.0.1:7300 &>/dev/null" >> "${fenixmanager_crontab}"
+            local badvpn_udpgw=$(which badvpn-udpgw 2>/dev/null)
+            echo -e "\n@reboot root screen -dmS badvpn ${badvpn_udpgw} --listen-addr 127.0.0.1:7300" >> "${fenixmanager_crontab}"
         } || {
             rm "/tmp/badvpn" -rf &>/dev/null
             error "No se pudo compilar el repositorio ${badvpn_git}."

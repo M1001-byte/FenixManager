@@ -1210,6 +1210,7 @@ cfg_python3_proxy(){
     clear
     echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO PYSOCKS ${BLUE}〢──────────────────〢${WHITE}"
     local config_file="${user_folder}/FenixManager/py-socks.conf"
+    [[ ! -f $config_file ]] && touch $config_file 2>/dev/null
     local pysocks_is_actived=$(systemctl is-active fenixmanager-pysocks &>/dev/null;echo $?)
     if [[ "$pysocks_is_actived" -eq 0 ]];then local pysocks_pid=$(systemctl show --property MainPID --value fenixmanager-pysocks); fi
 
@@ -1288,15 +1289,12 @@ cfg_python3_proxy(){
                                 error "El puerto existe en el archivo de configuracion."
                                 continue
                             }
-                            check_if_port_is_open $port
-                            if [[ $? -eq 0 ]];then
-                                break
-                            fi
+                            check_if_port_is_open $port && break
                         fi
                     done
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
-                    local number_of_custom_config=$(grep "CUSTOM#" py-socks.conf | cut -d '#' -f 2 | tr "]" " " | xargs)
+                    local number_of_custom_config=$(grep "CUSTOM#" ${config_file} | cut -d '#' -f 2 | tr "]" " " | xargs)
                     local number_of_custom_config=$((number_of_custom_config+1))
                     
                     select_status_code(){
@@ -1319,8 +1317,6 @@ cfg_python3_proxy(){
                         string_banner="${string_banner^^}"
                         if [[ -z "$string_banner" ]];then
                             string_banner="<font color=\"${html_colors[0]}\"><b>FenixManager<b></font>"
-                        elif [[ "${string_banner}" =~ "<\s*a[^>]*>(.*?)<\s*/\s*a>" ]];then
-                            error "No se puede usar etiquetas HTML"
                         else
                             info 'Seleccione unos de los colores disponibles:'
                             echo -e "\t${WHITE}[ 0 ] ${RED}${string_banner}"

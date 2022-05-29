@@ -76,6 +76,7 @@ check_and_veriy_preferences_integrity(){
 
 ctrl_c() {
     exit 130
+    echo ""
 }
 
 port_input() {
