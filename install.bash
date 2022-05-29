@@ -35,10 +35,10 @@ bar() {
             done
         done  & local while_pid=$!
 
-    trap "kill -9 $while_pid" SIGINT SIGTERM 
+    trap "kill -9 $while_pid 2>/dev/null" SIGINT SIGTERM 
     
     ${bg_process} &> /dev/null || STAT=$? && true
-    trap "kill -9  $!" SIGINT SIGTERM SIGKILL
+    trap "kill -9  $! 2>/dev/null" SIGINT SIGTERM SIGKILL
     kill $! &> /dev/null
     local endtime=$(cat $tmpfile | awk '{split($0,a,"ET:");print a[2] }')
     
