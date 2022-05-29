@@ -7,7 +7,7 @@ function check_for_update(){
     local files_dir_=("preferences.bash" "ip" "database/")
     local local_version=$(cat /etc/FenixManager/version 2>/dev/null)
     
-    if [ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]; then
+    if [[ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]]; then
         local temp_dir="/tmp/FenixManager_cfg"
         mkdir -p $temp_dir
         info "Hay una nueva version de FenixManager disponible."
@@ -15,10 +15,10 @@ function check_for_update(){
         info "Version remota: ${YELLOW}${git_remote_version}"
         info "Actualizando..."
         for file in "${file_dir_[@]}"; do
-            sudo mv "${file}" "${temp_dir}/"
+            sudo mv "/etc/FenixManager/${file}" "${temp_dir}/"
         done
         sudo rm -rf "/etc/FenixManager"
-        git clone "${url}" "/etc/FenixManager"
+        sudo git clone "${url}" "/etc/FenixManager"
         sudo mv "${temp_dir}/*" "/etc/FenixManager"
         sudo rm -rf "${temp_dir}"
         info "Actualizacion completada."
@@ -30,7 +30,7 @@ function check_for_update(){
 
 function fenix() {
     local ui_mode="$1"
-    local fenix_menu="/etc/Fenix/Manager/fenix-menu.bash"
+    local fenix_menu="/etc/FenixManager/fenix-menu.bash"
     check_for_update
     sudo "${fenix_menu}"
 }
