@@ -761,7 +761,7 @@ uninstall_fenixmanager(){
                     remove_openvpn "0"
                 # ! X-UI
                 elif [[ "${service}" == "x-ui" ]];then
-                     bar --cmd "yes | x-ui uninstall"
+                     yes | x-ui uninstall
                      rm $(which x-ui) -f &>/dev/null
                     # info "Eliminando ${service}..."
                     # systemctl stop x-ui &>/dev/null
