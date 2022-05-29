@@ -10,8 +10,9 @@ script_executed_with_root_privileges
 v2ray_and_x_ui_installed_or_running(){
     v2ray_is_running=$(systemctl status v2ray &>/dev/null; echo $?)
     x_ui_is_running=$(systemctl status x-ui &>/dev/null; echo $?)
+    local x_ui_bin=$(which x-ui)
 
-    if [ -e "/usr/bin/x-ui" ];then x_ui_is_installed=0 ; else x_ui_is_installed=1  ;  fi
+    if [ -e "${x_ui_bin}" ];then x_ui_is_installed=0 ; else x_ui_is_installed=1  ;  fi
     # re check if v2ray is installed
     if [[ -f "/usr/local/bin/v2ray" ]];then v2ray_installed=0 ; else v2ray_installed=1 ; fi 
 }

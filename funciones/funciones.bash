@@ -761,14 +761,16 @@ uninstall_fenixmanager(){
                     remove_openvpn "0"
                 # ! X-UI
                 elif [[ "${service}" == "x-ui" ]];then
-                    info "Eliminando ${service}..."
-                    systemctl stop x-ui &>/dev/null
-                    systemctl disable x-ui &>/dev/null
-                    rm /etc/systemd/system/x-ui.service -f &>/dev/null
-                    systemctl daemon-reload
-                    systemctl reset-failed &>/dev/null
-                    rm /etc/x-ui/ -rf 2>/dev/null
-                    rm /usr/local/x-ui/ -rf 2>/dev/null
+                     bar --cmd "yes | x-ui uninstall"
+                     rm $(which x-ui) -f &>/dev/null
+                    # info "Eliminando ${service}..."
+                    # systemctl stop x-ui &>/dev/null
+                    # systemctl disable x-ui &>/dev/null
+                    # rm /etc/systemd/system/x-ui.service -f &>/dev/null
+                    # systemctl daemon-reload
+                    # systemctl reset-failed &>/dev/null
+                    # rm /etc/x-ui/ -rf 2>/dev/null
+                    # rm /usr/local/x-ui/ -rf 2>/dev/null
                 # ! V2RAY 
                 elif [[ "${service}" == "v2ray" ]];then
                     /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove
@@ -793,13 +795,13 @@ uninstall_fenixmanager(){
         # delete /bin/false from /etc/shells
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
-            info "Eliminado ${RED}/bin/false del archivo ${GREEN}/etc/shells"
+            info "Eliminado ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells"
         }
         
         # restore .bashrc
         info "Restaurando ${GREEN}${user_folder}/.bashrc"
         cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
-        info "${RED}Fenix-Manager desinstalado correctamente."
+        info "${RED}FENIX-MANAGER DESINSTALO CORRECTAMENTE."
         info "Por cualquier duda o sugerencias,podes contactarme por telegram:"
         info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
         info "${GREEN}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
