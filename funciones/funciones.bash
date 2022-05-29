@@ -739,7 +739,6 @@ uninstall_fenixmanager(){
     echo ""
     info "${RED}TODOS${WHITE} los usuarios ${YELLOW}SSH ${WHITE}/${WHITE} ${YELLOW}OPENVPN${WHITE} / ${YELLOW}V2RAY${WHITE} seran eliminados."
     info "El archivo ${RED}${user_folder}/.bashrc${WHITE} sera restaurado por el original (${GREEN}/etc/skel/.bashrc${WHITE})."
-    info "El archivo ${RED}/etc/ssh/sshd_config${WHITE} sera restaurado a su estado original."
     info "Eliminara la entrada ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells${WHITE}."
     
     info "Los siguientes protocolos seran eliminados:"
@@ -793,9 +792,7 @@ uninstall_fenixmanager(){
             sed -i '/\/bin\/false/d' "/etc/shells"
             info "Eliminado ${RED}/bin/false del archivo ${GREEN}/etc/shells"
         }
-        # restore /etc/ssh/sshd_config
-        info "Restaurando ${GREEN}/etc/ssh/sshd_config"
-        mv "/etc/ssh/sshd_config.bak" "/etc/ssh/sshd_config"
+        
         # restore .bashrc
         info "Restaurando ${GREEN}${user_folder}/.bashrc"
         cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
