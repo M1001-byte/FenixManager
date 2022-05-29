@@ -15,14 +15,14 @@ function check_for_update(){
         info "Version remota: ${YELLOW}${git_remote_version}"
         info "Actualizando..." 
         
-        mv "${scr_dir}database/" "${temp_dir}"
-        mv "${scr_dir}preferences.bash" "${temp_dir}" 
+        sudo mv "${scr_dir}database/" "${temp_dir}"
+        sudo mv "${scr_dir}preferences.bash" "${temp_dir}" 
         
         sudo rm -rf "/etc/FenixManager" 
         sudo git clone "${url}" "/etc/FenixManager"
         
-        mv "${temp_dir}database/" "${scr_dir}"
-        mv "${temp_dir}preferenes.bash" "${scr_dir}"
+        sudo mv "${temp_dir}database/" "${scr_dir}"
+        sudo mv "${temp_dir}preferenes.bash" "${scr_dir}"
 
         info "Actualizacion completada."
         info "Nueva version: ${GREEN}$(cat /etc/FenixManager/version)"
