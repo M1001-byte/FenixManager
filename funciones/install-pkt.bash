@@ -148,7 +148,7 @@ install_shadowsocks() {
     clear
     echo -e "${BLUE}〢─────────────────〢 ${WHITE}INSTALANDO SHADOWSOCKS ${BLUE}〢───────────────〢"
     trap ctrl_c SIGINT SIGTERM SIGKILL
-    bar "apt-get install shadowsocks-libev --install-suggests -y" && systemctl stop shadowsocks-libev.service
+    bar --cmd "apt-get install shadowsocks-libev --install-suggests -y" --title "Instalando shadowsocks-libev" && systemctl stop shadowsocks-libev.service
     if [[ $? != 0 ]];then
         error 'No se pudo instalar shadowsocks-libev'
         exit $?
