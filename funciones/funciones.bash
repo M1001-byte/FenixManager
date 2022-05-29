@@ -743,7 +743,11 @@ uninstall_fenixmanager(){
     if [[ "${yes_no}" == [yYsS] ]];then
         # removed dir
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
-        for i in "${fenix_rm[@]}";do bar --cmd "rm -rf ${i}" ; done
+        for i in "${fenix_rm[@]}";do
+            rm -rf "${i}" && {
+                info "Elimando ${GREEN}${i}${WHITE}."
+            }
+        done
         # removed protocol
         for service in "${services_to_remove[@]}";do
             sleep 1
@@ -778,7 +782,7 @@ uninstall_fenixmanager(){
 
         # delete /bin/false from /etc/shells
         rm /etc/stunnel4 -rf &>/dev/null
-        
+
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
             info "Eliminado ${RED}/bin/false del archivo ${GREEN}/etc/shells"
