@@ -2,23 +2,22 @@
 source "/etc/FenixManager/funciones/funciones.bash"
 
 function check_for_update(){
-    source "/etc/FenixManager/preferences.bash"
-    local git_remote_version=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version")
+    local git_remote_version=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version" 2>/dev/null)
     local files_dir_=("preferences.bash" "ip" "database/")
-    local local_version=$(cat /etcFenixManager/version 2>/dev/null)
+    local local_version=$(cat /etc/FenixManager/version 2>/dev/null)
     
-    if [ -n "${local_version}" && "$git_remote_version" != "$local_version" ]; then
+    if [ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]; then
         local temp_dir="/tmp/FenixManager_cfg" && mkdir -p $temp_dir
         info "Hay una nueva version de FenixManager disponible."
         info "Version local: ${YELLOW}${local_version}"
         info "Version remota: ${YELLOW}${git_remote_version}"
         info "Actualizando..."
         for file in "${file_dir_[@]}"; do
-            mv "${file}" "${temp_dir}/"
+            sudo mv "${file}" "${temp_dir}/"
         done
-        rm -rf "/etc/FenixManager"
-        mv "${temp_dir}/*" "/etc/FenixManager"
-        rm -rf "${temp_dir}"
+        sudo rm -rf "/etc/FenixManager"
+        sudo mv "${temp_dir}/*" "/etc/FenixManager"
+        sudo rm -rf "${temp_dir}"
         info "Actualizacion completada."
         info "Nueva version: ${GREEN}$(cat /etcFenixManager/version)"
         info "Vuelva a ejecutar fenix para aplicar los cambios."
@@ -28,7 +27,7 @@ function check_for_update(){
 
 function fenix() {
     local ui_mode="$1"
-    local fenix_menu="/etc/FenixManager/fenix-menu.bash"
+    local fenix_menu="/etc/Fenix/Manager/fenix-menu.bash"
     check_for_update
     sudo "${fenix_menu}"
 }
