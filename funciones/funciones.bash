@@ -758,7 +758,7 @@ uninstall_fenixmanager(){
                     bar "systemctl daemon-reload"
                 # ! OPENVPN
                 } || [[ "${service}" == "openvpn" ]] && {
-                    source "/etc/FenixManager/funciones/ovpn.bash"
+                    /etc/FenixManager/funciones/ovpn.bash
                     remove_openvpn "0"
                 # ! V2RAY AND X-UI
                 } || [[ "${service}" == "v2ray" ]] && {
