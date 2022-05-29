@@ -751,7 +751,7 @@ uninstall_fenixmanager(){
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
                     bar "systemctl disable fenixmanager-pysocks"
-                    rm "/etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
+                    rm "rm /etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
                     bar "systemctl daemon-reload"
                 # ! BADVPN
                 } || [ "${service}" == "badvpn-udpgw" ] && {
@@ -779,19 +779,22 @@ uninstall_fenixmanager(){
         
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
-            info "Eliminando /bin/false del archivo /etc/shells"
+            info "Eliminado ${RED}/bin/false del archivo ${GREEN}/etc/shells"
         }
         # restore /etc/ssh/sshd_config
-        info "Restaurando /etc/ssh/sshd_config"
+        info "Restaurando ${GREEN}/etc/ssh/sshd_config"
         mv "/etc/ssh/sshd_config.bak" "/etc/ssh/sshd_config"
         # restore .bashrc
-        info "Restaurando ${user_folder}/.bashrc"
+        info "Restaurando ${GREEN}${user_folder}/.bashrc"
         cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
-        info "Fenix-Manager desinstalado correctamente."
+        info "${RED}Fenix-Manager desinstalado correctamente."
         info "Por cualquier duda o sugerencias,podes contactarme por telegram:"
         info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
-        info "${GRENE}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
-        info "Gracias por haber elegido FenixManager. :)"
+        info "${GREEN}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
+        info "Gracias por haber elegido ${YELLOW}FenixManager. :)"
+        info "Su vps se reiniciará en 5 segundos."
+        sleep 5
+        reboot
     else
         info "Cancelado por el usuario."
         exit 1
