@@ -782,8 +782,9 @@ uninstall_fenixmanager(){
             }
         done
         # remove badvpn-udpgw
-        rm $(which badvpn-udpgw) && {
-            info "Eliminando ${GREEN}badvpn-udpgw${WHITE}."
+        local badvpn_bin=$(which badvpn-udpgw)
+        rm  "${badvpn_bin}" && {
+            info "Eliminando ${GREEN}${badvpn_bin}${WHITE}."
         }
         
         rm /etc/{stunnel,stunnel4} -rf &>/dev/null
