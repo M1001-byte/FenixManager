@@ -208,7 +208,6 @@ option_menu_package(){
                 # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
                 # check if package is active
                 local i=${i//"python3-proxy"/"fenixmanager-pysocks"}
-                local i=${i//"openvpn"/"openvpn@server"}
 
                 if [[ "${i}" == "slowdns" ]];then
                     pgrep -f "slowdns" &>/dev/null && {
@@ -217,7 +216,7 @@ option_menu_package(){
                         }  || local activo=1
                 else
                     installed_packages+=($i)
-                    systemctl is-active "$i" &>/dev/null && {
+                    systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && {
                         local activo=0
                         
                         local color_var="${GREEN}"
