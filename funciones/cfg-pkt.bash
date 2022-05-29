@@ -1289,7 +1289,7 @@ cfg_python3_proxy(){
                                 error "El puerto existe en el archivo de configuracion."
                                 continue
                             }
-                            check_if_port_is_open $port && break
+                            check_if_port_is_open $port || break
                         fi
                     done
                     redirect_to_service "pysocks"
