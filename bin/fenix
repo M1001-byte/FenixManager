@@ -21,8 +21,8 @@ function check_for_update(){
         sudo rm -rf "/etc/FenixManager" 
         sudo git clone "${url}" "/etc/FenixManager"
         
-        sudo mv "${temp_dir}database/" "${scr_dir}"
-        sudo mv "${temp_dir}preferenes.bash" "${scr_dir}"
+        sudo mv "${temp_dir}/database/" "${scr_dir}"
+        sudo mv "${temp_dir}/preferenes.bash" "${scr_dir}"
 
         info "Actualizacion completada."
         info "Nueva version: ${GREEN}$(cat /etc/FenixManager/version)"
