@@ -750,7 +750,6 @@ uninstall_fenixmanager(){
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
         # removed protocol
         for service in "${services_to_remove[@]}";do
-            sleep 1
             if [[ "${services_actived[*]}" =~ "${service}" ]];then
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
@@ -760,7 +759,7 @@ uninstall_fenixmanager(){
                 # ! OPENVPN
                 } || [[ "${service}" == "openvpn" ]] && {
                     source "/etc/FenixManager/funciones/ovpn.bash"
-                    remove_openvpn
+                    remove_openvpn "0"
                 # ! V2RAY AND X-UI
                 } || [[ "${service}" == "v2ray" ]] && {
                     info "Eliminando ${service}..."
