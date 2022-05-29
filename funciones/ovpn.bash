@@ -399,7 +399,7 @@ install_openvpn() {
     info "Openvpn configurado correctamente!."
     read -p "Pulsa una tecla para continuar..."
     clear
-    cgf_openvpn
+    cfg_openvpn
 }
 
 newClient() {
@@ -614,7 +614,7 @@ option_menu_ovpn() {
                 removeClient
                 ;;
             3 )
-              cgf_openvpn
+              cfg_openvpn
               ;;
             e | E | q )
                 exit
