@@ -195,7 +195,7 @@ clone_fenix(){
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
     
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    echo -e "Ingrese la rama a usar:\n1) \\033[32mmaster\\033[m\n2) \\033[33mdev\\033[m\\033[m\nLa opcion por defecto es \\033[32mmaster\\033[m.La rama \\033[33mdev\\033[m es una rama de desarrollo."
+    echo -e "Ingrese la rama a usar:\n1) \\033[32mmaster\\033[m\n2) \\033[33mdev\\033[m\\033[m\nLa opcion por defecto es \\033[32mmaster\\033[m."
     read -p "[*] Desde que rama deseas clonar el repositorio: " branch
     if [ -z "${branch}" ]; then
         local branch='master'
@@ -219,18 +219,11 @@ clone_fenix(){
         info "Archivo de log: $gitlog/"
         exit $?
     fi
-    # if [ -d /etc/FenixManager ];then
-    #     rm -rf /etc/FenixManager/ &>/dev/null
-    # else
-    #     mkdir /etc/FenixManager/ &>/dev/null
-    # fi
-    
     
     local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
     for file in $fenix_bash_files; do
         chmod 777 $file &>/dev/null
     done
-    # sudo rm -rf /tmp/FenixManager/
     
     [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
 
