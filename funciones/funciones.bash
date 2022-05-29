@@ -726,7 +726,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "/usr/bin/fenix")
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "badvpn-udpgw" "v2ray")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "v2ray")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -745,7 +745,7 @@ uninstall_fenixmanager(){
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
         for i in "${fenix_rm[@]}";do
             rm -rf "${i}" && {
-                info "Elimando ${GREEN}${i}${WHITE}."
+                info "Eliminado ${GREEN}${i}${WHITE}."
             }
         done
         # removed protocol
@@ -757,14 +757,11 @@ uninstall_fenixmanager(){
                     bar "systemctl disable fenixmanager-pysocks"
                     rm "rm /etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
                     bar "systemctl daemon-reload"
-                # ! BADVPN
-                } || [ "${service}" == "badvpn-udpgw" ] && {
-                    bar --cmd 'rm $(which badvpn-udpgw)' --title "Eliminando ${service}"
-                # ! V2RAY
-                } || [[ "${service}" == "v2ray" ]] && {
-                    source "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
-                    remove_v2ray
-                # ! V2RAY
+                # ! OPENVPN
+                } || [[ "${service}" == "openvpn" ]] && {
+                    source "/etc/FenixManager/funciones/ovpn.bash"
+                    remove_openvpn
+                # ! V2RAY AND X-UI
                 } || [[ "${service}" == "x-ui" ]] && {
                     info "Eliminando ${service}..."
                     systemctl stop x-ui &>/dev/null
@@ -774,12 +771,17 @@ uninstall_fenixmanager(){
                     systemctl reset-failed &>/dev/null
                     bar "rm /etc/x-ui/ -rf"
                     bar "rm /usr/local/x-ui/ -rf"
+                    source "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
+                    remove_v2ray
                 } || {
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
                 }
             fi
         done
-
+        # remove badvpn-udpgw
+        rm $(which badvpn-udpgw) && {
+            info "Eliminando ${GREEN}badvpn-udpgw${WHITE}."
+        }
         # delete /bin/false from /etc/shells
         rm /etc/stunnel4 -rf &>/dev/null
 
@@ -798,8 +800,8 @@ uninstall_fenixmanager(){
         info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
         info "${GREEN}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
         info "Gracias por haber elegido ${YELLOW}FenixManager. :)"
-        info "Su vps se reiniciará en 5 segundos."
-        sleep 5
+        info "Su vps se reiniciará."
+        read -rp "[*] Presione enter para continuar..."
         reboot
     else
         info "Cancelado por el usuario."
