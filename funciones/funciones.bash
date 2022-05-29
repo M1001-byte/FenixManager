@@ -610,6 +610,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     local get_actived_services="$1"
     services_actived=()
     local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw shadowsocks-libev)
+    [[ "${get_actived_services}" == "get_actived_services" ]] && {
+        list_services+=("v2ray")
+    }
     local c=0    
     
     for services_ in "${list_services[@]}";do
@@ -726,7 +729,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "/usr/bin/fenix")
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "x-ui" "shadowsocks-libev" "pysocks" "v2ray")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "pysocks" "v2ray" "x-ui")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -762,7 +765,7 @@ uninstall_fenixmanager(){
                     source "/etc/FenixManager/funciones/ovpn.bash"
                     remove_openvpn
                 # ! V2RAY AND X-UI
-                } || [[ "${service}" == "x-ui" ]] && {
+                } || [[ "${service}" == "v2ray" ]] && {
                     info "Eliminando ${service}..."
                     systemctl stop x-ui &>/dev/null
                     systemctl disable x-ui &>/dev/null
@@ -782,9 +785,9 @@ uninstall_fenixmanager(){
         rm $(which badvpn-udpgw) && {
             info "Eliminando ${GREEN}badvpn-udpgw${WHITE}."
         }
+        
+        rm /etc/{stunnel,stunnel4} -rf &>/dev/null
         # delete /bin/false from /etc/shells
-        rm /etc/stunnel4 -rf &>/dev/null
-
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
             info "Eliminado ${RED}/bin/false del archivo ${GREEN}/etc/shells"
