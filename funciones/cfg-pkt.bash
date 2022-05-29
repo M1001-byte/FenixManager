@@ -1281,16 +1281,13 @@ cfg_python3_proxy(){
             1) # AGREGAR PUERTO
                 {
                     while true;do
-                        read -p "$(echo -e "${WHITE}[*] Puerto a agregar :  ")" port
-                        if [[ -z "$port" ]];then continue ; fi
-                        if [[ $port =~ ^[1-9]+$ ]];then
-                            local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
-                            [[ $port_in_file -ne 0 ]] && {
-                                error "El puerto existe en el archivo de configuracion."
-                                continue
-                            }
-                            check_if_port_is_open $port || break
-                        fi
+                        port_input
+                        local port="${puertos_array[1]}" && unset puertos_array
+                        local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
+                        [[ $port_in_file -ne 0 ]] && {
+                            error "El puerto existe en el archivo de configuracion."
+                            continue
+                        } || break
                     done
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
@@ -1479,7 +1476,6 @@ cfg_slowdns(){
 cfg_ssh_dropbear(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    # ! 〢────────────────────〢 CONFIGURANDO SSH / DROPBEAR 〢────────────────────────〢  # 77
     
     echo -e "${BBLUE}〢────────────────〢 ${WHITE}CONFIGURANDO SSH / DROPBEAR${BBLUE} 〢───────────〢${WHITE}"
     

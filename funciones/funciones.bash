@@ -86,7 +86,7 @@ port_input() {
     puertos_array=()
     while true;do
         trap ctrl_c SIGINT SIGTERM
-        read -r -p "$(echo -e "${WHITE}[*] Puertos a agregar (separados por espacios) : ")" puertos
+        read -r -p "$(echo -e "${WHITE}[*] Puertos a agregar : ")" puertos
         IFS=' ' read -r -a puertos <<< "$puertos"
         for puerto in "${puertos[@]}";do
             [[ -z "${puerto}" ]] && continue 
