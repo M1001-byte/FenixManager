@@ -9,7 +9,7 @@ function check_for_update(){
     local local_version=$(cat /etc/FenixManager/version 2>/dev/null)
     
     if [[ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]]; then
-        zip -r "${zip_name}" "${scr_dir}ip" "${scr_dir}/preferences.bash" "${scr_dir}/database" 2>/dev/null
+        zip -r "${zip_name}" "${scr_dir}ip" "${scr_dir}preferences.bash" "${scr_dir}database" 2>/dev/null
         
         info "Hay una nueva version de FenixManager disponible."
         info "Version local: ${YELLOW}${local_version}"
