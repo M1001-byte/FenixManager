@@ -5,23 +5,25 @@ function check_for_update(){
     local git_remote_version=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version" 2>/dev/null)
     local scr_dir="/etc/FeixManager/"
     local url="https://github.com/M1001-byte/FenixManager/"
-    local zip_name="FenixManager.zip"
     local local_version=$(cat /etc/FenixManager/version 2>/dev/null)
     
     if [[ -n "${git_remote_version}" && -n "${local_version}" && "$git_remote_version" != "$local_version" ]]; then
-        zip -r "${zip_name}" "${scr_dir}ip" "${scr_dir}preferences.bash" "${scr_dir}database" 2>/dev/null
+        local temp_dir=$(mktemp -d)
         
         info "Hay una nueva version de FenixManager disponible."
         info "Version local: ${YELLOW}${local_version}"
         info "Version remota: ${YELLOW}${git_remote_version}"
-        info "Actualizando..."
-        for file in "${file_dir_[@]}"; do
-            sudo mv "/etc/FenixManager/${file}" "${temp_dir}"
-        done
+        info "Actualizando..." 
+        
+        mv "${scr_dir}database/" "${temp_dir}"
+        mv "${scr_dir}preferenes.bash" "${temp_dir}"
+        
         sudo rm -rf "/etc/FenixManager"
         sudo git clone "${url}" "/etc/FenixManager"
-        unzip "/tmp/${zip_name}" -d "/etc/FenixManager/"
-        sudo rm "${zip_name}"
+        
+        mv "${temp_dir}database/" "${scr_dir}"
+        mv "${temp_dir}preferenes.bash" "${scr_dir}preferenes.bash"
+
         info "Actualizacion completada."
         info "Nueva version: ${GREEN}$(cat /etc/FenixManager/version)"
         info "Vuelva a ejecutar fenix para aplicar los cambios."
