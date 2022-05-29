@@ -5,9 +5,9 @@ function check_for_update(){
     source "/etc/FenixManager/preferences.bash"
     local git_remote_version=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/master/version")
     local files_dir_=("preferences.bash" "ip" "database/")
-    local local_version=${VERSION}
+    local local_version=$(cat /etcFenixManager/version 2>/dev/null)
     
-    if [ "$git_remote_version" != "$local_version" ]; then
+    if [ -n "${local_version}" && "$git_remote_version" != "$local_version" ]; then
         local temp_dir="/tmp/FenixManager_cfg" && mkdir -p $temp_dir
         info "Hay una nueva version de FenixManager disponible."
         info "Version local: ${YELLOW}${local_version}"
