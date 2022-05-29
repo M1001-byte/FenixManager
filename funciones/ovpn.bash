@@ -550,6 +550,7 @@ removeClient() {
 }
 
 remove_openvpn() {
+    local return_to_menu="${1}"
     PORT=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2)
 	PROTOCOL=$(grep '^proto ' /etc/openvpn/server.conf | cut -d " " -f 2) 
 
@@ -586,9 +587,12 @@ remove_openvpn() {
     # remove database
     sqlite3 $db_ovpn "DROP TABLE ovpn" 2>/dev/null
 
-    info "OpenVPN ha sido eliminado."
-    clear
-    fenix
+    [[ "${return_to_menu}" -eq 1 ]] && {
+        clear
+        fenix
+    } || {
+        info "OpenVPN ha sido eliminado."
+    }
 }
 
 option_menu_ovpn() {

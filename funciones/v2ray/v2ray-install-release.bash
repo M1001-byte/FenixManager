@@ -447,7 +447,7 @@ remove_v2ray() {
       systemctl disable v2ray &>/dev/null
       rm -rf "${JSON_PATH}" ; rm -fr /var/log/v2ray/
       info "V2RAY se ha eliminado con éxito!"
-      exit 0
+      return 0
     fi
   else
     error "V2RAY no está instalado. Por favor, instale V2Ray primero."
