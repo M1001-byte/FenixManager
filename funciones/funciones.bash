@@ -770,7 +770,7 @@ uninstall_fenixmanager(){
                     systemctl reset-failed &>/dev/null
                     rm /etc/x-ui/ -rf 2>/dev/null
                     rm /usr/local/x-ui/ -rf 2>/dev/null
-                    bash -c "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove"
+                    /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove
                 } || {
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
                 }
