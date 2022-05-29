@@ -208,6 +208,8 @@ option_menu_package(){
                 # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
                 # check if package is active
                 local i=${i//"python3-proxy"/"fenixmanager-pysocks"}
+                local i=${i//"openvpn"/"openvpn@server"}
+                
                 if [[ "${i}" == "slowdns" ]];then
                     pgrep -f "slowdns" &>/dev/null && {
                         local activo=0
@@ -739,14 +741,13 @@ uninstall_fenixmanager(){
     info "El archivo ${RED}${user_folder}/.bashrc${WHITE} sera restaurado por el original (${GREEN}/etc/skel/.bashrc${WHITE})."
     info "El archivo ${RED}/etc/ssh/sshd_config${WHITE} sera restaurado a su estado original."
     info "Eliminara la entrada ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells${WHITE}."
-
-    list_services_and_ports_used "get_actived_services" & # return 'services_actived' with all services actived
     
     info "Los siguientes protocolos seran eliminados:"
     for service in "${services_to_remove[@]}";do echo -e "${WHITE}${RED}  ${service}${WHITE}" ; done
     read -rp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
     if [[ "${yes_no}" == [yYsS] ]];then
         # removed dir
+        list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived
         for i in "${fenix_rm[@]}";do
             rm -rf "${i}" && {
                 info "Eliminado ${GREEN}${i}${WHITE}."
