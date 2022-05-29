@@ -754,7 +754,7 @@ uninstall_fenixmanager(){
                 # ! FENIXMANAGER PYSOCKS
                 [ "${service}" == "pysocks" ] && {
                     bar "systemctl disable fenixmanager-pysocks"
-                    rm "rm /etc/systemd/system/fenixmanager-pysocks.service" &>/dev/null
+                    rm /etc/systemd/system/fenixmanager-pysocks.service &>/dev/null
                     bar "systemctl daemon-reload"
                 # ! OPENVPN
                 } || [[ "${service}" == "openvpn" ]] && {
@@ -768,8 +768,8 @@ uninstall_fenixmanager(){
                     rm /etc/systemd/system/x-ui.service -f &>/dev/null
                     bar "systemctl daemon-reload"
                     systemctl reset-failed &>/dev/null
-                    bar "rm /etc/x-ui/ -rf"
-                    bar "rm /usr/local/x-ui/ -rf"
+                    rm /etc/x-ui/ -rf 2>/dev/null
+                    rm /usr/local/x-ui/ -rf 2>/dev/null
                     source "/etc/FenixManager/funciones/v2ray/v2ray-install-release.bash"
                     remove_v2ray
                 } || {

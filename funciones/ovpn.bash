@@ -551,8 +551,8 @@ removeClient() {
 
 remove_openvpn() {
     local return_to_menu="${1}"
-    PORT=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2)
-	PROTOCOL=$(grep '^proto ' /etc/openvpn/server.conf | cut -d " " -f 2) 
+    PORT=$(grep '^port ' /etc/openvpn/server.conf | cut -d " " -f 2 2>/dev/null)
+	PROTOCOL=$(grep '^proto ' /etc/openvpn/server.conf | cut -d " " -f 2 2>/dev/null) 
 
     # Stop OpenVPN
 	bar "systemctl disable openvpn@server"
