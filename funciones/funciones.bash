@@ -778,8 +778,9 @@ uninstall_fenixmanager(){
         rm  "${badvpn_bin}" && {
             info "Eliminando ${GREEN}${badvpn_bin}${WHITE}."
         }
-        # * Delete all ssh accounts
-        yes | delete_all_users_ssh
+        declare -f delete_all_users_ssh &>/dev/null && {
+            yes | delete_all_users_ssh
+        }
 
         # * remove stunnel4 dir
         rm /etc/{stunnel,stunnel4} -rf &>/dev/null
