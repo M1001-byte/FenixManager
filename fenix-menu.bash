@@ -31,14 +31,14 @@ show_first_panel() {
     local mem_available=$(free --kilo -h | awk 'NR==2{printf $7}') 
     local mem_used_percent=$(free | grep Mem | awk '{print $3/$2 * 100.0}' | cut -d. -f1)
     
-    swap=$(swapon -s)
-    swap_total=$(free --kilo -h  | awk 'NR==3{printf $2}')
-    swap_used=$(free  --kilo -h  |  awk 'NR==3{printf $3}')
-    swap_free=$(free  --kilo -h  |  awk 'NR==3{printf $4}')
+    local swap=$(swapon -s)
+    local swap_total=$(free --kilo -h  | awk 'NR==3{printf $2}')
+    local swap_used=$(free  --kilo -h  |  awk 'NR==3{printf $3}')
+    local swap_free=$(free  --kilo -h  |  awk 'NR==3{printf $4}')
     
-    cpu_core=$(grep 'cpu cores' < /proc/cpuinfo | uniq | awk '{print $4}')
-    cpu_model=$(grep name < /proc/cpuinfo | uniq | awk '{ for(f=4; f<=NF; f++) { printf $f " "; } }')
-    cpu_used=$(top -b -n1 | grep 'Cpu(s)' | awk '{print $2 + $4}')
+    local cpu_core=$(grep 'cpu cores' < /proc/cpuinfo | uniq | awk '{print $4}')
+    local cpu_model=$(grep name < /proc/cpuinfo | uniq | awk '{ for(f=4; f<=NF; f++) { printf $f " "; } }')
+    local cpu_used=$(top -b -n1 | grep 'Cpu(s)' | awk '{print $2 + $4}')
     
     printf "${WHITE}〢 ${WHITE}%-3s${RED}%-${#distro}s ${WHITE}%-6s${RED}%-${#arch}s ${WHITE}%-9s${RED}%-${#kernel}s${WHITE}%$(echo 60 - 19 - ${#distro} - ${#arch} - ${#kernel} | bc)s\n" "OS: " "${distro}" "ARCH: " "${arch^^}" "KERNEL: " "${kernel}" "〢"
     printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"

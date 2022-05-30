@@ -774,7 +774,7 @@ uninstall_fenixmanager(){
             }
         done
         # * Delete all ssh accounts
-        yes | delete_all_users_ssh
+        yes | delete_all_users_ssh "1"
         
         # * remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)
