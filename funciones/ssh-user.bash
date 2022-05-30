@@ -103,29 +103,21 @@ create_ssh_user_input() {
                 fi
             done
             
-            read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
             
-            if [[ -z "$date_exp" ]];then
-                info "Valor incorrecto, se asignara una fecha de expiracion de 1 dia."
-                date_exp=1
-            elif [[ ! $date_exp =~ ^[0-9]+$ ]];then
-                error "Solo se permiten numeros."
-                continue
-            fi
-            fi
-            
-            # ! crear temp user
-            [[ "${date_exp}" =~ ^- ]] && {
-                create_temp_user
-            } || {
-                if [ -z "${date_exp}" ] || [ ! grep -E '^[0-9]+$' <<< "${date_exp}" 2>/dev/null ] || [ "${date_exp}" == 0 ];then
-                    info 'El valor no es correcto.De forma predeterminada, se le asignara un (1) dia.'
-                    fecha_final=$(date -d "1 days" +%Y-%m-%d) 
+
+            until [[ "$date_exp" =~ ^[0-9]+$ ]];do
+                read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
+                if [[ "$date_exp" =~ ^-$ ]];then
+                    create_temp_user
+                elif [[ ! "${date_exp}" =~ ^[0-9]+$ ]];then
+                    error "El valor ingresado no es valido."
                 else
                     fecha_final=$(date -d "$date_exp days" +%Y-%m-%d 2>/dev/null)
+                    fecha_final=($fecha_final + $(date +'%T'))
+                    
                 fi
-                fecha_final=($fecha_final + $(date +'%T'))
-            }
+            done
+            
             read -p "$(echo -e $RED'[*] Cantidad maxima de conexiones : ' )" max_connections
             if [ -z $max_connections ] || [ ! grep -E '^[0-9]+$' <<< $max_connections &>/dev/null ] || [ $max_connections = 0 ];then
                 info 'El valor no es correcto.De forma predeterminada, se le asignara un maximo de una (1) conexion.'
