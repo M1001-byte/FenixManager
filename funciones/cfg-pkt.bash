@@ -1034,17 +1034,13 @@ cfg_openvpn(){
                     sed  -i "1i port ${ovpn_port_actually} ${ovpn_new_port}" /etc/openvpn/server.conf
                     if [[ $? -eq 0 ]];then
                         info "Puerto $ovpn_new_port agregado correctamente."
-                        sleep 1.5
-                        cgf_openvpn
                     else
                         error "Error al agregar el puerto $ovpn_new_port."
-                        sleep 1.5
-                        cfg_openvpn
                     fi
 
                 }
                 clear
-                cgf_openvpn
+                cfg_openvpn
                 ;;
             2) # REMOVER UN PUERTO
                 {
