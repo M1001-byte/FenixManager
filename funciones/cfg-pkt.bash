@@ -602,11 +602,9 @@ cfg_shadowsocks(){
         else
             error "Fallo al eliminar shadowsocks-libev."
         fi
-        # rmeove fail2ban config
-        rm_init_cfg_and_end_cfg_from_file "/etc/fail2ban/jail.conf" "shadowsocks-libev"
+        
     }
     clear
-    #cfg_menu "CONFIGURANDO SHADOWSOCKS"
     echo -e "${BLUE}〢──────────────〢${WHITE} CONFIGURANDO SHADOWSOCKS ${BLUE}〢────────────────〢"
     check_jq_is_installed
     local shadowsocks_is_running=$(systemctl status shadowsocks-libev.service &>/dev/null;echo $?)

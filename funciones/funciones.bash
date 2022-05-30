@@ -196,7 +196,7 @@ option_menu_package(){
             local str_="${WHITE}[ ${GREEN}INSTALADO ${WHITE}/"
             
             package_installed "dropbear" && {
-                local str_="${GREEN} INSTALADO ${WHITE}]"
+                local str_+="${GREEN} INSTALADO ${WHITE}]"
                 installed_packages+=("dropbear")
             
             } || local str_+="${RED} NO INSTALADO${WHITE}]"
@@ -218,25 +218,21 @@ option_menu_package(){
                     installed_packages+=($i)
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && {
                         local activo=0
-                        
-                        local color_var="${GREEN}"
-                    } || {
+                        } || {
                         local activo=1
-                        local color_var="${RED}"
                     }
                 fi
                 [[ ${activo} -eq 0 ]] && local str_="${WHITE}[ ${GREEN}ACTIVO ${WHITE}]" || local str_="${WHITE}[${RED} INACTIVO ${WHITE}]"
             fi
         }
-        local str_3="${str_}"
         local str_rel="-"
-        
-        local length=$(( 65 - ${#i} - ${#str_3} ))
+        local length=$(( 65 - ${#i} - ${#str_} ))
         local length=${length//-/ } # negative number
         for ((j=0;j<length;j++));do
             str_rel+="-"
         done
-        printf "%b [ %b${option}%b ]%b >>%b ${i^^} %b%s %b\n" "${WHITE}" "${GREEN}" "${WHITE}" "${YELLOW}" "${WHITE}" "${color_var}" "${str_rel}" "$str_3"
+        [[ ${activo} -eq 0 ]] && local color_="${GREEN}" || local color_="${RED}"
+        printf "${WHITE} [ ${GREEN}${option}${WHITE} ]${YELLOW} >>${WHITE} ${i^^} ${color_}${str_rel} ${str_}\n"
         
     done
 
