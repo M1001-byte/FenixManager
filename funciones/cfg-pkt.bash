@@ -1039,7 +1039,7 @@ cfg_openvpn(){
                     else
                         error "Error al agregar el puerto $ovpn_new_port."
                         sleep 1.5
-                        cgf_openvpn
+                        cfg_openvpn
                     fi
 
                 }
@@ -1064,16 +1064,14 @@ cfg_openvpn(){
                     sed  -i "s/${ovpn_port_del}/ /g" /etc/openvpn/server.conf
                     if [[ $? -eq 0 ]];then
                         info "Puerto $ovpn_port_del eliminado correctamente."
-                        sleep 1.5
-                        cgf_openvpn
                     else
                         error "Error al eliminar el puerto $ovpn_port_del."
-                        sleep 1.5
-                        cgf_openvpn
                     fi
+                    sleep 1.5
+                    cfg_openvpn
                 }
                 clear
-                cgf_openvpn
+                cfg_openvpn
                 ;;
             3) # CAMBIAR PROTOCOLO (tcp/udp)
                 {
@@ -1090,16 +1088,12 @@ cfg_openvpn(){
                     sed -i "s/proto ${ovpn_proto_actually}/proto ${ovpn_proto_new}/g" /etc/openvpn/server.conf
                         if [[ $? -eq 0 ]];then
                             info "Protocolo cambiado a ${ovpn_proto_new}."
-                            sleep 1.5
-                            cgf_openvpn
                         else
                             error "Error al cambiar el protocolo."
-                            sleep 1.5
-                            cgf_openvpn
                         fi
                 }
-                clear
-                cgf_openvpn
+                sleep 1.5
+                cfg_openvpn
                 ;;
             4) # CAMBIAR SERVIDORES DNS
                 {
@@ -1136,32 +1130,24 @@ cfg_openvpn(){
                     sed -i "s/${dns_[1]}/${dns_two}/g" /etc/openvpn/server.conf &> /dev/null
                     if [[ $? -eq 0 ]];then
                         info "DNS cambiados correctamente."
-                        sleep 1.5
-                        cgf_openvpn
                     else
                         error "Error al cambiar los DNS."
-                        sleep 1.5
-                        cgf_openvpn
                     fi
 
                 }
-                clear
-                cgf_openvpn
+                sleep 1.5
+                cfg_openvpn
                 ;;
             5) # INICIAR/REINICIAR OPENVPN
                 {
                  if [[ $oppenvpn_is_running -eq 0 ]];then
                     bar "systemctl start openvpn@server"
-                    sleep 1.5
-                    cgf_openvpn
                  else
                     bar "systemctl restart openvpn@server"
-                    sleep 1.5
-                    cgf_openvpn
                  fi
                 }
-                clear
-                cgf_openvpn
+                sleep 1.5
+                cfg_openvpn
                 ;;
             6) # DETENER/DESINSTALAR OPENVPN
                 {
@@ -1170,7 +1156,7 @@ cfg_openvpn(){
                     else
                         bar "systemctl stop openvpn@server"
                         sleep 1.5
-                        cgf_openvpn
+                        cfg_openvpn
                     fi
                 }
                 clear
@@ -1184,7 +1170,7 @@ cfg_openvpn(){
                 ;;
             "cls" | "CLS")
                 clear
-                cgf_openvpn
+                cfg_openvpn
                 ;;
             [bB])
                 option_menu_software
