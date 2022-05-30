@@ -203,7 +203,7 @@ option_menu_package(){
         
         } || {
             if ! package_installed "$i";then
-                local str_="${WHITE}[${RED}NO INSTALADO${WHITE}]"
+                local str_="${WHITE}[${RED} NO INSTALADO ${WHITE}]"
             else
                 # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
                 # check if package is active
@@ -231,8 +231,7 @@ option_menu_package(){
         for ((j=0;j<length;j++));do
             str_rel+="-"
         done
-        [[ ${activo} -eq 0 ]] && local color_="${GREEN}" || local color_="${RED}"
-        printf "${WHITE} [ ${GREEN}${option}${WHITE} ]${YELLOW} >>${WHITE} ${i^^} ${color_}${str_rel} ${str_}\n"
+        printf "${WHITE} [ ${GREEN}${option}${WHITE} ]${YELLOW} >>${WHITE} ${i^^} ${str_rel} ${str_}${WHITE}\n"
         
     done
 
