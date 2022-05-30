@@ -108,6 +108,10 @@ create_ssh_user_input() {
             if [[ -z "$date_exp" ]];then
                 info "Valor incorrecto, se asignara una fecha de expiracion de 1 dia."
                 date_exp=1
+            elif [[ ! $date_exp =~ ^[0-9]+$ ]];then
+                error "Solo se permiten numeros."
+                continue
+            fi
             fi
             
             # ! crear temp user
