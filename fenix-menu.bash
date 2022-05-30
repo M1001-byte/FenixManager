@@ -83,7 +83,7 @@ option_menu_software () {
 
     option_color E 'SALIR'
     option_color M 'MENU PRINCIPAL'
-
+    
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
@@ -95,7 +95,7 @@ option_menu_software () {
             3 ) [[ ${installed_packages[*]} =~ stunnel4 ]] && cfg_stunnel4 || install_stunnel4 ;;
             4 ) [[ ${installed_packages[*]} =~ slowdns ]] && cfg_slowdns || install_slowdns ;;
             5 ) [[ ${installed_packages[*]} =~ shadowsocks-libev ]] && cfg_shadowsocks || install_shadowsocks ;;
-            6 ) [[ ${installed_packages[*]} =~ openvpn ]] && cgf_openvpn || install_openvpn ;;
+            6 ) [[ ${installed_packages[*]} =~ openvpn ]] && cfg_openvpn || install_openvpn ;;
             7) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
             8) [[ ${installed_packages[*]} =~ fenixmanager-pysocks ]] && cfg_python3_proxy || install_python3_proxy ;;
             
