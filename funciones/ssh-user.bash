@@ -299,7 +299,7 @@ option_menu_ssh() {
             5 ) monitor_users ; clo ;;
             6 ) backup_user ;;
             7 ) restore_backup ;;
-            8 ) delete_all_users ;;
+            8 ) delete_all_users_ssh ;;
             e | E | q | Q ) exit 0 ;;
             m | M ) fenix ;;
             "cls" | "Cls" | "CLS" ) clo ;;
@@ -338,11 +338,11 @@ delete_user () {
     clo
 }
 
-delete_all_users() {
+delete_all_users_ssh() {
     read -p "$(echo -e $RED'[*] Esta seguro de eliminar todos los usuarios (S)i (N)o : ' )" confirm
     case $confirm in
         S | s | y | y )
-            info "Eliminando todos los usuarios.Esta accion no se puede deshacer."
+            info "Eliminando todos los usuarios."
             line_separator 51
             printf "${WHITE}〢 %-30s${YELLOW}%-20s${WHITE}〢\n" 'USUARIO' 'ESTADO'
             line_separator 51
