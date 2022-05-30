@@ -343,6 +343,7 @@ delete_user () {
 }
 
 delete_all_users_ssh() {
+    local return_clo="${1}"
     read -p "$(echo -e $RED'[*] Esta seguro de eliminar todos los usuarios (S)i (N)o : ' )" confirm
     case $confirm in
         S | s | y | y )
@@ -361,8 +362,12 @@ delete_all_users_ssh() {
             done
             sqlite3 $userdb "delete from ssh"
             info "Todos los usuarios han sido eliminados."
-            read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
-            clo
+            [[ "${return_clo}" -eq 0 ]] && {
+                read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
+                clo
+            } || {
+                exit 0
+            }
             ;;
         *)
             info "Operacion cancelada."
