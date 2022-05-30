@@ -32,7 +32,6 @@ function check_for_update(){
 }
 
 function fenix() {
-    local ui_mode="$1"
     local fenix_menu="/etc/FenixManager/fenix-menu.bash"
     check_for_update
     sudo "${fenix_menu}"
