@@ -773,22 +773,26 @@ uninstall_fenixmanager(){
                 info "Eliminado ${GREEN}${i}${WHITE}."
             }
         done
-        # remove badvpn-udpgw
+        # * remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)
         rm  "${badvpn_bin}" && {
             info "Eliminando ${GREEN}${badvpn_bin}${WHITE}."
         }
-        
+        # * Delete all ssh accounts
+        yes | delete_all_users_ssh
+
+        # * remove stunnel4 dir
         rm /etc/{stunnel,stunnel4} -rf &>/dev/null
-        # delete /bin/false from /etc/shells
+        # * delete /bin/false from /etc/shells
         grep -q "/bin/false" /etc/shells && {
             sed -i '/\/bin\/false/d' "/etc/shells"
             info "Eliminado ${RED}/bin/false${WHITE} del archivo ${GREEN}/etc/shells"
         }
         
-        # restore .bashrc
+        # * restore .bashrc
         info "Restaurando ${GREEN}${user_folder}/.bashrc"
         cp "/etc/skel/.bashrc" "${user_folder}/.bashrc"
+        
         info "${RED}FENIX-MANAGER DESINSTALO CORRECTAMENTE."
         info "Por cualquier duda o sugerencias,podes contactarme por telegram:"
         info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
