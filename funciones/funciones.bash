@@ -767,15 +767,18 @@ uninstall_fenixmanager(){
                 fi
             fi
         done
+
+        # * Delete all ssh accounts
+        declare -f delete_all_ssh_accounts &>/dev/null && {
+            yes | delete_all_ssh_accounts "1"
+        }
+        # * rmeove fenix directory
         cd /tmp &>/dev/null
         for i in "${fenix_rm[@]}";do
             rm -rf "${i}" && {
                 info "Eliminado ${GREEN}${i}${WHITE}."
             }
         done
-        # * Delete all ssh accounts
-        sudo bash -c "yes | delete_all_users_ssh 1"
-        
         # * remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)
         rm  "${badvpn_bin}" && {
