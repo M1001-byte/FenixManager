@@ -354,7 +354,6 @@ delete_all_users_ssh() {
                 }
             done
             sqlite3 $userdb "delete from ssh"
-            info "Todos los usuarios han sido eliminados."
             [[ "${return_clo}" -eq 0 ]] && {
                 read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
                 clo
