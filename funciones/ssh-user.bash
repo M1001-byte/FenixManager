@@ -359,6 +359,7 @@ delete_all_users_ssh() {
                 read -p "$(echo -e $MAGENTA'[*] Presione enter para continuar.': )"
                 clo
             } || {
+                line_separator 51
                 exit 0
             }
             ;;
