@@ -238,7 +238,7 @@ install_badvpn_udpgw(){
             bar "make install"
             info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
             local badvpn_udpgw=$(which badvpn-udpgw 2>/dev/null)
-            echo -e "\n@reboot root screen -dmS badvpn ${badvpn_udpgw} --listen-addr 127.0.0.1:7300" >> "${fenixmanager_crontab}"
+            echo -e "\n@reboot root screen -dmS badvpn ${badvpn_udpgw} --loglevel 0  --listen-addr 127.0.0.1:7300 --udp-mtu 1500" >> "${fenixmanager_crontab}"
             screen -dmS badvpn ${badvpn_udpgw} --listen-addr 127.0.0.1:7300
         } || {
             rm "/tmp/badvpn" -rf &>/dev/null
