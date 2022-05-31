@@ -769,8 +769,8 @@ uninstall_fenixmanager(){
         done
 
         # * Delete all ssh accounts
-        declare -f delete_all_ssh_accounts &>/dev/null && {
-            yes | delete_all_ssh_accounts "1"
+        declare -f delete_all_users_ssh &>/dev/null && {
+            yes | delete_all_users_ssh "1"
         }
         # * rmeove fenix directory
         cd /tmp &>/dev/null
