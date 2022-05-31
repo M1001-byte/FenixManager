@@ -119,11 +119,14 @@ create_ssh_user_input() {
                 fi
             done
             
-            read -p "$(echo -e $RED'[*] Cantidad maxima de conexiones : ' )" max_connections
-            if [ -z $max_connections ] || [ ! grep -E '^[0-9]+$' <<< $max_connections &>/dev/null ] || [ $max_connections = 0 ];then
-                info 'El valor no es correcto.De forma predeterminada, se le asignara un maximo de una (1) conexion.'
-                max_connections=1
-            fi
+            until [[ "$max_connections" =~ ^[0-9]+$ ]];do
+                read -p "$(echo -e $RED'[*] Cantidad maxima de conexiones : ' )" max_connections
+                if [ -z "$max_connections" ];then
+                    info 'El valor no es correcto.De forma predeterminada, se le asignara un maximo de una (1) conexion.'
+                    max_connections=1
+                    break
+                fi
+            done
 
             pass=$(perl -e 'print crypt($ARGV[0], "password")' $passwd)
             
