@@ -1262,6 +1262,7 @@ cfg_python3_proxy(){
                 {
                     while true;do
                         port_input
+                        echo "${puertos_array[1]}"
                         local port="${puertos_array[1]}" && unset puertos_array
                         local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
                         [[ $port_in_file -ne 0 ]] && {
