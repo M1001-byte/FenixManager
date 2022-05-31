@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# get terminal size
-columns=$(tput cols) 
-
-source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
-source "/etc/FenixManager/preferences.bash" 2>/dev/null
-
 info(){ echo -e "\\033[1;33m[INFO]\\033[m \\033[1;37m$*\\033[m";}
 error() { echo -e "\\033[1;31m[ERROR]\\033[m \\033[1;37m$*\\033[m";}
 warning() { echo -e "\\033[1;33m[ADVERTENCIA]\\033[m \\033[1;37m$*\\033[m";}
@@ -206,9 +200,8 @@ option_menu_package(){
                 local str_="${WHITE}[${RED} NO INSTALADO ${WHITE}]"
             else
                 installed_packages+=($i)
-                # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
+                # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks")
                 # check if package is active
-                local i=${i//"python3-proxy"/"fenixmanager-pysocks"}
 
                 if [[ "${i}" == "slowdns" ]];then
                     pgrep -f "slowdns" &>/dev/null && {
@@ -348,7 +341,7 @@ package_installed () {
     cmd=$(dpkg-query -W --showformat='${Status}\n' "$package" 2>/dev/null| grep -c "install ok installed" && return 0 || return 1)
     
     if [[ "$package" == "v2ray" ]];then if [[ -f "/usr/local/bin/v2ray" ]];then cmd=1 ; else cmd=0 ; fi ; fi
-    if [[ "$package" == "python3-proxy" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
+    if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ $cmd == 1 ]]; then
         return 0
@@ -774,7 +767,9 @@ uninstall_fenixmanager(){
             }
         done
         # * Delete all ssh accounts
-        sudo bash -c "yes | delete_all_users_ssh 1"
+        declare -f delete_all_users_ssh &>/dev/null && {
+            yes | delete_all_users_ssh '1'
+            }
         
         # * remove badvpn-udpgw
         local badvpn_bin=$(which badvpn-udpgw)

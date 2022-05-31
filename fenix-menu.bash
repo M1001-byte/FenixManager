@@ -78,12 +78,12 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
     option_color M 'MENU PRINCIPAL'
-    
+
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
