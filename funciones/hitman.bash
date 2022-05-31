@@ -5,6 +5,8 @@ log_file="/var/log/FenixManager/hitman.log"
 db='/etc/FenixManager/database/usuarios.db'
 fecha_actual=$(date "+%Y-%m-%d")
 
+source "/etc/FenixManager/funciones/funciones.bash"
+
 check_for_expire_ssh(){
     for user in $(sqlite3 "$db" "SELECT nombre,password,exp_date FROM ssh WHERE exp_date == '${fecha_actual}'"); do
         IFS='|' read -r -a array <<< "$user"

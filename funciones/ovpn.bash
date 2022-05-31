@@ -5,10 +5,11 @@
 
 db_ovpn='/etc/FenixManager/database/usuarios.db'
 
-#  source "/etc/FenixManager/preferences.bash" 2>/dev/null
-#  source "/etc/FenixManager/funciones/funciones.bash"
-#  source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
- 
+
+source "/etc/FenixManager/preferences.bash" 2>/dev/null
+source "/etc/FenixManager/funciones/funciones.bash"
+source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
+
 script_executed_with_root_privileges
 
 trap ctrl_c SIGINT SIGTERM
