@@ -1395,6 +1395,7 @@ cfg_slowdns(){
     clear
     echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO SLOWDNS ${BLUE}〢─────────────────〢"
     local slowdns_running=$(pgrep slowdns &>/dev/null;echo $?)
+    if [[ $slowdns_running -ne 0 ]];then install_slowdns ; fi
     local pub_key=$(cat "${user_folder}/FenixManager/slowdns_pubkey" 2>/dev/null)
     show_info(){
         # 66
@@ -1403,7 +1404,7 @@ cfg_slowdns(){
         else
             local protocolo port key_file redirect_to
             local slowdns_pid=$(pgrep slowdns)
-            local process_argv=$(cat "/proc/${slowdns_pid}/cmdline" | sed -e 's/\x00/ /g'; echo)
+            local process_argv=$(cat "/proc/${slowdns_pid}/cmdline" 2>/dev/null | sed -e 's/\x00/ /g'; echo )
             IFS=' ' read -r -a array_argv <<< "${process_argv}"
             local protocolo=${array_argv[1]//-}
             local port=${array_argv[2]//:}
@@ -1419,7 +1420,7 @@ cfg_slowdns(){
     }
     show_info
 
-    option_color 1 "DETENER SLOWDNS"
+    option_color 1 "${RED}DETENER${WHITE} SLOWDNS"
     option_color 2 "MOSTRAR CLAVE PUBLICA   "
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
@@ -1430,23 +1431,14 @@ cfg_slowdns(){
         read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option
         case $option in
             1) #DETENER SLOWDNS
-                bar "killall slowdns"
+                killall slowdns 2>/dev/null
                 rm "${user_folder}/FenixManager/slowdns_pubkey" 2>/dev/null
-                sleep 2
                 fenix
                 ;;
-            2) #MOSTRAR CLAVE PUBLICA
-                [[ -z "${pub_key}" ]] && error "No se ha encontrado la clave publica." || echo -e "${pub_key}"
-                ;;
-            [bB])
-                option_menu_software
-                ;;
-            [Mm])
-                fenix
-                ;;
-            q|Q|e|E)
-                exit 0
-                ;;
+            2) [[ -z "${pub_key}" ]] && error "No se ha encontrado la clave publica." || echo -e "${pub_key}" ;;
+            [bB]) option_menu_software ;;
+            [Mm]) fenix ;;
+            q|Q|e|E) exit 0 ;;
         esac
     done
 
