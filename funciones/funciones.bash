@@ -224,6 +224,7 @@ option_menu_package(){
                     pgrep -f "badvpn-udpgw" &>/dev/null && {
                         local activo=0
                         }  || local activo=1
+                # ! SHADOWSOCKS-LIBEV
                 elif [[ "${i}" == "shadowsocks-libev" ]];then
                     pgrep obfs-server &>/dev/null && local activo=0 || {
                         pgrep ss-server &>/dev/null && local activo=0 || local activo=1

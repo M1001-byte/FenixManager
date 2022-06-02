@@ -222,7 +222,7 @@ clone_fenix(){
     
     local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
     for file in $fenix_bash_files; do
-        chmod 777 $file &>/dev/null
+        chmod 777 "${file}" &>/dev/null
     done
     
     [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
