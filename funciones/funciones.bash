@@ -647,9 +647,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             "dropbear")
                 local file="/etc/default/dropbear"
                 local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
-                local dropbear_extra_arg_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_EXTRA_ARGS=.*" | awk '{split($0,a,"-p"); print a[2]}')
+                local dropbear_extra_arg_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_EXTRA_ARGS=.*" | awk '{split($0,a,"-p"); print a[2]}'| tr "'" " " | xargs)
                 [[ -n "${dropbear_port}" ||  -n "${dropbear_extra_arg_port}" ]] && {
-                    local port_listen="$dropbear_port $dropbear_extra_arg_port"
+                    local port_listen="$dropbear_port ${dropbear_extra_arg_port//''/ }"
                 } || local port_listen=""
                 ;;
             "stunnel4")
