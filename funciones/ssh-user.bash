@@ -45,7 +45,7 @@ create_temp_user(){
 }
 
 create_ssh_user_input() {
-    local date_exp fecha_final
+    local date_exp fecha_final max_connections
     group_ssh='ssh_user'
     {   # check if group exist,and perl is installed
         if ! grep -q "^$group_ssh:" /etc/group; then groupadd $group_ssh ; fi
@@ -106,7 +106,7 @@ create_ssh_user_input() {
             
             
 
-            until [[ "$date_exp" =~ ^[0-9]+$ ]];do
+            while true;do
                 read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
                 if [[ "$date_exp" =~ ^-$ ]];then
                     create_temp_user
@@ -115,7 +115,7 @@ create_ssh_user_input() {
                 else
                     fecha_final=$(date -d "$date_exp days" +%Y-%m-%d 2>/dev/null)
                     fecha_final=($fecha_final + $(date +'%T'))
-                    
+                    break
                 fi
             done
             
