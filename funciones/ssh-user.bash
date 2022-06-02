@@ -45,7 +45,7 @@ create_temp_user(){
 }
 
 create_ssh_user_input() {
-    local date_exp
+    local date_exp fecha_final
     group_ssh='ssh_user'
     {   # check if group exist,and perl is installed
         if ! grep -q "^$group_ssh:" /etc/group; then groupadd $group_ssh ; fi
