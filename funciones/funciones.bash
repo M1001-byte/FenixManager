@@ -224,6 +224,10 @@ option_menu_package(){
                     pgrep -f "badvpn-udpgw" &>/dev/null && {
                         local activo=0
                         }  || local activo=1
+                elif [[ "${i}" == "shadowsocks-libev" ]];then
+                    pgrep obfs-server &>/dev/null && local activo=0 || {
+                        pgrep ss-server &>/dev/null && local activo=0 || local activo=1
+                    }
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && {
                         local activo=0
@@ -628,6 +632,10 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             systemctl status "openvpn@server" &>/dev/null
         elif [[ "${services_}" == "udpgw" ]];then
             pgrep badvpn-udpgw &> /dev/null
+        elif [[ "${services_}" == "shadowsocks-libev" ]];then
+            pgrep obfs-server &> /dev/null || {
+                pgrep ss-server &>/dev/null
+            }
         else
             systemctl status "${services_}" &>/dev/null
             
@@ -662,6 +670,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
             "shadowsocks-libev")
+                pidof obfs-server &>/dev/null && services_+=" obfs"
                 local port_listen=$(cat /etc/shadowsocks-libev/config.json 2>/dev/null | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
                 ;;
             "openvpn")
