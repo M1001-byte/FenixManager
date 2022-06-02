@@ -823,3 +823,4 @@ uninstall_fenixmanager(){
     fi
     
 }
+

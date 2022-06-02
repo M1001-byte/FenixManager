@@ -1606,28 +1606,99 @@ cfg_ssh_dropbear(){
                 cfg_ssh_dropbear
                 ;;
             4) # CAMBIAR BANNER
-                list_banners
-                local banner_ssh="${BANNER_FILE}" && unset BANNER_FILE
+                # ! SELECT OPT BANNER
+                change_banner_openssh(){
+                    # find banner line number in ssh config
+                    local banner_file="${1}"
+                    local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
+                    [[ -z ${ssh_banner_line} ]] && {
+                        echo "Banner ${banner_file}" >> ${ssh_file}
+                    } || {
+                        sed -i "${ssh_banner_line}s|^Banner.*|Banner ${banner_file}|g" ${ssh_file}
+                    }
+                    bar "service ssh restart"
+                }
+                change_banner_dropbear(){
+                    # find banner line number in dropbear config
+                    local banner_file="${1}"
+                    local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
+                    [[ -z ${dropbear_banner_line} ]] && {
+                        echo "DROPBEAR_BANNER='${banner_file}'" >> ${dropbear_file}
+                    } || {
+                        sed -i "${dropbear_banner_line}s|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER='${banner_file}'|g" ${dropbear_file}
+                    }
+                    bar "service dropbear restart"
+                }
+                banner_select() {
+                    echo -e "${WHITE}[ ${GREEN}1${WHITE} ] ${WHITE}Cargar banner desde un archivo${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}2${WHITE} ] ${WHITE}Cargar banner desde una URL${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}3${WHITE} ] ${WHITE}Copiar banner de un servidor ssh${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}4${WHITE} ] ${WHITE}Introducir el banner${WHITE}"
 
-                # ! CHANGE BANENR FOR SSH
-                # find banner line number in ssh config
-                local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
-                [[ -z ${ssh_banner_line} ]] && {
-                    echo "Banner ${banner_ssh}" >> ${ssh_file}
-                } || {
-                    sed -i "${ssh_banner_line}s|^Banner.*|Banner ${banner_ssh}|g" ${ssh_file}
+                    until [[ ${banner_option} =~ ^[1-4]$ ]];do
+                        trap ctrl_c SIGINT SIGTERM
+                        read -r -p "$(echo -e "${WHITE}[*] Opcion : ")" banner_option
+                    done
+                    
+                    case $banner_option in 
+                        1 ) # ! LOAD BANNER FROM FILE
+                            list_banners && local banner_file="${BANNER_FILE}" && unset BANNER_FILE
+                            change_banner_dropbear "${banner_file}" && change_banner_openssh "${banner_file}"
+                            ;;
+                        2 ) # ! LOAD BANNER FROM URL
+                            info "Tenga en cuenta que, todo el contenido que devuelve la URL sera usado como banner."
+                            info "Es recomendable que el contenido sea solamente texto plano."
+                            read -r -p "$(echo -e "${WHITE}[*] URL : ")" banner_url
+                            read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file}"
+                            if wget -q "${banner_url}" -O "${banner_file}";then
+                                change_banner_dropbear "${banner_file}"
+                                change_banner_openssh "${banner_file}"
+                            else
+                                error "No se pudo descargar el banner."
+                                info "Compruebe su conexion a internet o firewall."
+                                exit 1
+                            fi
+                            ;;
+                        3 ) # ! COPY BANNER FROM SSH SERVER
+                            package_installed "sshpass" || {
+                                bar "apt-get install sshpass" || {
+                                    error "No se pudo instalar sshpass."
+                                    exit 1
+                                }
+                            }
+                            info "Introduce la direccion IP del servidor ssh."
+                            until [[ "${get_banner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ || "${get_banner_ip}" =~ (?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$) ]];do
+                                read -r -p "$(echo -e "${WHITE}[*] IP / DOMINIO : ")" get_banner_ip
+                            done
+                            banner_file="${user_folder}/FenixManager/banner/banner_${get_banner_ip}.txt"
+                            timeout 5s sshpass -p "fenixmanager" ssh -o StrictHostKeyChecking=no "${get_banner_ip}" &> /tmp/banner_ssh_tmp
+                            [[ $(wc -l /tmp/banner_ssh_tmp | cut -d" " -f1) -gt 1 ]] || {
+                                error "No se pudo obtener el banner del servidor ssh."
+                                info "El servidor no tiene un banner configurado."
+                                info "O hay un problema de conexion."
+                                exit 1
+                            }
+                            sed -i '/Permission denied, please try again./d' /tmp/banner_ssh_tmp
+                            cat "/tmp/banner_ssh_tmp" > "${banner_file}"
+                            rm /tmp/banner_ssh_tmp
+                            change_banner_openssh "${banner_file}" && change_banner_dropbear "${banner_file}"
+                            ;;
+                        4 ) # ! INPUT BANNER
+                            info "Cuando termine de introducir el banner, presiona la combinacion: ${YELLOW}CTRL + D ${WHITE}."
+                            info "Puede que necesites presionar unas dos o tres veces la combinacion mencionada."
+                            line_separator 62
+                            local banner_array
+                            readarray -t banner_array
+                            line_separator 62
+                            read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file}"
+                            echo -e "${banner_array[@]}" > "${banner_file}"
+                            change_banner_dropbear "${banner_file}" && change_banner_openssh "${banner_file}"
+                    esac
                 }
-                bar "service ssh restart"
-                # ! CHANGE BANENR FOR DROPBEAR
-                # find banner line number in dropbear config
-                local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
-                [[ -z ${dropbear_banner_line} ]] && {
-                    echo "DROPBEAR_BANNER='${banner_ssh}'" >> ${dropbear_file}
-                } || {
-                    sed -i "${dropbear_banner_line}s|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER='${banner_ssh}'|g" ${dropbear_file}
-                }
-                bar "service dropbear restart"
-                info "Banner ${GREEN}${banner_ssh}${WHITE} cambiado correctamente."
+                banner_select
+                info "Banner ${GREEN}${banner_file}${WHITE} cambiado correctamente."
                 sleep 4
                 cfg_ssh_dropbear
                 ;;
@@ -1832,3 +1903,6 @@ cfg_badvpn(){
         esac
     done
 }
+
+
+

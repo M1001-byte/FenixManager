@@ -153,6 +153,7 @@ create_ssh_user_input() {
                 }
             else
                 error 'Fallo la creacion del usuario.'
+                read -p "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
             fi
             break
             
