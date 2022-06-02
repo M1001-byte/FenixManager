@@ -676,7 +676,11 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
                 ;;
             "udpgw")
-                local port_listen=$(cat "/proc/$(pgrep badvpn-udpgw)/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs)
+                local badvpn_pids=$(pgrep badvpn-udpgw)
+                local port_listen
+                for i in $badvpn_pids;do
+                    local port_listen+="$(cat "/proc/${i}/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs) "
+                done
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then
