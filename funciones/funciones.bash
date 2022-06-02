@@ -812,6 +812,7 @@ uninstall_fenixmanager(){
         info "Por cualquier duda o sugerencias,podes contactarme por telegram:"
         info "${GREEN}@Mathiue1001 ${YELLOW} https://t.me/Mathiue1001"
         info "${GREEN}@M1001_byte ${YELLOW} https://t.me/M1001_byte"
+        info "${GREEN}ScriptFenixManager ${YELLOW}https://t.me/ScriptFenixManager"
         info "Gracias por haber elegido ${YELLOW}FenixManager. :)"
         info "Su vps se reiniciará."
         read -rp "[*] Presione enter para continuar..."
