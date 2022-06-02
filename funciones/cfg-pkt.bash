@@ -1599,10 +1599,12 @@ cfg_ssh_dropbear(){
                 ;;
             4) # CAMBIAR BANNER
                 # ! SELECT OPT BANNER
+                local fenixbanner='<br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Script: </strong><strong style="color:#ff0000;font-size: 30px;">FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Version: </strong><strong style="color:#ff0000;font-size: 30px;">replace_version</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Dev: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001_byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Github: </strong><strong style="color:#ff0000;font-size: 30px;">github.com/M1001-byte/FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001-byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@Mathiue1001</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢Gracias por utilizar FenixManager!〢</strong>'
                 change_banner_openssh(){
                     # find banner line number in ssh config
                     local banner_file="${1}"
                     local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
+                    echo -e "${fenixbanner}" >> "${banner_file}"
                     [[ -z ${ssh_banner_line} ]] && {
                         echo "Banner ${banner_file}" >> ${ssh_file}
                     } || {
@@ -1619,6 +1621,7 @@ cfg_ssh_dropbear(){
                     } || {
                         sed -i "${dropbear_banner_line}s|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER='${banner_file}'|g" ${dropbear_file}
                     }
+                    echo -e "${fenixbanner}" >> "${banner_file}"
                     bar "service dropbear restart"
                 }
                 banner_select() {
