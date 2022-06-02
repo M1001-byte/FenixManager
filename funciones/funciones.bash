@@ -15,6 +15,11 @@ separator() {
     echo -e "\\033[1;34m〢────────────────────〢 \\033[m\\033[37m$*\\033[m\\033[1;34m 〢────────────────────────〢\\033[m";
 }
 
+delete_empty_lines(){
+    local file=$1
+    sed -i '/^$/d' "${file}"
+}
+
 line_separator() {    
     # ** $2 = color de la linea ( default: azul )
     # ** $1 = longitud de la linea
@@ -209,8 +214,14 @@ option_menu_package(){
                 # ! tmp_array=( "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "python3-proxy")
                 # check if package is active
 
+                # ! SLOWDNS
                 if [[ "${i}" == "slowdns" ]];then
                     pgrep -f "slowdns" &>/dev/null && {
+                        local activo=0
+                        }  || local activo=1
+                # ! BADVPN-UDPGW
+                elif [[ "${i}" == "badvpn-udpgw" ]];then
+                    pgrep -f "badvpn-udpgw" &>/dev/null && {
                         local activo=0
                         }  || local activo=1
                 else
@@ -349,6 +360,7 @@ package_installed () {
     if [[ "$package" == "v2ray" ]];then if [[ -f "/usr/local/bin/v2ray" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
+    if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
     if [[ $cmd == 1 ]]; then
         return 0
     else

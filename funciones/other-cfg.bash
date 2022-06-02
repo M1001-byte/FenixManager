@@ -58,11 +58,16 @@ cfg_hitman(){
         else
             printf "${WHITE}〢%4s : ${GREEN}%16s ${WHITE}%39s\n" "CRON" "[ EJECUTANDOSE ]" "〢"
         fi
-        # ! CHECK IF CRON-FILE EXISTS
+        # ! CHECK IF CRON-FILE EXISTS 
         if [ ! -f "$fenixmanager_crontab_file" ]; then
             error "NO SE HA ENCONTRADO EL ARCHIVO CRONTAB DE FENIXMANAGER."
             sleep 3
-            add_cront_job_for_hitman
+            add_cron_job_for_hitman
+            cfg_hitman
+        elif ! cat "${fenixmanager_crontab_file}" | grep -q "/etc/FenixManager/funciones/hitman.bash";then
+            error "NO SE HA ENCONTRADO LA ENTRADA DE HITMAN EN EL ARCHIVO CRONTAB."
+            sleep 3
+            cfg_hitman
         else
             printf "${WHITE}〢%9s : ${GREEN}%${#fenixmanager_crontab_file}s ${WHITE}%$((60 - 10 - ${#fenixmanager_crontab_file}))s\n" "CRON-FILE" "${fenixmanager_crontab_file}" "〢"
         fi

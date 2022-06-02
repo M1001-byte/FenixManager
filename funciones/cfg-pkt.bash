@@ -1587,7 +1587,6 @@ cfg_ssh_dropbear(){
                     sed -i "s|^DROPBEAR_EXTRA_ARGS=.*|DROPBEAR_EXTRA_ARGS='${dropbear_extra_args_from_file//$str_to_del/}'|g"  ${dropbear_file}
                     bar "systemctl restart dropbear"
                     info "Puerto ${port_to_del} eliminado."
-                    sleep 4
                 } || {
                     # ELIMINAR PUERTOS SSH
                     del_openssh_port
@@ -1695,3 +1694,141 @@ del_openssh_port(){
     done
 }
 
+cfg_badvpn(){
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO BADVPN UDPGW${BLUE} 〢─────────────〢"
+    local badvpn_udpgw="$(which badvpn-udpgw)"
+    local cron_file="/etc/cron.d/fenixmanager"
+    local guardian_is_installed=$(cat ${cron_file} | grep -c "udpgw-guardian.bash" )
+    local down_port=0
+    local ports_
+    show_info(){
+        ports_=$(cat "${cron_file}" | grep "/bin/badvpn-udpgw" | grep -Eo "127.0.0.1:[0-9]{1,5}" | cut -d: -f2 | xargs )
+        local str_=""
+        for i in ${ports_};do
+            netstat -lntup | grep ":${i} " -q  && local str_+="${GREEN} ${i}" || {
+                    local str_+="${RED} ${i}"
+                    down_port=$((down_port+1))
+            }
+        done
+        local str_badvpn color_
+        
+        pgrep "badvpn-udpgw" &>/dev/null && {
+            str_badvpn="[ ACTIVO ]"
+            color_="${GREEN}"
+        } || {
+            str_badvpn="[ INACTIVO ]"
+            color_="${RED}"
+        }
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((60-${#str_badvpn}-8))s \n" "ESTADO:" "${str_badvpn}" "〢"
+        printf "${WHITE}〢 %-5s%-${#ports_}b ${WHITE} %$((60-9-${#ports_}))s \n" "PUERTOS:" "${str_}" "〢"
+        line_separator 60
+    }
+    show_info
+    option_color 1 "AGREGAR PUERTO"
+    option_color 2 "ELIMINAR PUERTO"
+    [[ $down_port -eq 0 ]] && option_color 3 "${RED}DETENER${WHITE} TODOS LOS PUERTOS" || option_color 3 "${GREEN}INICIAR${WHITE} TODOS LOS PUERTOS"
+    [[ $guardian_is_installed -eq 0 ]] && option_color 4 "${GREEN}ACTIVAR ${WHITE}GUARDIAN${WHITE}" || option_color 4 "${RED}DESACTIVAR ${WHITE}GUARDIAN${WHITE}"
+    option_color M "MENU"
+    option_color E "SALIR"
+
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        case $option in 
+            1 ) # ! AGREGAR PUERTOS
+                {
+                    port_input && local new_port="${puertos_array[0]}" && unset puertos_array
+                    local cron_string="@reboot root screen -dmS badvpn-${new_port} ${badvpn_udpgw} --loglevel 0  --listen-addr 127.0.0.1:${new_port} --udp-mtu 1500"
+                    echo -e "${cron_string}" >> "${cron_file}"
+                    screen -dmS badvpn ${badvpn_udpgw} --loglevel 0  --listen-addr 127.0.0.1:${new_port} --udp-mtu 1500 && {
+                        service cron restart || {
+                            error "No se pudo reiniciar el servicio cron."
+                            return 0
+                        }
+                        info "Puerto ${new_port} agregado."
+                    } || {
+                        error "No se pudo agregar el puerto ${new_port}."
+                    }
+                }
+                sleep 2
+                cfg_badvpn
+                ;;
+            2 ) # ! ELIMINAR PUERTO
+                {
+                    local ports_=($(cat "${cron_file}" | grep "/bin/badvpn-udpgw" | grep -Eo "127.0.0.1:[0-9]{1,5}" | cut -d: -f2 | xargs ))
+                    info "Seleccione el puerto a eliminar."
+                    for ((i=0;i<${#ports_[@]};i++));do
+                        echo -e "\t${WHITE}[ ${BLUE}${i}${WHITE} ] ${GREEN}${ports_[$i]}${WHITE}"
+                    done
+                    # until port_index is lees than ${i}
+                    while true;do
+                        trap ctrl_c SIGINT SIGTERM
+                        read -r -p "$(echo -e "${WHITE}[*] Opcion  : ")" port_index
+                        if [[ ${port_index} -ge 0 && ${i} -le ${i} ]];then
+                            local port_del="${ports_[$port_index]}"
+                            local line_contain_port="$(cat "${cron_file}" | grep --line-number "127.0.0.1:${port_del}" | cut -d: -f1 )"
+                            sed -i "${line_contain_port}d" "${cron_file}"
+                            delete_empty_lines "${cron_file}"
+                            service cron restart &>/dev/null && {
+                                info "Puerto ${port_del} eliminado."
+                            } || {
+                                error "No se pudo reiniciar el servicio cron."
+                            }
+                            fuser ${port_del}/tcp -k &>/dev/null
+                            break
+                        else
+                            error "Opcion invalida."
+                            continue
+                        fi
+                    done
+                }
+                sleep 2
+                cfg_badvpn
+                ;;
+            3 ) # ! DETENER / INICIAR TODOS LOS PUERTOS
+                {
+                    if [[ ${down_port} -eq 0 ]];then
+                        killall badvpn-udpgw &>/dev/null && {
+                            info "Todos los puertos fueron detenidos."
+                        } || {
+                            error "Fallo al detener todos los puertos."
+                        }
+                    else
+                        for i in ${ports_};do
+                            netstat -lntup | grep ":${i} " -q || {
+                                # start port
+                                screen -dmS "badvpn-${i}" "${badvpn_udpgw}" --loglevel 0  --listen-addr 127.0.0.1:${i} --udp-mtu 1500 && {
+                                    info "Puerto ${i} iniciado."
+                                } || {
+                                    error "No se pudo iniciar el puerto ${i}."
+                                }
+                            }
+                        done
+                    fi
+                }
+                sleep 2
+                cfg_badvpn
+                ;;
+            4 ) # ! ACTIVAR GUARDIAN
+                [[ $guardian_is_installed -eq 0 ]] && {
+                    info "'Guardian',es simplemente una tarean crontab que: comprobara cada 10 minutos si el servidor badvpn esta activo,si no lo esta,lo iniciara."
+                    local str_cron="*/10 * * * * root /etc/FenixManager/funciones/udpgw-guardian.bash 1"
+                    echo -e "${str_cron}" >> "${cron_file}"
+                    service cron restart &>/dev/null
+                    read -r -p "$(echo -e "${WHITE}[*] Presione enter para continuar...")"
+                } || {
+                    local line_number_guardian="$(cat "${cron_file}" | grep --line-number "/etc/FenixManager/funciones/udpgw-guardian.bash" | cut -d: -f1 )"
+                    sed -i "${line_number_guardian}d" "${cron_file}"
+                    delete_empty_lines "${cron_file}"
+                    service cron restart &>/dev/null
+                }
+                cfg_badvpn
+                ;;
+            [mM]) fenix ;;
+            [eEqQ]) exit 0 ;;
+            *) tput cuu1 && tput el1
+        esac
+    done
+}

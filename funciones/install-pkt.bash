@@ -227,6 +227,7 @@ install_python3_proxy(){
 install_badvpn_udpgw(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Descargando badvpn-udpgw"
+    rm -rf /tmp/badvpn &>/dev/null
     bar  "git clone https://github.com/ambrop72/badvpn /tmp/badvpn" || {
         rm "/tmp/badvpn" -rf &>/dev/null
         error "No se pudo descargar el repositorio ${badvpn_git}."
