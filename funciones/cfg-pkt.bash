@@ -1242,7 +1242,7 @@ cfg_python3_proxy(){
     option_color 2 "ELIMINAR UN PUERTO"
     option_color 3 "VER ESTADO DE PYSOCKS"
     if [[ "$pysocks_is_actived" -eq 0 ]];then
-        option_color 4 "DETENER PYSOCKS"
+    option_color 4 "DETENER PYSOCKS"
         option_color 5 "REINICIAR PYSOCKS"
         option_color 6 "${RED}DESHABILITAR PYSOCKS"
     else
