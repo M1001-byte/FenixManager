@@ -18,8 +18,6 @@
 
 ## 🚀 Instalacion
 
-**Al momento de instalar: le preguntaran desde que rama clonar el repositorio, seleccionen la opcion `1` ( Correspondiente a la rama `master` ), o simplemente puede presionar `enter`.**
-
 ```bash
 sudo apt-get update # Actualizar lista de paquetes
 sudo apt-get upgrade -y # Actualizar paquetes
