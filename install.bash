@@ -193,7 +193,7 @@ add_basic_ufw_rules(){
 clone_fenix(){
     trap "exit 130" SIGINT SIGTERM
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
-    
+    local branch="master"
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
     
     local url="https://github.com/M1001-byte/FenixManager"
