@@ -59,7 +59,7 @@ create_ssh_user_input() {
         fi
     }
     while true;do
-        read -pe "$(echo -e "$WHITE[*] Ingrese el nombre de usuario:${endcolor}") " user
+        read -e -p "$(echo -e "$WHITE[*] Ingrese el nombre de usuario:${endcolor}") " user
     
         if [[ ${#user} -gt 32 ]];then
             error 'El nombre de usuario no puede tener mas de 32 caracteres.'
