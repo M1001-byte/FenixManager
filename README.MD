@@ -1,16 +1,16 @@
+
 # FénixManager
 
-![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)
-![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)
-![GitHub issues](https://img.shields.io/github/issues/M1001-byte/FenixManager?style=for-the-badge)
-![GitHub stars](https://img.shields.io/github/stars/M1001-byte/FenixManager?style=for-the-badge)
-![GitHUb License](https://img.shields.io/github/license/m1001-byte/fenixmanager?style=for-the-badge)
+<div align="center">
 
+  <a href="">![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)</a>
+  <a href="">![GitHub forks](https://img.shields.io/github/forks/M1001-byte/FenixManager?style=for-the-badge)</a>
+  <a href="">![GitHub issues](https://img.shields.io/github/issues/M1001-byte/FenixManager?style=for-the-badge)</a>
+  <a href="">![GitHub stars](https://img.shields.io/github/stars/M1001-byte/FenixManager?style=for-the-badge)</a>
+  <a href="">![GitHUb License](https://img.shields.io/github/license/m1001-byte/fenixmanager?style=for-the-badge)</a>
 
-
-<p align="center">
-<a href="https://imgbb.com/"><img src="https://i.ibb.co/2WMKqT8/fenix-menu.png" alt="fenix-menu" border="0"></a>
-</p>
+  <a href="https://imgbb.com/"><img src="https://i.ibb.co/qBj4Pth/fenix-menu.png" alt="fenix-menu" border="0"></a>
+</div>
 
 ## 💻 Requisitos
  * Ubuntu 18.04 LTS o superior.
@@ -18,7 +18,8 @@
 
 ## 🚀 Instalacion
 
-**Versión beta. Aún hay bug y errores en la interfaz gráfica que se debe corregir. Además, se está trabajando en una interfaz más amigable para los dispositivos móviles**
+**Al momento de instalar: le preguntaran desde que rama clonar el repositorio, seleccionen la opcion `1` ( Correspondiente a la rama `master` ), o simplemente puede presionar `enter`.**
+
 ```bash
 sudo apt-get update # Actualizar lista de paquetes
 sudo apt-get upgrade -y # Actualizar paquetes
@@ -42,6 +43,7 @@ sudo bash /tmp/install-fenix.bash # Instalar
     * Openvpn
     * V2ray / X-UI
     * Un simple proxy de redireccionamiento de puertos. ( Escrito en python3 )
+    * badvpn udpgw
 * Configuracion
     * Administrar Hitman ( Encargado de eliminar usuarios expirados,o que superen el número máximo de conexiones permitidas)
     * Administrar Firewall ( UFW )
@@ -52,27 +54,19 @@ sudo bash /tmp/install-fenix.bash # Instalar
     * Bloquear / Desbloquear P2P ( Torrents, etc )
     * Cambiar ajustes de Fénix
         * Mostar / Ocultar Paneles
+* Desinstalar FénixManager
+    * Elimina todos los archivos/directorios creados por el script
+    * Elimina todos los servicios instalados por el script ( dropbear,squid,etc )
+    * Restaura el archivo ".bashrc" al estado original
+    * Elimina la entrada "/bin/false" del archivo "/etc/shells" ( Agregada para el correcto funcionamiento de dropbear )
 
 ### **Y mas por venir :)**
 
-## 📸 Screenshots
-
-## ✏️ Características Futuras
- - [ ] Administrar vps desde un bot de Telegram
- - [ ] Panel de administracion via web
-
-
-## Contribuir
-1. Bifurcar este  repositorio
-2. Crea tu rama de característica (`git checkout -b feature/CaracteristicaIncreible`)
-3. Guardar los cambios  (`git commit -m 'Agregadas funciones increibles'`)
-4. Subir los cambios hacia la rama (`git push origin feature/CaracteristicaIncreible`)
-5. Abrir una solicitud pull
-
 ## Contacto
-**Unicos medios de contactos**
+**Unicos medios de contactos.**
   * **Telegram: [@Mathiue1001](https://t.me/Mathiue1001)**
   * **Telegram: [@M1001_byte](https://t.me/M1001_byte)**
+  * **Canal de Telegram: [@ScriptFenixManager](https://t.me/ScriptFenixManager)**
 
 ## 📝 Licencia
 [MIT](https://choosealicense.com/licenses/mit/)
