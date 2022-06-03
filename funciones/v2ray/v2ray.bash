@@ -73,7 +73,7 @@ cfg_v2ray(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[${BBLUE}${prompt}${WHITE}")] : " user_option
+        read -er -p "$(echo -e "${WHITE}[${BBLUE}${prompt}${WHITE}")] : " user_option
 
         case $user_option in
             1) # INSTALAR/ADMINISTRAR V2RAY-WEBUI
@@ -184,7 +184,7 @@ cfg_x_ui(){
                 ;;
             4) # RESTABLECER CONTRASEÑA DE USUARIO
                 {
-                    read -p "$(echo -e "${YELLOW}[*] Estas seguro de querer restablecer la contraseña y usuario a los valored por defectos? [y/n] : ")" user_option
+                    read -ep "$(echo -e "${YELLOW}[*] Estas seguro de querer restablecer la contraseña y usuario a los valored por defectos? [y/n] : ")" user_option
                     if [[ $user_option == "y" ]];then
                         /usr/local/x-ui/x-ui setting -username admin -password admin &>/dev/null
                         info "El nombre de usuario y contraseña se han restablecido a los valores por defecto. ( ${GREEN}admin ${WHITE}/ ${GREEN}admin )"
@@ -198,7 +198,7 @@ cfg_x_ui(){
                 ;;
             5) # RESTABLECER LA CONFIGURACION DEL PANEL
                 {
-                    read -p "$(echo -e "${YELLOW}[*] ¿Está seguro de que desea restablecer todas las configuraciones del panel, los datos de la cuenta no se perderán, el nombre de usuario y la contraseña no se cambiarán? [y/n] : ")" user_option
+                    read -ep "$(echo -e "${YELLOW}[*] ¿Está seguro de que desea restablecer todas las configuraciones del panel, los datos de la cuenta no se perderán, el nombre de usuario y la contraseña no se cambiarán? [y/n] : ")" user_option
                     if [[ $user_option == "y" ]];then
                         /usr/local/x-ui/x-ui setting -reset &>/dev/null
                         systemctl restart x-ui

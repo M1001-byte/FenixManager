@@ -91,7 +91,7 @@ port_input() {
     puertos_array=()
     while true;do
         trap ctrl_c SIGINT SIGTERM
-        read -r -p "$(echo -e "${WHITE}[*] Puertos a agregar : ")" puertos
+        read -er -p "$(echo -e "${WHITE}[*] Puertos a agregar : ")" puertos
         IFS=' ' read -r -a puertos <<< "$puertos"
         for puerto in "${puertos[@]}";do
             [[ -z "${puerto}" ]] && continue 
@@ -429,7 +429,7 @@ redirect_to_service() {
     printf "${WHITE}〢${YELLOW}[ %-2s ]${WHITE} %-30s %25s\n" "10" "UTILIZAR UN PUERTO PERSONALIZADO" "〢"
     line_separator 62
     while true;do
-        read  -r -p "$(echo -e "${WHITE}[*] # del servicio al que desea redireccionar: ")" service_number
+        read  -er -p "$(echo -e "${WHITE}[*] # del servicio al que desea redireccionar: ")" service_number
         if [[ -z "$service_number" ]]; then continue ; fi
         if grep -E "[a-z]|[A-Z]" <<< "$service_number" &>/dev/null;then continue ; fi
         if [[ $service_number -lt 1 ]] || [[ $service_number -gt 10 ]]; then continue ; fi
@@ -442,7 +442,7 @@ redirect_to_service() {
     
     if [[ $service_number == 10 ]]; then
         until [[ $port_number =~ ^[0-9]+$ ]]; do
-            read -r -p "$(echo -e "${yellow}[*] Ingrese el  puerto: ")" port_number
+            read -e -r -p "$(echo -e "${yellow}[*] Ingrese el  puerto: ")" port_number
             if [[ -z "$port_number" ]]; then continue ; fi
         done
     fi
@@ -474,7 +474,7 @@ list_certs() {
     line_separator 60
     
     while true;do
-        read -r -p "$(echo -e "${green}[*] Certificado (*.cert,*.pem,*.crt): ")" cert_opt
+        read -er -p "$(echo -e "${green}[*] Certificado (*.cert,*.pem,*.crt): ")" cert_opt
         if [[ -z "$cert_opt" ]] || [[ $cert_opt -gt $count_ ]] || grep -E "[a-z]|[A-Z]" <<< "$cert_opt" &>/dev/null;then
             continue
         else
@@ -484,7 +484,7 @@ list_certs() {
     done
     [[ ! $CERT_FILE =~ "pem" ]] && {
         while true;do
-            read -r -p "$(echo -e "${RED}[*] Llave privada (*.key): ")" key_file
+            read -er -p "$(echo -e "${RED}[*] Llave privada (*.key): ")" key_file
             if [[ -z "${key_file}" ]] || [[ "${key_file}" -gt $count_ ]] || [[ "${key_file}" =~ "[a-z]|[A-Z" ]];then continue ; fi
             export KEY_FILE="$cert_dir${certs_array[$key_file-1]}" &>/dev/null
             break
@@ -497,7 +497,7 @@ cert_gen() {
     info 'Generando un certificado ssl autofirmado.'
     cert_dir="${user_folder}/FenixManager/cert-ssl/"
     
-    read -r -p "$(echo -e "${WHITE}[*] Ingrese el dominio del certificado (fenixmanager.com): ")" domain
+    read -er -p "$(echo -e "${WHITE}[*] Ingrese el dominio del certificado (fenixmanager.com): ")" domain
     if [[ -z "$domain" ]];then  domain='fenixmanager.com' ; fi
     
     if [[ ! -d "${cert_dir}" ]];then mkdir -p "${cert_dir}" ; fi
@@ -531,7 +531,7 @@ stunnel4_whats_cert_to_use(){
     
     while true;do
         trap ctrl_c SIGINT SIGTERM SIGKILL
-        read -p "$(echo -e "$BLUE[*] Ingrese la opcion ${endcolor}") : " option
+        read -ep "$(echo -e "$BLUE[*] Ingrese la opcion ${endcolor}") : " option
         case  $option in
             1 )
                 cert_gen
@@ -605,7 +605,7 @@ list_banners(){
     done 
     line_separator 60
     while true;do
-        read -r -p "$(echo -e "${WHITE}[*] ID del banner : ")" banner_id
+        read -er -p "$(echo -e "${WHITE}[*] ID del banner : ")" banner_id
         if [[ $banner_id -lt 0 || $banner_id -gt ${#banners_array[@]}-1 ]];then
             error "El ID ingresado no es valido."
             continue
@@ -761,7 +761,7 @@ uninstall_fenixmanager(){
     
     info "Los siguientes protocolos seran eliminados:"
     for service in "${services_to_remove[@]}";do echo -e "${WHITE}${RED}  ${service}${WHITE}" ; done
-    read -rp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
+    read -erp "[*] Continuar con la desinstalacion ? [y/n]: " yes_no
     if [[ "${yes_no}" == [yYsS] ]];then
         # removed dir
         list_services_and_ports_used "get_actived_services" # return 'services_actived' with all services actived

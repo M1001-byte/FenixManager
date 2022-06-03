@@ -59,7 +59,7 @@ create_ssh_user_input() {
         fi
     }
     while true;do
-        read -p "$(echo -e "$WHITE[*] Ingrese el nombre de usuario:${endcolor}") " user
+        read -pe "$(echo -e "$WHITE[*] Ingrese el nombre de usuario:${endcolor}") " user
     
         if [[ ${#user} -gt 32 ]];then
             error 'El nombre de usuario no puede tener mas de 32 caracteres.'
@@ -73,7 +73,7 @@ create_ssh_user_input() {
         check_user_exist "$user"
         if [ $? -eq 0 ];then
             while true;do
-                read -p "$(echo -e $BLUE'[*] Alias (Opcional) : ' )" alias_
+                read -ep "$(echo -e $BLUE'[*] Alias (Opcional) : ' )" alias_
                 if [[ ${#alias_} -gt 15  ]];then
                     error "El alias no puede tener mas de 15 caracteres."
                     continue
@@ -91,7 +91,7 @@ create_ssh_user_input() {
                 fi
                 # if lenght of user is greater than 18
                 [[ ${#user} -gt 18 ]] && local user_tmp="${user:0:17}(~)" || local user_tmp="${user}"
-                read -p "$(echo -e $YELLOW"[*] Contraseña para ${user_tmp} $str: " )" passwd
+                read -ep "$(echo -e $YELLOW"[*] Contraseña para ${user_tmp} $str: " )" passwd
                 if [[ ${#passwd} -gt 20 ]];then
                     error 'La contraseña no puede tener mas de 20 caracteres.'
                     continue
@@ -107,7 +107,7 @@ create_ssh_user_input() {
             
 
             while true;do
-                read -p "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
+                read -ep "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
                 if [[ "$date_exp" =~ ^-$ ]];then
                     create_temp_user
                 elif [[ ! "${date_exp}" =~ ^[0-9]+$ ]];then
@@ -120,7 +120,7 @@ create_ssh_user_input() {
             done
             
             until [[ "$max_connections" =~ ^[0-9]+$ ]];do
-                read -p "$(echo -e $RED'[*] Cantidad maxima de conexiones : ' )" max_connections
+                read -ep "$(echo -e $RED'[*] Cantidad maxima de conexiones : ' )" max_connections
                 if [ -z "$max_connections" ];then
                     info 'El valor no es correcto.De forma predeterminada, se le asignara un maximo de una (1) conexion.'
                     max_connections=1
@@ -136,7 +136,7 @@ create_ssh_user_input() {
                     local output=$(echo "/etc/FenixManager/funciones/hitman.bash 5 ${user} ${passwd}"| at "${at_time}" 2>&1)
                     local hours=$(echo "${output}" | awk 'NR==2{split($0,a," "); print a[7]}')
                     info "El usuario ${GREEN}$user${WHITE} se creo correctamente.Se eliminara a las ${GREEN}${hours}${WHITE} ( hora local )."
-                    read -p "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
+                    read -ep "$(echo -e $GREEN'[*] Presione enter para continuar... ' )"
                 } || {
                     if [[ -z $alias_ ]];then
                         cmd="insert into ssh (nombre,password,exp_date,max_conn) values ('$user','$passwd','$fecha_final','$max_connections')"
@@ -174,7 +174,7 @@ list_user() {
             users_count=$(sqlite3 $db "select count(*) from ssh")
         else
             error 'LA TABLA SSH NO EXISTE EN LA BASE DE DATOS.'
-            read -p "$(echo -e $WHITE'[*] Desea crearla (S)i (N)o : ' )" create_table
+            read -ep "$(echo -e $WHITE'[*] Desea crearla (S)i (N)o : ' )" create_table
             if [[ "$create_table" == 's' ]] || [[ "$create_table" = 'S' ]];then
                 sqlite3 $db  'CREATE TABLE ssh (nombre VARCHAR(20) NOT NULL, alias VARCHAR(10), password VARCHAR(15), exp_date DATETIME, max_conn INT NOT NULL );'
                 info 'La tabla ssh fue creada con exito.'
@@ -291,7 +291,7 @@ option_menu_ssh() {
     
     while true;do
         prompt=$(date "+%x %X")
-        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read -re  option
         case $option in
             1 ) create_ssh_user_input && clo ;;
             2 ) delete_user ;;

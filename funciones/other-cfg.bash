@@ -16,7 +16,7 @@ deny_allow_port_ufw_input(){ # *OPERATION = DENY OR ALLOW
     info "Para ${str_show} un puerto, introduzca el número del puerto seguido de /[protocolo]."
     info "Ejemplo: 80/tcp 443/udp 2222/all"
     while true;do
-    read -r -p "[*] Introduzca los puertos que desa ${str_show} ( separados por espacio ): " ports_array
+    read -er -p "[*] Introduzca los puertos que desa ${str_show} ( separados por espacio ): " ports_array
     if [ -z "${ports_array}" ];then continue ; fi
         for ports_str in "${ports_array[@]}";do
             IFS='/' read -r -a array <<< "${ports_str}"
@@ -88,7 +88,7 @@ cfg_hitman(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -er -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case $opt in
             1) # VER REGISTRO DE HITMAN
                 clear
@@ -100,7 +100,7 @@ cfg_hitman(){
                 {   
                     info "Cada cuanto se ejecutará el script de HITMAN (en minutos), para comprobar si hay cuentas con excedente de conexiones."
                     while true;do
-                        read -r -p "[*] Tiempo de ejecución (minutos): " time_to_run
+                        read -er -p "[*] Tiempo de ejecución (minutos): " time_to_run
                         # time_to_run es mayor que 0 y menor que 60
                         if [ $time_to_run -gt 0 ] && [ $time_to_run -lt 60 ]; then
                             break
@@ -193,7 +193,7 @@ cfg_firewall_ufw(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -er -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case $opt in
             1) # ACTIVAR/DESACTIVAR FIREWALL
                 if [[  "${ufw_status}" =~ "[ INACTIVO ]" ]];then
@@ -233,7 +233,7 @@ cfg_timezone(){
     done
     line_separator 61
     while true;do
-        read -r -p "$(echo -e "${BLUE}[*] Zona Horaria [0-19]${WHITE}") : " opt
+        read -er -p "$(echo -e "${BLUE}[*] Zona Horaria [0-19]${WHITE}") : " opt
         if [[ "${opt}" =~ ^[0-9]+$ ]];then
             if [ "${opt}" -ge 0 ] && [ "${opt}" -lt ${#opt_for_timedatectl[@]} ];then
                 local timezone_="${opt_for_timedatectl[$opt]}"
@@ -287,7 +287,7 @@ cfg_fail2ban(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -er -p "$(echo -e "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case $opt in
             1) [[ "${fail2ban_status}" -eq 0 ]] && bar "systemctl stop fail2ban" || bar "systemctl start fail2ban"
                 sleep 3
@@ -386,7 +386,7 @@ cfg_fenix_settings(){
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
-        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        read -er -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case ${opt} in
             1) # ! 
                 [[ "${hide_first_panel}" == "false" ]] && {
@@ -466,11 +466,11 @@ limit_bandwidth(){
         info "Esto incluye tu usuario actual ( ${user} ). ( Es recomendable habilitar,cuando este servidor sea solo exclusivo para usuarios publicos )."
         until [[ "${download}" =~ ^[0-9]+$ ]];do
             trap ctrl_c SIGINT SIGTERM
-            read -p "$(echo -e "${WHITE}[*] Ingrese el limite de descarga en Kbps ( Kilo Bytes Per Second ) : ")" download
+            read -ep "$(echo -e "${WHITE}[*] Ingrese el limite de descarga en Kbps ( Kilo Bytes Per Second ) : ")" download
         done
         while [[ "${upload}" =~ ^[0-9]+$ ]];do
             trap ctrl_c SIGINT SIGTERM
-            read -p "$(echo -e "${WHITE}[*] Ingrese el limite de subida en Kbps ( Kilo Bytes Per Second ) : ")" upload
+            read -ep "$(echo -e "${WHITE}[*] Ingrese el limite de subida en Kbps ( Kilo Bytes Per Second ) : ")" upload
         done
         for interface in ${interfaces};do
             wondershaper ${interface} ${download} ${upload} || {
