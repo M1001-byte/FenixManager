@@ -8,7 +8,7 @@ https://github.com/m1001-byte/FenixManager
 """
 
 from threading import Thread
-import sys, socket, select, argparse, os
+import sys, socket, select, argparse, os, time
 from colorama import Fore
 
 def show_info(**kwargs):
@@ -26,7 +26,7 @@ class proxy_socket(Thread):
         self.s = None
         self.conn,self.addr = client_soket,"{}:{}".format(addr[0],addr[1])
         self.connect_to = forwarding_to
-        self.buffer_size = 4096
+        self.buffer_size = 4096 * 4
         self.custom_response = custom_response
 
     def run(self):
@@ -36,40 +36,47 @@ class proxy_socket(Thread):
     def forward(self):
         try:
             self.remote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            self.remote.connect_ex (self.connect_to)
+            self.remote.connect(self.connect_to)
         except KeyboardInterrupt: sys.exit(130)
         except Exception as er:
             print(f"[ ERROR ] Fallo al conectar con el servidor remoto: {Fore.YELLOW}{self.connect_to}{Fore.WHITE}")
             exit(1)
     
     def incoming_connections(self):
-        self.inputs = [self.remote,self.conn]
+        err = False
+        self.inputs = [self.remote,self.conn]    
         
-        if self.custom_response != b"None":
-            payload=self.conn.recv(self.buffer_size)
-            self.conn.sendall(self.custom_response)
+
+        if self.custom_response != b"None":            
+                while True:
+                    payload = self.conn.recv(self.buffer_size)
+                    if "SSH-2.0" in payload.decode():
+                        self.conn.send(self.custom_response)
+                        self.remote.send(payload)
+                        break
 
         while self.inputs:
-            try:
-                read, _, _ = select.select(self.inputs, [],[])
+            read, _, err = select.select(self.inputs, [],[],3)
             
-                for self.s in read:
+            for self.s in read:
+                try:    
                     self.data = self.s.recv(self.buffer_size)
-                    if len(self.data) == 0:
-                        self.close()
-                        break
-                        
-                    else:
+                    if self.data:
                         if self.s == self.remote:
                             self.conn.sendall(self.data)
                         else:
-                            self.remote.sendall(self.data)
-            except KeyboardInterrupt:
-                sys.exit(130)
-            except Exception as er:
-                write_to_log(log_file,er)
-                self.close()
-                break
+                            while self.data:
+                                bytes = self.remote.send(self.data)
+                                self.data = self.data[bytes:]
+                    else:
+                        break
+                except KeyboardInterrupt:
+                    sys.exit(130)
+                except Exception as er:
+                    write_to_log(log_file,er)
+                    #self.close()
+                    break
+            if err: break
                         
     def close(self):
         self.inputs = []
