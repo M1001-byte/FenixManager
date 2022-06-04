@@ -48,12 +48,8 @@ class proxy_socket(Thread):
         
 
         if self.custom_response != b"None":            
-                while True:
-                    payload = self.conn.recv(self.buffer_size)
-                    if "SSH-2.0" in payload.decode():
-                        self.conn.send(self.custom_response)
-                        self.remote.send(payload)
-                        break
+            payload = self.conn.recv(self.buffer_size)
+            self.conn.send(self.custom_response)
 
         while self.inputs:
             read, _, err = select.select(self.inputs, [],[],3)
