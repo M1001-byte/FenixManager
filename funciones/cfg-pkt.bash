@@ -1316,7 +1316,12 @@ cfg_python3_proxy(){
                     echo ""
                     select_string_msg
                     local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
-                    local base_cfg="[CUSTOM#${number_of_custom_config}]\naccept=${port}\nconnect=127.0.0.1:${port_to_redirect}\ncustom_response=${base_response}"
+                    [[ "${SERVICE_NAME}" == "dropbear" || "${SERVICE_NAME}" == "ssh" ]] && {
+                        local connection_type="SSH"
+                    } || {
+                        local connection_type="OPENVPN"
+                    }
+                    local base_cfg="[CUSTOM#${number_of_custom_config}]\naccept=${port}\nconnect=127.0.0.1:${port_to_redirect}\ncustom_response=${base_response}\nconnection_type=${connection_type}\n"
                     echo -e "${base_cfg}" >> "${config_file}"
                     local service_status=$(systemctl status fenixmanager-pysocks &>/dev/null;echo $?)
                     if [[ $service_status -eq 0 ]];then
@@ -1638,7 +1643,8 @@ cfg_ssh_dropbear(){
                     case $banner_option in 
                         1 ) # ! LOAD BANNER FROM FILE
                             list_banners && local banner_file="${BANNER_FILE}" && unset BANNER_FILE
-                            change_banner_dropbear "${banner_file}" && change_banner_openssh "${banner_file}"
+                            change_banner_dropbear "${banner_file}"
+                            change_banner_openssh "${banner_file}"
                             ;;
                         2 ) # ! LOAD BANNER FROM URL
                             info "Tenga en cuenta que, todo el contenido que devuelve la URL sera usado como banner."
@@ -1677,7 +1683,8 @@ cfg_ssh_dropbear(){
                             sed -i '/Permission denied, please try again./d' /tmp/banner_ssh_tmp
                             cat "/tmp/banner_ssh_tmp" > "${banner_file}"
                             rm /tmp/banner_ssh_tmp
-                            change_banner_openssh "${banner_file}" && change_banner_dropbear "${banner_file}"
+                            change_banner_dropbear "${banner_file}"
+                            change_banner_openssh "${banner_file}"
                             ;;
                         4 ) # ! INPUT BANNER
                             info "Cuando termine de introducir el banner, presiona la combinacion: ${YELLOW}CTRL + D ${WHITE}."
@@ -1689,7 +1696,8 @@ cfg_ssh_dropbear(){
                             read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
                             banner_file="${user_folder}/FenixManager/banner/${banner_file}"
                             echo -e "${banner_array[@]}" > "${banner_file}"
-                            change_banner_dropbear "${banner_file}" && change_banner_openssh "${banner_file}"
+                            change_banner_dropbear "${banner_file}"
+                            change_banner_openssh "${banner_file}"
                     esac
                 }
                 banner_select

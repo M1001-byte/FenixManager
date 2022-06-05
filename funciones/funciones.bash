@@ -448,6 +448,8 @@ redirect_to_service() {
     fi
 
     export SERVICE_REDIRECT=${port_number:-$service_number}
+    export SERVICE_NAME=${service_available[$service_number-1]}
+    echo -e "${WHITE}[*] El servicio seleccionado es: ${green}${SERVICE_NAME}${WHITE} y el puerto es: ${green}${SERVICE_REDIRECT}${WHITE}"
 
 }
 
