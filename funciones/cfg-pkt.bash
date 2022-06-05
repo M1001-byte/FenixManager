@@ -1355,7 +1355,7 @@ cfg_python3_proxy(){
                         local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
                         local line_of_port=$((line_of_port-1))
                         local array_lines_delete
-                        for (( i=$line_of_port; i<$((line_of_port+4)); i++ ));do array_lines_delete+="${i}d;" ; done
+                        for (( i=$line_of_port; i<$((line_of_port+5)); i++ ));do array_lines_delete+="${i}d;" ; done
                         sed -i "${array_lines_delete}" ${config_file}
                         fuser  ${port_to_delete}/tcp -k &>/dev/null
                         sed '/^[[:space:]]*$/d' -i ${config_file} 
