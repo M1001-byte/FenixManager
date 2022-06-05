@@ -14,7 +14,7 @@ def kill_port(port:int) -> int:
         return 0
     except:pass
 def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,connection_type:str,action:str="start") -> None:
-    args_parse_to_script = f"--port {bind_port} --connect {connect_to} --custom-response '{custom_response} --connection-type {connection_type}"
+    args_parse_to_script = f"--port {bind_port} --connect {connect_to} --custom-response '{custom_response}' --connection-type {connection_type}"
     tmp_proc = subprocess.Popen([f'python3 {proxy_file} {args_parse_to_script} &'],shell=True)
     #os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
