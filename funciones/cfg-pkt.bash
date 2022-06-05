@@ -1271,7 +1271,7 @@ cfg_python3_proxy(){
                     done
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
-                    local number_of_custom_config=$(grep "CUSTOM#" ${config_file} | cut -d '#' -f 2 | tr "]" " " | xargs)
+                    local number_of_custom_config=$(grep "CUSTOM#" ${config_file} -c )
                     local number_of_custom_config=$(echo ${number_of_custom_config} + 1 | bc)
                     
                     select_status_code(){
