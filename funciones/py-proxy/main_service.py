@@ -34,7 +34,7 @@ def main(config:str):
             connection_type = parser.get(section, 'connection_type')
         except Exception as er:
             if "connection_type" in str(er):
-                connection_type = "ssh"
+                connection_type = "SSH"
         #log_file = f"/var/log/FenixManager/pysocks:{bind_port}-{connect_to}.log"
         
         is_open = port_is_open(int(bind_port))
