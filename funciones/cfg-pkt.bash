@@ -1605,28 +1605,39 @@ cfg_ssh_dropbear(){
             4) # CAMBIAR BANNER
                 # ! SELECT OPT BANNER
                 local fenixbanner='<br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Script: </strong><strong style="color:#ff0000;font-size: 30px;">FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Version: </strong><strong style="color:#ff0000;font-size: 30px;">replace_version</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Dev: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001_byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Github: </strong><strong style="color:#ff0000;font-size: 30px;">github.com/M1001-byte/FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001-byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@Mathiue1001</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢Gracias por utilizar FenixManager!〢</strong>'
-                change_banner_openssh(){
+                change_banner(){
                     # find banner line number in ssh config
                     local banner_file="${1}"
+                    local fenix_thanks_banner='<br><font color="#0066cc" style="font-size: 30px"><strong>〢─────────────────────────〢</strong></font><br><font color="#ff3333" style="font-size: 30px"><strong>〢 Gracias por utilizar FenixManager! 〢</strong></font><br><font color="#0066cc" style="font-size: 30px"><strong>〢─────────────────────────〢</strong></font><br><br>'
+                    echo -e "${fenix_thanks_banner}" >> "${banner_file}"
+                    
+                    local banner_size=$(wc -c < "${banner_file}")
+                    if [[ ${banner_size} -gt 2000 ]];then
+                        error "El banner supera los 2000 bytes ( 2 KB ). Limite impuesto por dropbear."
+                        rm -f "${banner_file}"
+                        return 1
+                    fi
+                    package_installed "htmlmin" || bar "apt-get install -y htmlmin"
+                    cp "${banner_file}" "${banner_file}.unminified"
+                    htmlmin -s "${banner_file}.unminified" > "${banner_file}"
+                    rm -f "${banner_file}.unminified"
+                     # minify html
                     local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
-                    echo -e "${fenixbanner}" >> "${banner_file}"
+                    local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
+
+                    # ! OPENSSH
                     [[ -z ${ssh_banner_line} ]] && {
                         echo "Banner ${banner_file}" >> ${ssh_file}
                     } || {
                         sed -i "${ssh_banner_line}s|^Banner.*|Banner ${banner_file}|g" ${ssh_file}
                     }
                     bar "service ssh restart"
-                }
-                change_banner_dropbear(){
-                    # find banner line number in dropbear config
-                    local banner_file="${1}"
-                    local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
+                    # ! DROPBEAR
                     [[ -z ${dropbear_banner_line} ]] && {
                         echo "DROPBEAR_BANNER='${banner_file}'" >> ${dropbear_file}
                     } || {
                         sed -i "${dropbear_banner_line}s|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER='${banner_file}'|g" ${dropbear_file}
                     }
-                    echo -e "${fenixbanner}" >> "${banner_file}"
                     bar "service dropbear restart"
                 }
                 banner_select() {
@@ -1634,7 +1645,7 @@ cfg_ssh_dropbear(){
                     echo -e "${WHITE}[ ${GREEN}2${WHITE} ] ${WHITE}Cargar banner desde una URL${WHITE}"
                     echo -e "${WHITE}[ ${GREEN}3${WHITE} ] ${WHITE}Copiar banner de un servidor ssh${WHITE}"
                     echo -e "${WHITE}[ ${GREEN}4${WHITE} ] ${WHITE}Introducir el banner${WHITE}"
-
+                    local banner_option
                     until [[ ${banner_option} =~ ^[1-4]$ ]];do
                         trap ctrl_c SIGINT SIGTERM
                         read -r -p "$(echo -e "${WHITE}[*] Opcion : ")" banner_option
@@ -1643,8 +1654,7 @@ cfg_ssh_dropbear(){
                     case $banner_option in 
                         1 ) # ! LOAD BANNER FROM FILE
                             list_banners && local banner_file="${BANNER_FILE}" && unset BANNER_FILE
-                            change_banner_dropbear "${banner_file}"
-                            change_banner_openssh "${banner_file}"
+                            change_banner "${banner_file}"
                             ;;
                         2 ) # ! LOAD BANNER FROM URL
                             info "Tenga en cuenta que, todo el contenido que devuelve la URL sera usado como banner."
@@ -1653,8 +1663,7 @@ cfg_ssh_dropbear(){
                             read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
                             banner_file="${user_folder}/FenixManager/banner/${banner_file}"
                             if wget -q "${banner_url}" -O "${banner_file}";then
-                                change_banner_dropbear "${banner_file}"
-                                change_banner_openssh "${banner_file}"
+                                change_banner "${banner_file}"
                             else
                                 error "No se pudo descargar el banner."
                                 info "Compruebe su conexion a internet o firewall."
@@ -1683,8 +1692,7 @@ cfg_ssh_dropbear(){
                             sed -i '/Permission denied, please try again./d' /tmp/banner_ssh_tmp
                             cat "/tmp/banner_ssh_tmp" > "${banner_file}"
                             rm /tmp/banner_ssh_tmp
-                            change_banner_dropbear "${banner_file}"
-                            change_banner_openssh "${banner_file}"
+                            change_banner "${banner_file}"
                             ;;
                         4 ) # ! INPUT BANNER
                             info "Cuando termine de introducir el banner, presiona la combinacion: ${YELLOW}CTRL + D ${WHITE}."
@@ -1695,15 +1703,20 @@ cfg_ssh_dropbear(){
                             line_separator 62
                             read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
                             banner_file="${user_folder}/FenixManager/banner/${banner_file}"
-                            echo -e "${banner_array[@]}" > "${banner_file}"
-                            change_banner_dropbear "${banner_file}"
-                            change_banner_openssh "${banner_file}"
+
+                            echo "${banner_array[@]}" > "${banner_file}"
+                            change_banner "${banner_file}"
                     esac
                 }
-                banner_select
-                info "Banner ${GREEN}${banner_file}${WHITE} cambiado correctamente."
-                sleep 4
-                cfg_ssh_dropbear
+                banner_select && {
+                    info "Banner ${GREEN}${banner_file}${WHITE} cambiado correctamente."
+                    sleep 4
+                    cfg_ssh_dropbear
+                } || {
+                    error "No se pudo cambiar el banner."
+                    read -r -p "$(echo -e "${WHITE}[*] Presiona enter para continuar...")"
+                    cfg_ssh_dropbear
+                }
                 ;;
             5) #  REINICIAR DROPBEAR / OPENSSH
                 [[ ${dropbear_is_installed} -eq 0 ]] && bar "service dropbear restart"

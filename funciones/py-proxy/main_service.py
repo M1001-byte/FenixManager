@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import configparser, subprocess, time, sys, os, socket
 
 def port_is_open(port:int) -> int:

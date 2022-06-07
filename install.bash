@@ -71,7 +71,7 @@ script_name=`basename "$0"`
 script_folder='/etc/FenixManager'
 [[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
 
-packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake)
+packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake htmlmin)
 updates_command=(update full-upgrade autoremove)
 pip_packages=(colorama argparse requests)
 
