@@ -110,6 +110,7 @@ create_ssh_user_input() {
                 read -ep "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
                 if [[ "$date_exp" =~ ^-$ ]];then
                     create_temp_user
+                    break
                 elif [[ ! "${date_exp}" =~ ^[0-9]+$ ]];then
                     error "El valor ingresado no es valido."
                 else
