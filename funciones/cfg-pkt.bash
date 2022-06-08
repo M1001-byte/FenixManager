@@ -370,6 +370,7 @@ cfg_stunnel4() {
             fi
         fi
         info "Certificado cambiado correctamente."
+        bar "service stunnel4 restart"
         sleep 1.5
         cfg_stunnel4
     }
@@ -1621,7 +1622,6 @@ cfg_ssh_dropbear(){
                     cp "${banner_file}" "${banner_file}.unminified"
                     htmlmin -s "${banner_file}.unminified" > "${banner_file}"
                     rm -f "${banner_file}.unminified"
-                     # minify html
                     local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
                     local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
 

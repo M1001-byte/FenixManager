@@ -499,31 +499,16 @@ cert_gen() {
     info 'Generando un certificado ssl autofirmado.'
     cert_dir="${user_folder}/FenixManager/cert-ssl/"
     
-    read -er -p "$(echo -e "${WHITE}[*] Ingrese el dominio del certificado (fenixmanager.com): ")" domain
-    if [[ -z "$domain" ]];then  domain='fenixmanager.com' ; fi
-    
-    if [[ ! -d "${cert_dir}" ]];then mkdir -p "${cert_dir}" ; fi
-
-    regex_domain='(?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$)' 
-    grep -P "$regex_domain" <<< $domain &> /dev/null
-    if [[ $? != 0 ]];then
-        error "El dominio no es valido."
-        info 'Por omision,se usara "fenixmanager.com"'
-        domain='fenixmanager.com'
-    fi
-
-    name="$cert_dir$domain-autogen_"
-    
-    openssl req -newkey rsa:2048 -nodes -keyout "$name.key" -x509 -days 365 -out "$name.crt" -subj "/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=$domain" &>/dev/null
+    openssl req -newkey rsa:2048 -nodes -keyout "stunnel.key" -x509 -days 365 -out "stunnel.crt" -subj "/C=AR/ST=BuenosAires/L=BuenosAires/O=FenixManager/OU=ADMVPS/CN=fenixmanager.com" &>/dev/null
     if [[ $? != 0 ]];then
         error "No se pudo generar el certificado."
         return 1
     else
-        cat "$name.crt" >> "$name.pem"
-        cat "$name.key" >> "$name.pem"
-        
-        CERT_FILE="$name.pem"
-        rm "$name.crt" "$name.key" &>/dev/null
+        cat "stunnel.crt" "stunnel.key" > "stunnel.pem"
+        mv "stunnel.pem" "$cert_dir"
+        CERT_FILE="${cert_dir}stunnel.pem"
+        chmod 400 "$CERT_FILE" 2>/dev/null
+        rm "stunnel.crt" "stunnel.key" &>/dev/null
         info "Certificado guardado en : $cert_dir"
     fi
 }
