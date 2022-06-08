@@ -20,6 +20,11 @@ function check_for_update(){
         
         sudo rm -rf "/etc/FenixManager" 
         sudo git clone "${url}" "/etc/FenixManager"
+
+        local fenix_bash_files=$(find /etc/FenixManager/ -name "*.bash")
+        for file in $fenix_bash_files; do
+            chmod 777 "${file}" &>/dev/null
+        done
         
         sudo mv "${temp_dir}/database/" "${scr_dir}"
         sudo mv "${temp_dir}/preferences.bash" "${scr_dir}"

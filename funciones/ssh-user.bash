@@ -10,6 +10,7 @@ script_executed_with_root_privileges
 
 create_temp_user(){
     info "Creando un usuario temporal"
+    package_installed "at" || bar "apt-get install at -y"
     while true;do
         read -p "$(echo -e ${WHITE}'[*] Ingrese el valor en este formato ( 00H:00M ) : ' )" date_exp
         
