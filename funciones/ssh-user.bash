@@ -10,6 +10,7 @@ script_executed_with_root_privileges
 
 create_temp_user(){
     info "Creando un usuario temporal"
+    package_installed "at" || bar "apt-get install at -y"
     while true;do
         read -p "$(echo -e ${WHITE}'[*] Ingrese el valor en este formato ( 00H:00M ) : ' )" date_exp
         
@@ -110,6 +111,7 @@ create_ssh_user_input() {
                 read -ep "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
                 if [[ "$date_exp" =~ ^-$ ]];then
                     create_temp_user
+                    break
                 elif [[ ! "${date_exp}" =~ ^[0-9]+$ ]];then
                     error "El valor ingresado no es valido."
                 else

@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-
 import configparser, subprocess, time, sys, os, socket
 
 def port_is_open(port:int) -> int:
@@ -13,8 +12,8 @@ def kill_port(port:int) -> int:
         os.system(f"kill -9 $(lsof -t -i:{port})")
         return 0
     except:pass
-def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,action:str="start"):
-    args_parse_to_script = f"--port {bind_port} --connect {connect_to} --custom-response '{custom_response}'"
+def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,connection_type:str,action:str="start") -> None:
+    args_parse_to_script = f"--port {bind_port} --connect {connect_to} --custom-response '{custom_response}' --connection-type {connection_type}"
     tmp_proc = subprocess.Popen([f'python3 {proxy_file} {args_parse_to_script} &'],shell=True)
     #os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
@@ -27,9 +26,14 @@ def main(config:str):
     parser.read(config)
     
     for index,section in enumerate(parser.sections()):
-        bind_port = parser.get(section, 'accept')
-        connect_to = parser.get(section, 'connect')
-        custom_response = parser.get(section, 'custom_response')
+        try:
+            bind_port = parser.get(section, 'accept')
+            connect_to = parser.get(section, 'connect')
+            custom_response = parser.get(section, 'custom_response')
+            connection_type = parser.get(section, 'connection_type')
+        except Exception as er:
+            if "connection_type" in str(er):
+                connection_type = "SSH"
         #log_file = f"/var/log/FenixManager/pysocks:{bind_port}-{connect_to}.log"
         
         is_open = port_is_open(int(bind_port))
@@ -38,11 +42,11 @@ def main(config:str):
                 continue
             else:
                 show_info(index,bind_port,connect_to)
-                run_proxy_server(bind_port, connect_to, custom_response)
+                run_proxy_server(bind_port, connect_to, custom_response, connection_type)
         else:
             #print(f"Log File [#{index}] : {log_file}")
             show_info(index,bind_port,connect_to)
-            run_proxy_server(bind_port, connect_to, custom_response)
+            run_proxy_server(bind_port, connect_to, custom_response, connection_type)
 
 
 if __name__ == "__main__":
