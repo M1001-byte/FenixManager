@@ -1,11 +1,8 @@
 #!/usr/bin/python3
 
 from threading import Thread
-<<<<<<< HEAD
 import sys, socket, select, argparse, os, time
-=======
 import sys, socket, select, argparse, os, re
->>>>>>> dev
 from colorama import Fore
 
 def show_info(**kwargs):
@@ -108,10 +105,6 @@ class proxy_socket(Thread,main):
         try:
             self.remote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             self.remote.connect(self.connect_to)
-<<<<<<< HEAD
-=======
-            
->>>>>>> dev
         except KeyboardInterrupt: sys.exit(130)
         except Exception as er:
             print(f"[ ERROR ] Fallo al conectar con el servidor remoto: {Fore.YELLOW}{self.connect_to}{Fore.WHITE}")
@@ -121,7 +114,6 @@ class proxy_socket(Thread,main):
     
     def incoming_connections(self):
         err = False
-<<<<<<< HEAD
         self.inputs = [self.remote,self.conn]    
         
 
@@ -151,7 +143,6 @@ class proxy_socket(Thread,main):
                     #self.close()
                     break
             if err: break
-=======
         self.inputs = [self.remote,self.conn]
         
 
@@ -183,8 +174,6 @@ class proxy_socket(Thread,main):
                             break
                 if err:
                     break
->>>>>>> dev
-                        
     def close(self):
         self.inputs = []
         self.remote.close()
