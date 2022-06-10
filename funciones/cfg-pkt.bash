@@ -1561,8 +1561,7 @@ cfg_ssh_dropbear(){
                 ;;
             2) # ELIMINAR PUERTOS DROPBEAR/OPENSSH
                 [[ ${dropbear_is_installed} -eq 0 ]] && {
-                    info "143, es el puerto por defecto de dropbear." 
-                    info "No se puede eliminar."
+                    info "143, es el puerto por defecto de dropbear. No se puede eliminar." 
                     local dropbear_extra_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
                     IFS=" " read -r -a ports_array <<< $dropbear_extra_ports
                     for ((i=0;i<${#ports_array[@]};i++));do
@@ -1571,7 +1570,7 @@ cfg_ssh_dropbear(){
                     done
                     while true;do
                         trap ctrl_c SIGINT SIGTERM
-                        read -r -p "$(echo -e "${WHITE}[*] Opcion [0-${#ports_array}] : ")" port_index
+                        read -r -p "$(echo -e "${WHITE}[*] Opcion : ")" port_index
                         if [[ ${port_index} -ge 0 && ${port_index} -lt ${#ports_array[@]} ]];then
                             break
                         else
@@ -1608,20 +1607,13 @@ cfg_ssh_dropbear(){
                 local fenixbanner='<br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Script: </strong><strong style="color:#ff0000;font-size: 30px;">FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Version: </strong><strong style="color:#ff0000;font-size: 30px;">replace_version</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Dev: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001_byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Github: </strong><strong style="color:#ff0000;font-size: 30px;">github.com/M1001-byte/FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001-byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@Mathiue1001</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢Gracias por utilizar FenixManager!〢</strong>'
                 change_banner(){
                     # find banner line number in ssh config
-                    local banner_file="${1}"
-                    local fenix_thanks_banner='<br><font color="#0066cc" style="font-size: 30px"><strong>〢─────────────────────────〢</strong></font><br><font color="#ff3333" style="font-size: 30px"><strong>〢 Gracias por utilizar FenixManager! 〢</strong></font><br><font color="#0066cc" style="font-size: 30px"><strong>〢─────────────────────────〢</strong></font><br><br>'
-                    echo -e "${fenix_thanks_banner}" >> "${banner_file}"
-                    
+                    local banner_file="${1}"                    
                     local banner_size=$(wc -c < "${banner_file}")
                     if [[ ${banner_size} -gt 2000 ]];then
                         error "El banner supera los 2000 bytes ( 2 KB ). Limite impuesto por dropbear."
                         rm -f "${banner_file}"
                         return 1
                     fi
-                    package_installed "htmlmin" || bar "apt-get install -y htmlmin"
-                    cp "${banner_file}" "${banner_file}.unminified"
-                    htmlmin -s "${banner_file}.unminified" > "${banner_file}"
-                    rm -f "${banner_file}.unminified"
                     local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
                     local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
 
@@ -1661,7 +1653,7 @@ cfg_ssh_dropbear(){
                             info "Es recomendable que el contenido sea solamente texto plano."
                             read -r -p "$(echo -e "${WHITE}[*] URL : ")" banner_url
                             read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
-                            banner_file="${user_folder}/FenixManager/banner/${banner_file}"
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file// /_}"
                             if wget -q "${banner_url}" -O "${banner_file}";then
                                 change_banner "${banner_file}"
                             else
@@ -1681,7 +1673,7 @@ cfg_ssh_dropbear(){
                             until [[ "${get_banner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ || "${get_banner_ip}" =~ (?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$) ]];do
                                 read -r -p "$(echo -e "${WHITE}[*] IP / DOMINIO : ")" get_banner_ip
                             done
-                            banner_file="${user_folder}/FenixManager/banner/banner_${get_banner_ip}.txt"
+                            banner_file="${user_folder}/FenixManager/banner/${get_banner_ip}"
                             timeout 5s sshpass -p "fenixmanager" ssh -o StrictHostKeyChecking=no "${get_banner_ip}" &> /tmp/banner_ssh_tmp
                             [[ $(wc -l /tmp/banner_ssh_tmp | cut -d" " -f1) -gt 1 ]] || {
                                 error "No se pudo obtener el banner del servidor ssh."
@@ -1702,7 +1694,7 @@ cfg_ssh_dropbear(){
                             readarray -t banner_array
                             line_separator 62
                             read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
-                            banner_file="${user_folder}/FenixManager/banner/${banner_file}"
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file// /_}"
 
                             echo "${banner_array[@]}" > "${banner_file}"
                             change_banner "${banner_file}"
