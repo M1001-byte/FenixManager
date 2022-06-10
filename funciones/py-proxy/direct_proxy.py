@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
 from threading import Thread
-import sys, socket, select, argparse, os, time
 import sys, socket, select, argparse, os, re
 from colorama import Fore
 
@@ -65,7 +64,7 @@ class proxy_socket(Thread,main):
         self.s = None
         self.conn,self.addr = client_soket,"{}:{}".format(addr[0],addr[1])
         self.connect_to = forwarding_to
-        self.buffer_size = 4096 * 4
+        self.buffer_size = 4096
         self.custom_response = custom_response
         self.client_buffer = ''
 
@@ -105,6 +104,7 @@ class proxy_socket(Thread,main):
         try:
             self.remote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
             self.remote.connect(self.connect_to)
+            
         except KeyboardInterrupt: sys.exit(130)
         except Exception as er:
             print(f"[ ERROR ] Fallo al conectar con el servidor remoto: {Fore.YELLOW}{self.connect_to}{Fore.WHITE}")
@@ -114,35 +114,6 @@ class proxy_socket(Thread,main):
     
     def incoming_connections(self):
         err = False
-        self.inputs = [self.remote,self.conn]    
-        
-
-        if self.custom_response != b"None":            
-            payload = self.conn.recv(self.buffer_size)
-            self.conn.send(self.custom_response)
-
-        while self.inputs:
-            read, _, err = select.select(self.inputs, [],[],3)
-            
-            for self.s in read:
-                try:    
-                    self.data = self.s.recv(self.buffer_size)
-                    if self.data:
-                        if self.s == self.remote:
-                            self.conn.sendall(self.data)
-                        else:
-                            while self.data:
-                                bytes = self.remote.send(self.data)
-                                self.data = self.data[bytes:]
-                    else:
-                        break
-                except KeyboardInterrupt:
-                    sys.exit(130)
-                except Exception as er:
-                    write_to_log(log_file,er)
-                    #self.close()
-                    break
-            if err: break
         self.inputs = [self.remote,self.conn]
         
 
@@ -174,6 +145,7 @@ class proxy_socket(Thread,main):
                             break
                 if err:
                     break
+                        
     def close(self):
         self.inputs = []
         self.remote.close()
