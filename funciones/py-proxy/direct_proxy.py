@@ -86,16 +86,15 @@ class proxy_socket(Thread,main):
                     if count_packet == 0:
                         self.conn.sendall(self.custom_response)
                         count_packet += 1
-                    else:
-                        try:
-                            ssh_identifier = self.regex_ssh_hotkey.findall(str(payload.decode("utf-8")))
-                            print(ssh_identifier[0])
-                            self.forward()
-                            self.remote.sendall(f"{ssh_identifier[0]}\r\n".encode())
-                            self.incoming_connections()
-                            
-                        except:
-                            pass
+                    try:
+                        ssh_identifier = self.regex_ssh_hotkey.findall(str(payload.decode("utf-8")))
+                        print(ssh_identifier[0])
+                        self.forward()
+                        self.remote.sendall(f"{ssh_identifier[0]}\r\n".encode())
+                        self.incoming_connections()
+                        break                
+                    except:
+                        pass
                 
                 
             
