@@ -1226,8 +1226,7 @@ cfg_python3_proxy(){
                         if [[ $is_open -eq 0 ]];then local color_1=${RED} ; local color_2=${RED} ; local color_3=${RED}; fi
                     fi
                     if [[ "${key}" == *"custom_response"* ]];then
-                        #local ${key}="$(grep -E "HTTP/.* [0-9]{1,}" -o <<< ${!key})"
-                        local ${key}="$(grep -E "HTTP/[0-9].[0-9] [0-9]{1,9}" -o <<< ${!key})"
+                        local ${key}="$(grep -E "HTTP/[0-9]\.?[0-9]? [0-9]{1,9}" -o <<< ${!key})"
                     fi
                     array_cfg+=("${!key}")
                 done
@@ -1272,8 +1271,8 @@ cfg_python3_proxy(){
                     done
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
-                    local number_of_custom_config=$(grep "CUSTOM#" ${config_file} -c )
-                    local number_of_custom_config=$(echo ${number_of_custom_config} + 1 | bc)
+                    local number_of_custom_config=($(grep -Eo "#[0-9]{1,}" ${config_file} | cut -d# -f2 | xargs ))
+                    local number_of_custom_config="$(echo ${number_of_custom_config[-1]} + 1 | bc)"
                     
                     select_status_code(){
                     
@@ -1290,7 +1289,7 @@ cfg_python3_proxy(){
                     select_string_msg(){
                         local array_colors=(RED GREEN BLUE YELLOW MAGENTA)
                         local html_colors=("#ff3333" "#0500ff" "#0cff00" "#ffef00" "#ff0078" "#ffffff" "#000000")
-                        info "Por favor, no utilice etiquetas HTML."
+                        info "${RED}No ${WHITE}utilizar: codigos ${RED}html${WHITE}, ${RED}emojis${WHITE} o cualquier otro caracter ${RED}invalido${WHITE}."
                         read -p "$(echo -e "${WHITE}[*] Escriba el texto de conexion : ")" string_banner
                         string_banner="${string_banner^^}"
                         if [[ -z "$string_banner" ]];then
@@ -1314,9 +1313,8 @@ cfg_python3_proxy(){
                         fi
                     }
                     select_status_code
-                    echo ""
                     select_string_msg
-                    local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
+                    local base_response="HTTP/3 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
                     [[ "${SERVICE_NAME}" == "dropbear" || "${SERVICE_NAME}" == "ssh" ]] && {
                         local connection_type="SSH"
                     } || {
@@ -1341,31 +1339,7 @@ cfg_python3_proxy(){
                 cfg_python3_proxy
                 ;;
             2) # ELIMINAR PUERTO
-                local ports_list=$(grep "accept" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
-                local ports_list_array=(${ports_list})
-                local number_of_ports=${#ports_list_array[@]}
-                if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
-                info "Seleccione el puerto a eliminar :"
-                for (( i=0; i<${number_of_ports}; i++ ));do
-                    echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
-                done
-                read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
-                if [[ $port_to_delete =~ ^[0-9]+$ ]];then
-                    if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then
-                        local port_to_delete="${ports_list_array[port_to_delete]}"
-                        local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
-                        local line_of_port=$((line_of_port-1))
-                        local array_lines_delete
-                        for (( i=$line_of_port; i<$((line_of_port+5)); i++ ));do array_lines_delete+="${i}d;" ; done
-                        sed -i "${array_lines_delete}" ${config_file}
-                        fuser  ${port_to_delete}/tcp -k &>/dev/null
-                        sed '/^[[:space:]]*$/d' -i ${config_file} 
-                        bar "systemctl restart fenixmanager-pysocks"
-                    else
-                        error "Opcion invalida."
-                    fi
-                fi
-                sleep 3
+                pysocks_del_port 
                 cfg_python3_proxy
                 ;;
             3) systemctl status fenixmanager-pysocks ;;
@@ -1738,41 +1712,6 @@ cfg_ssh_dropbear(){
     done
 }
 
-del_openssh_port(){
-    local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))
-    for ((i=0;i<${#ssh_ports[@]};i++));do
-        local port=${ssh_ports[$i]}
-        [[ ${port} -eq 22 ]] && {
-            echo -e "\t${WHITE}[ ${BLUE}!${WHITE} ] ${GREEN}${port}${WHITE} (${RED}Este puerto no se puede eliminar.${WHITE})"
-            } || {
-                echo -e "\t${WHITE}[ ${BLUE}${i}${WHITE} ] ${GREEN}${port}${WHITE}"
-            }
-    done
-    if [[ ${#ssh_ports[@]} -eq 1 ]];then
-        info "No hay puertos SSH disponibles para eliminar."
-        return 0
-    fi
-    while true;do
-        trap ctrl_c SIGINT SIGTERM
-        read -r -p "$(echo -e "${WHITE}[*] Opcion  : ")" port_index
-        if [[ ${port_index} -ge 0 && ${port_index} -lt ${#ssh_ports[@]} ]];then
-            local port_to_del=${ssh_ports[$port_index]}
-            [[ ${port_to_del} -eq 22 ]] && {
-                error "El puerto ( ${port_to_del} ) no se puede eliminar."
-                continue
-            } || {
-                sed -i "/^Port ${port_to_del}$/d" ${ssh_file}
-                bar "service ssh restart"
-                info "Puerto ${port_to_del} eliminado."
-                return 0
-            }
-        else
-            error "Opcion invalida."
-            continue
-        fi
-    done
-}
-
 cfg_badvpn(){
     clear
     echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO BADVPN UDPGW${BLUE} 〢─────────────〢"
@@ -1910,6 +1849,76 @@ cfg_badvpn(){
             *) tput cuu1 && tput el1
         esac
     done
+}
+
+
+del_openssh_port(){
+    local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))
+    for ((i=0;i<${#ssh_ports[@]};i++));do
+        local port=${ssh_ports[$i]}
+        [[ ${port} -eq 22 ]] && {
+            echo -e "\t${WHITE}[ ${BLUE}!${WHITE} ] ${GREEN}${port}${WHITE} (${RED}Este puerto no se puede eliminar.${WHITE})"
+            } || {
+                echo -e "\t${WHITE}[ ${BLUE}${i}${WHITE} ] ${GREEN}${port}${WHITE}"
+            }
+    done
+    if [[ ${#ssh_ports[@]} -eq 1 ]];then
+        info "No hay puertos SSH disponibles para eliminar."
+        return 0
+    fi
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        read -r -p "$(echo -e "${WHITE}[*] Opcion  : ")" port_index
+        if [[ ${port_index} -ge 0 && ${port_index} -lt ${#ssh_ports[@]} ]];then
+            local port_to_del=${ssh_ports[$port_index]}
+            [[ ${port_to_del} -eq 22 ]] && {
+                error "El puerto ( ${port_to_del} ) no se puede eliminar."
+                continue
+            } || {
+                sed -i "/^Port ${port_to_del}$/d" ${ssh_file}
+                bar "service ssh restart"
+                info "Puerto ${port_to_del} eliminado."
+                return 0
+            }
+        else
+            error "Opcion invalida."
+            continue
+        fi
+    done
+}
+
+
+pysocks_del_port() {
+    local port_to_delete
+    if [[ -z ${@} ]];then
+        local ports_list=$(grep "accept" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
+        local ports_list_array=(${ports_list})
+        local number_of_ports=${#ports_list_array[@]}
+        if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
+            info "Seleccione el puerto a eliminar :"
+        for (( i=0; i<${number_of_ports}; i++ ));do
+            echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
+        done
+        while true;do
+            trap ctrl_c SIGINT SIGTERM
+            read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
+            if [[ $port_to_delete =~ ^[0-9]+$ ]];then
+                if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then break ; fi
+            else
+                error "Opcion invalida."
+                continue
+            fi
+        done
+    fi
+    [[ -n "${1}" ]] && port_to_delete=${1} || port_to_delete="${ports_list_array[$port_to_delete]}"
+    local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
+    local line_of_port=$((line_of_port-1))
+    local array_lines_delete
+    for (( i=$line_of_port; i<$((line_of_port+5)); i++ ));do array_lines_delete+="${i}d;" ; done
+    sed -i "${array_lines_delete}" ${config_file}
+    fuser  ${port_to_delete}/tcp -k &>/dev/null
+    sed '/^[[:space:]]*$/d' -i ${config_file} 
+    systemctl restart fenixmanager-pysocks &>/dev/null
 }
 
 
