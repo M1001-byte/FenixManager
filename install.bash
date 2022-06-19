@@ -77,7 +77,7 @@ update_system(){
 install_packets(){
     echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO PAQUETES NECESARIOS ${BLUE}〢────────────〢${WHITE}"
     for packets in "${packets_to_install[@]}" ; do
-        bar "$packets" "apt-get install $packets -y"  || {
+        bar --title "${packets}" --cmd "apt-get install $packets -y"  || {
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
                 exit 130
@@ -93,7 +93,7 @@ install_packets(){
 install_python3_package(){
     echo -e "${BLUE}〢───────────〢 ${WHITE}INSTALANDO PAQUETES DE PYTHON3 ${BLUE}〢─────────────〢${WHITE}"
     for i in "${pip_packages[@]}" ; do
-        bar "$i" "pip3 install $i" || {
+        bar --title "$i" --cmd "pip3 install $i" || {
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
                 exit 130
