@@ -269,7 +269,7 @@ list_id_user_simple(){
         local username=${var_val[1]}
         local alias_=${var_val[2]}
         
-        printf  "${WHITE}%-5s [ ${GREEN}${id}${WHITE} ] ${RED}${username} ${YELLOW}${alias_}${WHITE}\n"
+        printf  "${WHITE}%-5s [ ${GREEN}${id}${WHITE} ] ${RED}${username^^} ${YELLOW}${alias_}${WHITE}\n"
     done
     [[ "${count_}" -eq 0 ]] && {
         error 'No hay usuarios registrados en la base de datos'.
@@ -286,7 +286,8 @@ option_menu_ssh() {
     option_color "5" "MONITOR DE USUARIOS CONECTADOS"
     option_color '6' 'CREAR UN BACKUP DE LA BASE DE DATOS'
     option_color '7' 'RESTAURAR BACKUP DE LA BASE DE DATOS'
-    option_color '8' "${RED}ELIMINAR TODOS LOS USUARIOS"
+    option_color '8' 'CONFIGURAR LIMITADOR DE USUARIOS'
+    option_color '9' "${RED}ELIMINAR TODOS LOS USUARIOS"
 
     option_color 'E' 'SALIR'
     option_color 'M' 'MENU PRINCIPAL'
@@ -302,7 +303,8 @@ option_menu_ssh() {
             5 ) monitor_users ; clo ;;
             6 ) backup_user ;;
             7 ) restore_backup ;;
-            8 ) delete_all_users_ssh ;;
+            8 ) limit_user_menu ;;
+            9 ) delete_all_users_ssh ;;
             e | E | q | Q ) exit 0 ;;
             m | M ) fenix ;;
             "cls" | "Cls" | "CLS" ) clo ;;

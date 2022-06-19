@@ -1,15 +1,6 @@
 #!/bin/bash
 
-source "/etc/FenixManager/funciones/funciones.bash"
-source "/etc/FenixManager/funciones/ssh-user.bash"
-source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
-source "/etc/FenixManager/funciones/install-pkt.bash"
-source "/etc/FenixManager/funciones/cfg-pkt.bash" 
-source "/etc/FenixManager/funciones/v2ray/v2ray.bash"
-source "/etc/FenixManager/funciones/other-cfg.bash" 
-
-source "/etc/FenixManager/preferences.bash" 2>/dev/null
-
+for i in /etc/FenixManager/funciones/*.bash ;do source "${i}";done
 
 simple_text_fenix(){
     line_separator 60

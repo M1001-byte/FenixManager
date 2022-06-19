@@ -368,8 +368,8 @@ cfg_fenix_settings(){
     
     
     
-    local home_var_val=("show_fenix_banner" "hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
-    local home_var_desc=("banner de Fenix-Manager" "panel de informacion (os,etc)" "panel de usuarios ssh" "panel de adaptadores de red" "panel de puertos abiertos")
+    local home_var_val=("hide_first_panel" "hide_second_panel" "hide_third_panel" "hide_ports_open_services_in_home_menu")
+    local home_var_desc=("panel de informacion (os,etc)" "panel de usuarios ssh" "panel de adaptadores de red" "panel de puertos abiertos")
     for ((i=0;i<${#home_var_val[@]};i++));do
         local var_name="${home_var_val[$i]}"
         local var_value="$(grep -o "${var_name}=.*" "/etc/FenixManager/preferences.bash" | cut -d "=" -f 2 | tr "'" " " | xargs)" # get value of var_name

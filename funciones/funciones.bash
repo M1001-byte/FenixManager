@@ -267,14 +267,6 @@ check_user_exist () {
 }
 
 bar() {
-    help_msg() {
-        error "Parametros desconocidos."
-        info "$0 --cmd <comando> --title <texto> --show-eta <true|false>"
-        info "$0 <comando>"
-        #
-        info "Al parametro --cmd y --title , se le pasan los argumentos codificado en base64."
-        exit 1
-    }
     while [[ $# -gt 0 ]]; do
         [[ ! "$1" =~ ^-- ]] && {
             local cmd_="$@"
@@ -314,22 +306,18 @@ bar() {
     
     blc_=0
  
-    while [[ $blc -eq 0 ]];do 
-        for i in {1..14}; do
-            sleep 0.25
-            s=$(echo ${s} + 0.25| bc)
-            [[ "${show_eta_}" == "true" ]] && {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
-            } || {
-                printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]"  # save time 
-            }
-            done
-        done  & 
-    
-    trap "blc_=1" SIGINT SIGTERM 
+    for i in {1..14}; do
+        sleep 0.25
+        s=$(echo ${s} + 0.25| bc)
+        [[ "${show_eta_}" == "true" ]] && {
+            printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
+        } || {
+            printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]"  # save time 
+        }
+    done  & 
+    local progress_bar_pid=$!
     ${cmd_} &> /dev/null || STAT=$? && true
-    trap '"(kill -9 $!)"' SIGINT SIGTERM 
-    kill $! &> /dev/null
+    kill ${progress_bar_pid} &> /dev/null
     local endtime=$(awk '{split($0,a,"ET:");print a[2] }' < "$tmpfile" )
 
     
@@ -355,6 +343,7 @@ bar() {
     return $STAT
 
 }
+
 
 
 package_installed () {
