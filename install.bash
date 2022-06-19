@@ -26,14 +26,13 @@ clone_fenix(){
     
     local url="https://github.com/M1001-byte/FenixManager"
     if [ -d /etc/FenixManager ];then
-        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
         rm -rf /etc/FenixManager/ &>/dev/null
     fi
     git clone -b "master" $url /etc/FenixManager
     
     if [ $? -ne 0 ];then
-        error 'Fallo al clonar el repositorio.'
-        info "Archivo de log: $gitlog/"
+        echo -e '\033[1;31mFallo al clonar el repositorio\033[1;37m.'
+        echo -e "\033[1;33mArchivo de log: \033[1;37m$gitlog/"
         exit $?
     fi
     
