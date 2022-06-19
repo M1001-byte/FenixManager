@@ -1272,7 +1272,7 @@ cfg_python3_proxy(){
                     redirect_to_service "pysocks"
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
                     local number_of_custom_config=($(grep -Eo "#[0-9]{1,}" ${config_file} | cut -d# -f2 | xargs ))
-                    [[ -z "${number_of_custom_config}" ]] && number_of_custom_config=0 || local number_of_custom_config="$(echo ${number_of_custom_config[-1]} + 1 | bc)"
+                    [[ -z "${number_of_custom_config}" ]] && number_of_custom_config=0 || number_of_custom_config="$((${number_of_custom_config[-1]}+1))"
                     
                     select_status_code(){
                     
@@ -1314,7 +1314,7 @@ cfg_python3_proxy(){
                     }
                     select_status_code
                     select_string_msg
-                    local base_response="HTTP/3 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
+                    local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
                     [[ "${SERVICE_NAME}" == "dropbear" || "${SERVICE_NAME}" == "ssh" ]] && {
                         local connection_type="SSH"
                     } || {
