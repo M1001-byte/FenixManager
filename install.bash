@@ -48,8 +48,7 @@ clone_fenix(){
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
     local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
     echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
-
-
+    return 0
 }
 
 change_dns(){
@@ -154,10 +153,10 @@ add_basic_ufw_rules(){
 
 initial(){
     change_dns
-    clone_fenix && {
-        source "/etc/FenixManager/funciones.bash"
-        source "/etc/FenixManager/color.bash"
-    }
+    clone_fenix
+    source "/etc/FenixManager/funciones/funciones.bash"
+    source "/etc/FenixManager/funciones/color.bash"
+    
     update_system
     install_packets
     install_python3_package
