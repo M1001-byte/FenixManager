@@ -7,9 +7,6 @@ source "/etc/FenixManager/funciones/color.bash"
 
 db='/etc/FenixManager/databases/usuarios.db'
 limiter_cfg_file="${user_folder}/FenixManager/limit_user.cfg"
-if [ ! -f "$limiter_cfg_file" ]; then
-    touch "$limiter_cfg_file"
-fi
 
 show_limit_info(){
     echo -e "${BLUE}〢───────────────〢 ${WHITE}LIMITADOR DE USUARIOS SSH ${BLUE}〢──────────────〢${WHITE}"
@@ -103,6 +100,10 @@ remove_limiter_from_user(){
 }
 limit_user_menu(){
     clear
+    if [ ! -f "$limiter_cfg_file" ]; then
+        touch "$limiter_cfg_file"
+    fi
+
     show_limit_info
     option_color "1" "LIMITAR USUARIO"
     option_color "2" "DESLIMITAR USUARIO"

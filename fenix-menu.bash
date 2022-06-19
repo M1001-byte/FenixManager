@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for i in /etc/FenixManager/funciones/*.bash ;do source "${i}" &>/dev/null;done
+for i in /etc/FenixManager/funciones/*.bash ;do source "${i}" 2>/dev/null;done
 
 simple_text_fenix(){
     line_separator 60
