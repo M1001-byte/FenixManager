@@ -59,41 +59,6 @@ change_dns(){
     echo "nameserver 1.0.0.1" > /etc/resolv.conf
     chattr +i /etc/resolv.conf
 }
-
-clone_fenix(){
-    trap "exit 130" SIGINT SIGTERM
-    echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
-    local branch="master"
-    local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    
-    local url="https://github.com/M1001-byte/FenixManager"
-    if [ -d /etc/FenixManager ];then
-        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
-        rm -rf /etc/FenixManager/ &>/dev/null
-    fi
-    git clone -b "master" $url /etc/FenixManager
-    
-    if [ $? -ne 0 ];then
-        error 'Fallo al clonar el repositorio.'
-        info "Archivo de log: $gitlog/"
-        exit $?
-    fi
-    
-    chmod -R 777 /etc/FenixManager
-    
-    [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
-
-    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
-    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
-    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
-    echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
-    echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
-    echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
-    local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
-    echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
-    return 0
-}
-
 update_system(){
     echo -e "${BLUE}〢───────────────〢 ${WHITE}ACTUALIZANDO EL SISTEMA ${BLUE}〢────────────────〢${WHITE}"
     for i in "${updates_command[@]}" ; do
