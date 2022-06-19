@@ -1,67 +1,38 @@
 #!/bin/bash
 clear
-ctrl_c() {
-        exit 130
-}
 
-info(){ echo -e "\\033[1;33m[INFO]\\033[m \\033[1;37m$*\\033[m";}
-error() { echo -e "\\033[1;31m[ERROR]\\033[m \\033[1;37m$*\\033[m";}
-
-bar() {
-    local str="###############"
-    local s=0.25
-    if [ -z "$2" ]; then
-        local bg_process="$1"
-        local textshow="$1"
-    else
-        local textshow="$1"
-        local bg_process="$2"
+clone_fenix(){
+    trap "exit 130" SIGINT SIGTERM
+    echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
+    local branch="master"
+    local gitlog=$(mktemp -t gitlog.XXXXXXXX)
+    
+    local url="https://github.com/M1001-byte/FenixManager"
+    if [ -d /etc/FenixManager ];then
+        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
+        rm -rf /etc/FenixManager/ &>/dev/null
     fi
-    local tmpfile=$(mktemp -t progress.XXXXXXXX)
-    echo $text
+    git clone -b "master" $url /etc/FenixManager
     
-    # colors var
-    local green='\033[32m'
-    local red='\033[31m'
-    local yellow='\033[33m'
-    local end='\033[0m'
-    
- 
-    while true;do 
-        for i in {1..14}; do
-            sleep 0.25
-            s=$(echo ${s} + 0.25| bc)
-            printf "\33[2K\r[ $yellow%s$end ] $green[%-16s $end%s" "$textshow" "${str:0:$i}]" " ET: ${s}s"  | tee $tmpfile # save time 
-            done
-        done  & local while_pid=$!
-
-    trap "kill -9 $while_pid 2>/dev/null" SIGINT SIGTERM 
-    
-    ${bg_process} &> /dev/null || STAT=$? && true
-    trap "kill -9  $! 2>/dev/null" SIGINT SIGTERM SIGKILL
-    kill $! &> /dev/null
-    local endtime=$(cat $tmpfile | awk '{split($0,a,"ET:");print a[2] }')
-    
-    #Si el proceso termino en menos de 1 segundo
-    if [[ -z "${endtime}" ]]; then
-        local endtime="0.00s"
+    if [ $? -ne 0 ];then
+        error 'Fallo al clonar el repositorio.'
+        info "Archivo de log: $gitlog/"
+        exit $?
     fi
-    # Depende el comando ejecutado,devuelve ok,instalado o error.
-    if [[ $STAT -eq 0 ]];then
-        local result='OK'
-        local result_color=$green #green
-        if [[ $bg_process == "*install*" ]] ;then
-        local result='INSALADO'
-        local result_color=$green # green 
-        fi
-    else
-        local result='FALLO !'${STAT}
-        local result_color=$red #red
-    fi
+    
+    chmod -R 777 /etc/FenixManager
+    
+    [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
 
-    printf "\33[2K\r[ $yellow%s$end ] $result_color[%-15s]$end [$result_color%s$end] %s \n" "$textshow" "${str}" "${result}" " ET: ${endtime}"
-    rm -f ${tmpfile}
-    return $STAT
+    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
+    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
+    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
+    echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
+    echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
+    echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
+    local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
+    echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
+
 
 }
 
@@ -90,9 +61,46 @@ change_dns(){
     chattr +i /etc/resolv.conf
 }
 
+clone_fenix(){
+    trap "exit 130" SIGINT SIGTERM
+    echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
+    local branch="master"
+    local gitlog=$(mktemp -t gitlog.XXXXXXXX)
+    
+    local url="https://github.com/M1001-byte/FenixManager"
+    if [ -d /etc/FenixManager ];then
+        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
+        rm -rf /etc/FenixManager/ &>/dev/null
+    fi
+    git clone -b "master" $url /etc/FenixManager
+    
+    if [ $? -ne 0 ];then
+        error 'Fallo al clonar el repositorio.'
+        info "Archivo de log: $gitlog/"
+        exit $?
+    fi
+    
+    chmod -R 777 /etc/FenixManager
+    
+    [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
+
+    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
+    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
+    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
+    echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
+    echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
+    echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
+    local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
+    echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
+    return 0
+} && {
+    source "/etc/FenixManager/funciones.bash"
+    source "/etc/FenixManager/color.bash"
+}
+
 update_system(){
-    echo -e "\\033[34m〢───────────────〢 \\033[1;37mACTUALIZANDO EL SISTEMA \\033[34m〢────────────────〢"
-    for i in "${updates_command[@]}" ; do 
+    echo -e "${BLUE}〢───────────────〢 ${WHITE}ACTUALIZANDO EL SISTEMA ${BLUE}〢────────────────〢${WHITE}"
+    for i in "${updates_command[@]}" ; do
         bar "apt-get $i -y" || {
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
@@ -107,7 +115,7 @@ update_system(){
 }
 
 install_packets(){
-    echo -e "\\033[34m〢────────────〢 \\033[1;37mINSTALANDO PAQUETES NECESARIOS \\033[34m〢────────────〢"
+    echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO PAQUETES NECESARIOS ${BLUE}〢────────────〢${WHITE}"
     for packets in "${packets_to_install[@]}" ; do
         bar "$packets" "apt-get install $packets -y"  || {
            if [ $? -eq 130 ];then
@@ -120,11 +128,10 @@ install_packets(){
            }
     done
     sed -i /etc/hosts -e "s/^127.0.0.1 localhost$/127.0.0.1 localhost $(hostname)/" &>/dev/null
-
 }
 
 install_python3_package(){
-    echo -e "\\033[34m〢───────────〢 \\033[1;37mINSTALANDO PAQUETES DE PYTHON3 \\033[34m〢─────────────〢"
+    echo -e "${BLUE}〢───────────〢 ${WHITE}INSTALANDO PAQUETES DE PYTHON3 ${BLUE}〢─────────────〢${WHITE}"
     for i in "${pip_packages[@]}" ; do
         bar "$i" "pip3 install $i" || {
            if [ $? -eq 130 ];then
@@ -167,17 +174,13 @@ config_bashrc(){
         print_fenix_banner
 '
     if  ! grep -q "print_fenix_banner" <<< "$(declare -F)";then
-        [[ "${user}" != "root" ]] && {
-            echo -e "${print_fenix_banner}" >> "/home/${user}/.bashrc"
-        } || {
-            echo -e "${print_fenix_banner}" >> "$userfolder/.bashrc"
-        }
+        echo -e "${print_fenix_banner}" >> "$userfolder/.bashrc"
     fi
 }
 
 add_basic_ufw_rules(){
     trap "exit 130" SIGINT SIGTERM
-    echo -e "\\033[34m〢────────────────〢 \\033[1;37mAGREGANDO REGLAS UFW \\033[34m〢──────────────────〢"
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}AGREGANDO REGLAS UFW ${BLUE}〢──────────────────〢${WHITE}"
     info "Agregando reglas basicas: ssh (22), http (80), https (443), dns (53/udp)"
     bar "ufw allow ssh"
     bar "ufw allow http"
@@ -188,45 +191,9 @@ add_basic_ufw_rules(){
     sed -i "s/IPV6=yes/IPV6=no/" "${ufw_file}" &>/dev/null
 }
 
-
-
-clone_fenix(){
-    trap "exit 130" SIGINT SIGTERM
-    echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
-    local branch="master"
-    local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    
-    local url="https://github.com/M1001-byte/FenixManager"
-    if [ -d /etc/FenixManager ];then
-        info "${GREEN}/etc/FenixManager${WHITE} ya existe, se procede a eliminar."
-        rm -rf /etc/FenixManager/ &>/dev/null
-    fi
-    git clone -b "master" $url /etc/FenixManager
-    
-    if [ $? -ne 0 ];then
-        error 'Fallo al clonar el repositorio.'
-        info "Archivo de log: $gitlog/"
-        exit $?
-    fi
-    
-    chmod -R 777 /etc/FenixManager
-    
-    [ -f "/etc/FenixManager/preferences.bash" ] && rm -rf "/etc/FenixManager/preferences.bash"
-
-    echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
-    echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
-    echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
-    echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
-    echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
-    echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
-    local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
-    echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
-
-
-}
-
 initial(){
     change_dns
+    clone_fenix
     update_system
     install_packets
     install_python3_package
