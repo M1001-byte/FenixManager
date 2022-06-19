@@ -28,7 +28,7 @@ clone_fenix(){
     if [ -d /etc/FenixManager ];then
         rm -rf /etc/FenixManager/ &>/dev/null
     fi
-    git clone -b "master" $url /etc/FenixManager
+    git clone -b "${branch}" "$url" "/etc/FenixManager"
     
     if [ $? -ne 0 ];then
         echo -e '\033[1;31mFallo al clonar el repositorio\033[1;37m.'
