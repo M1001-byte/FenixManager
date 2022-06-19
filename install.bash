@@ -1,6 +1,23 @@
 #!/bin/bash
 clear
 
+user=$(logname)
+
+script_name=`basename "$0"`
+script_folder='/etc/FenixManager'
+[[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
+
+packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake htmlmin at)
+updates_command=(update full-upgrade autoremove)
+pip_packages=(colorama argparse requests)
+
+if [ $(id -u) -ne 0 ]; then
+    error "Este escrip debe ser ejecutado como root: sudo ./$script_name"
+    exit 1
+fi
+
+mkdir /var/log/FenixManager/ &>/dev/null
+
 clone_fenix(){
     trap "exit 130" SIGINT SIGTERM
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
@@ -35,23 +52,6 @@ clone_fenix(){
 
 
 }
-
-user=$(logname)
-
-script_name=`basename "$0"`
-script_folder='/etc/FenixManager'
-[[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
-
-packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake htmlmin at)
-updates_command=(update full-upgrade autoremove)
-pip_packages=(colorama argparse requests)
-
-if [ $(id -u) -ne 0 ]; then
-    error "Este escrip debe ser ejecutado como root: sudo ./$script_name"
-    exit 1
-fi
-
-mkdir /var/log/FenixManager/ &>/dev/null
 
 change_dns(){
     chattr -i /etc/resolv.conf &>/dev/null
@@ -93,9 +93,6 @@ clone_fenix(){
     local version_for_branch=$(curl -s "https://raw.githubusercontent.com/M1001-byte/FenixManager/${branch}/version")
     echo "version='${version_for_branch}'" >> "/etc/FenixManager/preferences.bash"
     return 0
-} && {
-    source "/etc/FenixManager/funciones.bash"
-    source "/etc/FenixManager/color.bash"
 }
 
 update_system(){
@@ -193,11 +190,13 @@ add_basic_ufw_rules(){
 
 initial(){
     change_dns
-    clone_fenix
+    clone_fenix && {
+        source "/etc/FenixManager/funciones.bash"
+        source "/etc/FenixManager/color.bash"
+    }
     update_system
     install_packets
     install_python3_package
-    clone_fenix
     add_basic_ufw_rules
     config_bashrc
     chmod -x /etc/update-motd.d/* & > /dev/null # remove all motd message
