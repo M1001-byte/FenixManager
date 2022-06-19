@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# get terminal size
-columns=$(tput cols) 
-
 source "/etc/FenixManager/funciones/color.bash" 2>/dev/null
 source "/etc/FenixManager/preferences.bash" 2>/dev/null
 

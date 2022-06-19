@@ -1,9 +1,7 @@
 #!/bin/bash
 
 source "/etc/FenixManager/funciones/funciones.bash"
-source "/etc/FenixManager/funciones/ssh-user.bash"
 source "/etc/FenixManager/funciones/color.bash"
-
 
 db='/etc/FenixManager/databases/usuarios.db'
 limiter_cfg_file="${user_folder}/FenixManager/limit_user.cfg"
