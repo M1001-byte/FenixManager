@@ -264,6 +264,8 @@ check_user_exist () {
 }
 
 bar() {
+    local FRAME=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+
     while [[ $# -gt 0 ]]; do
         [[ ! "$1" =~ ^-- ]] && {
             local cmd_="$@"
@@ -278,65 +280,38 @@ bar() {
                 local title="${2}"
                 shift ; shift
                 ;;
-            "--show-eta")
-                local show_eta_="${2}"
-                shift ; shift
-                ;;
             *|"--help")
                 help_msg
                 ;;
             
         esac
     done
-    [[ -z "${cmd_}" ]] && help_msg
     [ -z "${title}" ] && local title="${cmd_}"
     [ -z "${show_eta_+x}" ] && local show_eta_="true"
-    local str="###############"
-    local s=0.25
-    local tmpfile=$(mktemp -t progress.XXXXXXXX)
     
     # colors var
     local green='\033[32m'
     local red='\033[31m'
     local yellow='\033[33m'
     local end='\033[0m'
-    
-    blc_=0
- 
-    for i in {1..14}; do
-        sleep 0.25
-        s=$(echo ${s} + 0.25| bc)
-        [[ "${show_eta_}" == "true" ]] && {
-            printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]" " ET: ${s}s"  | tee "$tmpfile" # save time 
-        } || {
-            printf "\33[2K\r[ $yellow%s$end ] $green [%-16s $end%s" "$title" "${str:0:$i}]"  # save time 
-        }
-    done  & 
+
+    while true;do
+      for i in ${FRAME[@]}; do
+        sleep 0.1
+        printf "\33[2K\r [ ${green}${i}${end} ] ${yellow}${title}${end}"
+        
+      done
+    done &
     local progress_bar_pid=$!
     ${cmd_} &> /dev/null || STAT=$? && true
-    kill ${progress_bar_pid} &> /dev/null
-    local endtime=$(awk '{split($0,a,"ET:");print a[2] }' < "$tmpfile" )
-
+    kill  ${progress_bar_pid}  &> /dev/null
     
-    # Depende el comando ejecutado,devuelve ok,instalado o error.
     if [[ $STAT -eq 0 ]];then
-        local result='OK'
-        local result_color=$green #green
-        if [[ "${cmd_}" == "*install*" ]] ;then
-            local result='INSALADO'
-            local result_color=$green # green 
-        fi
+      printf "\33[2K\r[ ${green} ✔ ${end} ] ${yellow}${title}${end} \n" 
     else
-        local result='FALLO !'${STAT}
-        local result_color=$red #red
+      printf "\33[2K\r[ ${red} ✘ ${end} ] ${yellow}${title}${end} (${red}${STAT}${end}) \n" 
     fi
 
-    [[ ! "${show_eta_}" == "true" ]] && {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$title" "${str}" "${result}" 
-    } || {
-        printf "\33[2K\r[ $yellow%s$end ] $result_color [%-15s]$end [$result_color%s$end] %s \n" "$title" "${str}" "${result}" " ET: ${endtime}"
-    }
-    rm -f "${tmpfile}"
     return $STAT
 
 }
@@ -811,4 +786,3 @@ uninstall_fenixmanager(){
     fi
     
 }
-

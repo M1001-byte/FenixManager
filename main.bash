@@ -94,7 +94,7 @@ add_alias_to_fenix () {
     trap "exit 130" SIGINT SIGTERM
     echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
     
-    cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod +x /usr/bin/fenix
+    cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod 777 /usr/bin/fenix
     echo -e "unalias fenix 2>/dev/null" >> "${user_folder}/.bashrc"
     
     local preferences_var="hide_first_panel='false'\nhide_second_panel='false'\nhide_third_panel='false'\nhide_fourth_panel='false'\nhide_ports_open_services_in_home_menu='false'\nhide_ports_open_services_in_protocol_menu='false'"
