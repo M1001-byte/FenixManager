@@ -7,7 +7,7 @@ script_name=`basename "$0"`
 script_folder='/etc/FenixManager'
 [[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
 
-packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake htmlmin at)
+packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake at screen bc cron psmisc)
 updates_command=(update full-upgrade autoremove)
 pip_packages=(colorama argparse requests)
 
@@ -23,7 +23,7 @@ clone_fenix(){
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
     local branch="master"
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    
+    local os=$(cat /etc/os-release | grep -E '^NAME=.*"' | cut -d= -f2 | xargs)
     local url="https://github.com/M1001-byte/FenixManager"
     if [ -d /etc/FenixManager ];then
         rm -rf /etc/FenixManager/ &>/dev/null
@@ -43,6 +43,7 @@ clone_fenix(){
     echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
     echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
     echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
+    echo "os=${os}" >> "/etc/FenixManager/preferences.bash"
     echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
     echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"

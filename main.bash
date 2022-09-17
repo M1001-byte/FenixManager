@@ -12,7 +12,7 @@ script_executed_with_root_privileges
 
 config_sshd () {
     trap "exit 130" SIGINT SIGTERM
-    echo -e "${BLUE}〢────────────────────〢 ${WHITE}CONFIGURANDO SSHD${BLUE} 〢─────────────────〢"
+    echo -e "${BLUE}| ──────────────────── | ${WHITE}CONFIGURANDO SSHD${BLUE} | ───────────────── |"
     mkdir "$user_folder/FenixManager/banner" &> /dev/null
     local ssh_banner="$user_folder/FenixManager/banner/fenix.html"
     local v="$(cat /etc/FenixManager/version 2>/dev/null)"
@@ -38,7 +38,7 @@ config_sshd () {
 
 fail2ban_config () {
     trap "exit 130" SIGINT SIGTERM
-    echo -e "${BLUE}〢──────────────────〢 ${WHITE}CONFIGURANDO FAIL2BAN${BLUE} 〢───────────────〢"
+    echo -e "${BLUE}| ────────────────── | ${WHITE}CONFIGURANDO FAIL2BAN${BLUE} | ─────────────── |"
     local fail2ban_dir_config='/etc/fail2ban'
     info "Configurando fail2ban ${GREEN}$fail2ban_dir_config/jail.conf/"
 
@@ -54,7 +54,7 @@ fail2ban_config () {
 config_bbr() {
     trap "exit 130" SIGINT SIGTERM
     local sysctl_file='/etc/sysctl.conf'
-    echo -e "${BLUE}〢────────────────────〢 ${WHITE}SYSCTL 'TWEAKS'${BLUE} 〢───────────────────〢"
+    echo -e "${BLUE}| ──────────────────── | ${WHITE}SYSCTL 'TWEAKS'${BLUE} | ─────────────────── |"
 
     cp $sysctl_file "$sysctl_file.bak" # backup
     modprobe tcp_bbr
@@ -73,7 +73,7 @@ sqlite3_config () {
     usuariosdb='/etc/FenixManager/database/usuarios.db'
     logfile='/var/log/FenixManager/sqlite.log'
 
-    echo -e "${BLUE}〢───────────────────〢 ${WHITE}CONFIGURANDO SQLITE3${BLUE} 〢───────────────〢"
+    echo -e "${BLUE}| ─────────────────── | ${WHITE}CONFIGURANDO SQLITE3${BLUE} | ─────────────── |"
 
     info "Creando base de datos con el nombre de '${YELLOW}usuarios${WHITE}'"
     rm /etc/FenixManager/database/usuarios.db &>/dev/null
@@ -92,7 +92,7 @@ sqlite3_config () {
 
 add_alias_to_fenix () {
     trap "exit 130" SIGINT SIGTERM
-    echo -e "${BLUE}〢───────────────〢 ${WHITE}INSTALANDO FENIXMANAGER${BLUE} 〢────────────────〢"
+    echo -e "${BLUE}| ─────────────── | ${WHITE}INSTALANDO FENIXMANAGER${BLUE} | ──────────────── |"
     
     cp "/etc/FenixManager/bin/fenix" /usr/bin/fenix && chmod 777 /usr/bin/fenix
     echo -e "unalias fenix 2>/dev/null" >> "${user_folder}/.bashrc"
@@ -103,7 +103,7 @@ add_alias_to_fenix () {
 
 fenix_create_cfg_dir(){
     trap "exit 130" SIGINT SIGTERM
-    echo -e "${BLUE}〢──────────────────〢 ${WHITE}CREANDO DIRECTORIOS${BLUE} 〢─────────────────〢"
+    echo -e "${BLUE}| ────────────────── | ${WHITE}CREANDO DIRECTORIOS${BLUE} | ───────────────── |"
     echo -e "${GREEN}${user_folder}/FenixManager/${WHITE} : Archivos de configuracion. ( pysocks,slowdns_pub, etc )"
     echo -e  "${GREEN}${user_folder}/FenixManager/banner${WHITE} : Banners de ssh/dropbear."
     echo -e  "${GREEN}${user_folder}/FenixManager/cert-ssl${WHITE} : Certificados SSL."
@@ -130,7 +130,7 @@ main(){
     add_alias_to_fenix
     add_cron_job_for_hitman
     install_badvpn_udpgw
-    echo -e "${BLUE}〢──────────────〢 ${WHITE}FIN DE LA INSTALACION${BLUE} 〢───────────────────〢"
+    echo -e "${BLUE}| ────────────── | ${WHITE}FIN DE LA INSTALACION${BLUE} | ─────────────────── |"
     info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
     info "Su session de usuario se cerrara automaticamente,para terminar con el proceso de instalacion."
     read -p 'Presione enter para continuar...'

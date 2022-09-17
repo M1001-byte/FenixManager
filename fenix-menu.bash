@@ -41,7 +41,7 @@ show_first_panel() {
     printf "${WHITE}〢 ${WHITE}%4s${WHITE}${RED}%-${#mem_total}s ${WHITE}%8s${RED}%-${#mem_used}s ${WHITE}%7s${RED}%-${#mem_free}s ${WHITE}%12s${RED}%-${#mem_available}s ${WHITE}%5s %$(echo 56 - 36 - ${#mem_total} - ${#mem_used} - ${#mem_free} - ${#mem_available} | bc)s\n" "RAM: " "${mem_total}" "EN USO: " "${mem_used}" "LIBRE: " "${mem_free}" "DISPONIBLE: " "${mem_available}" "%${mem_used_percent}" "〢"
     
     printf "${WHITE}〢 ${WHITE}%-5s${RED}%-${#cpu_model}s ${WHITE}%-8s${RED}%-${#cpu_core}s ${WHITE}%$(echo 58 - 11 - ${#cpu_model} - ${#cpu_core} | bc)s\n" "CPU: " "${cpu_model}" "CORES: " "${cpu_core}" '〢'
-    printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢"    
+    printf "${WHITE}〢 ${WHITE}%30s${RED}%-${#cpu_used}s ${WHITE}%$(echo 59 - 30 - ${#cpu_used} | bc)s\n" "EN USO: " "% ${cpu_used}" "〢" 
     
 }
 
@@ -67,7 +67,7 @@ option_menu_software () {
     clear
     local columns=$(tput cols)
     line_separator 60
-    echo -e "${BLUE}〢───────────────〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}   〢──────────────────〢"
+    echo -e "${BLUE}〢 ───────────── 〢  ${WHITE}MENU DE PROTOCOLOS${BLUE}  〢 ───────────────── 〢"
     line_separator 60
     
     
@@ -75,7 +75,7 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks" "badvpn-udpgw")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks" "wireguard" "badvpn-udpgw")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -95,7 +95,8 @@ option_menu_software () {
             6 ) [[ ${installed_packages[*]} =~ openvpn ]] && cfg_openvpn || install_openvpn ;;
             7) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
             8) [[ ${installed_packages[*]} =~ fenixmanager-pysocks ]] && cfg_python3_proxy || install_python3_proxy ;;
-            9) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
+            9) [[ ${installed_packages[*]} =~ wireguard ]] && cfg_wireguard || installWireGuard ;;
+            10) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
             "cls" | "CLS") clear && option_menu_software ;;
             [mM]) fenix  ;;
             q|Q|e|E) exit 0 ;;
@@ -110,7 +111,7 @@ option_menu_configuration(){
     # relaod preferences.bash
     source "/etc/FenixManager/preferences.bash"
     line_separator 60
-    echo -e "${BLUE}〢─────────────────〢  ${WHITE}CONFIGURACIONES${BLUE}   〢───────────────────〢"
+    echo -e "${BLUE}〢 ───────────────── 〢 ${WHITE}CONFIGURACIONES${BLUE}   〢 ─────────────────── 〢"
     line_separator 60
     
     

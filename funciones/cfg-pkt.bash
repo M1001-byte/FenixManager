@@ -1808,7 +1808,7 @@ cfg_badvpn(){
             3 ) # ! DETENER / INICIAR TODOS LOS PUERTOS
                 {
                     if [[ ${down_port} -eq 0 ]];then
-                        killall badvpn-udpgw &>/dev/null && {
+                        killall -9 badvpn-udpgw &>/dev/null && {
                             info "Todos los puertos fueron detenidos."
                         } || {
                             error "Fallo al detener todos los puertos."
@@ -1851,6 +1851,28 @@ cfg_badvpn(){
     done
 }
 
+
+cfg_wireguard(){
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO WIREGUARD${BLUE} 〢────────────────〢"
+    show_info(){
+        local is_running ports file_cfg
+        is_running="$(systemctl is-active wg-quick@wg0 | grep "^active" -q)"
+        ports=$(wg show | grep "listening port.*" | cut -d: -f2 | xargs)
+        file_cfg=""
+        
+    }
+    show_info
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        case $option in 
+            1)
+            ;;
+        esac
+    done
+}
 
 del_openssh_port(){
     local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))
@@ -1920,6 +1942,3 @@ pysocks_del_port() {
     sed '/^[[:space:]]*$/d' -i ${config_file} 
     systemctl restart fenixmanager-pysocks &>/dev/null
 }
-
-
-

@@ -25,7 +25,7 @@ line_separator() {
     length_line=$1
     color_=$2
     [ -z $color_ ] && color_="${BLUE}"
-    if [[ "$length_line" -lt 0 ]];then  length_line=50 ; fi
+    if [[ "$length_line" -lt 0 ]];then  length_line=49 ; fi
     for i in $(seq 1 $length_line);do  str+="─" ; done
     echo -e "${BLUE}${str}〢${WHITE}"
 }
@@ -183,6 +183,7 @@ option_menu_package(){
     local RED=$(tput setaf 1)
     local WHITE=$(tput setaf 7)
     local YELLOW=$(tput setaf 3)
+    local activo=0
 
     array_of_packages=("$@")
     option=0
@@ -213,25 +214,19 @@ option_menu_package(){
 
                 # ! SLOWDNS
                 if [[ "${i}" == "slowdns" ]];then
-                    pgrep -f "slowdns" &>/dev/null && {
-                        local activo=0
-                        }  || local activo=1
+                    pgrep -f "slowdns" &>/dev/null && activo=0 || activo=1
                 # ! BADVPN-UDPGW
                 elif [[ "${i}" == "badvpn-udpgw" ]];then
-                    pgrep -f "badvpn-udpgw" &>/dev/null && {
-                        local activo=0
-                        }  || local activo=1
+                    pgrep -f "badvpn-udpgw" &>/dev/null && activo=0 || activo=1
                 # ! SHADOWSOCKS-LIBEV
                 elif [[ "${i}" == "shadowsocks-libev" ]];then
-                    pgrep obfs-server &>/dev/null && local activo=0 || {
-                        pgrep ss-server &>/dev/null && local activo=0 || local activo=1
+                    pgrep obfs-server &>/dev/null && activo=0 || {
+                        pgrep ss-server &>/dev/null && activo=0 || activo=1
                     }
+                elif [[ "${i}" == "wireguard" ]];then
+                    wg show | grep "interface" -q && activo=0 || activo=1
                 else
-                    systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && {
-                        local activo=0
-                        } || {
-                        local activo=1
-                    }
+                    systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
                 [[ ${activo} -eq 0 ]] && local str_="${WHITE}[ ${GREEN}ACTIVO ${WHITE}]" || local str_="${WHITE}[${RED} INACTIVO ${WHITE}]"
             fi
@@ -327,6 +322,7 @@ package_installed () {
     if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
+    if [[ "$package" == "wireguard" ]];then if [[ -e /etc/wireguard/params ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ $cmd == 1 ]]; then
         return 0
     else
@@ -566,9 +562,10 @@ list_banners(){
 
 
 list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
-    local get_actived_services="$1"
+    #local get_actived_services="$1"
+    local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw shadowsocks-libev)
+    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -586,20 +583,19 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 pgrep ss-server &>/dev/null
             }
         else
-            systemctl status "${services_}" &>/dev/null
-            
+            systemctl status "${services_//wireguard/wg-quick@wg0}" &>/dev/null
         fi
-
-        [[ $? -eq  0 ]] && {
-            local color_="${GREEN}"
-            local status_="[ ACTIVO ]"
-        } || {
-            local color_="${RED}"
-            local status_="[ INACTIVO ]"
-        }
+        
+        if [[ $? -eq 0 ]];then
+            color_="${GREEN}"
+            status_="[ ACTIVO ]"
+        else
+            color_="${RED}"
+            status_="[ INACTIVO ]"
+        fi
         case $services_ in
             "sshd")
-                local port_listen=$(cat /etc/ssh/sshd_config | grep -o "^Port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
+                port_listen=$(cat /etc/ssh/sshd_config | grep -o "^Port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "dropbear")
                 local file="/etc/default/dropbear"
@@ -607,47 +603,51 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 local dropbear_extra_arg_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_EXTRA_ARGS=.*" | awk '{split($0,a,"-p"); print a[2]}'| tr -d "'" | xargs)
                 
                 [[ -n "${dropbear_port}" ||  -n "${dropbear_extra_arg_port}" ]] && {
-                    local port_listen="$dropbear_port ${dropbear_extra_arg_port}"
-                } || local port_listen=""
+                    port_listen="$dropbear_port ${dropbear_extra_arg_port}"
+                } || port_listen=""
                 ;;
             "stunnel4")
-                local port_listen=$(cat /etc/stunnel/stunnel.conf 2>/dev/null | grep "^accept .*" | awk '{split($0,a,"="); print a[2]}' | xargs)
+                port_listen=$(cat /etc/stunnel/stunnel.conf 2>/dev/null | grep "^accept .*" | awk '{split($0,a,"="); print a[2]}' | xargs)
                 ;;
             "squid")
-                local port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
+                port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
             "pysocks")
-                local port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
+                port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
             "shadowsocks-libev")
                 pidof obfs-server &>/dev/null && services_+=" obfs"
-                local port_listen=$(cat /etc/shadowsocks-libev/config.json 2>/dev/null | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
+                port_listen=$(cat /etc/shadowsocks-libev/config.json 2>/dev/null | grep "\"server_port\": .*" | awk '{split($0,a,":"); print a[2]}' | sed 's/"/ /g; s/,/ /g' | xargs )
                 ;;
             "openvpn")
                 #local is_running=$(service openvpn@server status &>/dev/null;echo $?)
-                local port_listen=$(cat /etc/openvpn/server.conf 2>/dev/null  | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs)
+                port_listen=$(cat /etc/openvpn/server.conf 2>/dev/null  | grep -E 'port [0-9]{0,}' | grep -Eo '[0-9]{4,5}' | xargs)
                 ;;
             "v2ray")
                 local is_running=$(service v2ray status &>/dev/null;echo $?)
-                [[ "${is_running}" == 0 ]] && local port_listen="configurar puertos desde x-ui"  || local port_listen="" 
+                [[ "${is_running}" == 0 ]] && port_listen="configurar puertos desde x-ui"  || port_listen="" 
                 ;;
             "x-ui")
-                local port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
+                port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
+                ;;
+            "wireguard")
+                port_listen=$(wg show | grep "listening port.*" | cut -d: -f2 | xargs)
                 ;;
             "udpgw")
+                unset port_listen
                 local badvpn_pids=$(pgrep badvpn-udpgw)
-                local port_listen
-                for i in $badvpn_pids;do
-                    local port_listen+="$(cat "/proc/${i}/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs) "
-                done
+                [[ -n "${badvpn_pids}" ]] && {
+                    for i in $badvpn_pids;do
+                        port_listen+="$(cat "/proc/${i}/cmdline" | sed -e "s/\x00/ /g" | grep -oE ":[0-9]{0,9}" | tr ":" " " | xargs) "
+                    done
+                } || {
+                    port_listen="$(cat "/etc/cron.d/fenixmanager" | grep "/bin/badvpn-udpgw" | grep -Eo "127.0.0.1:[0-9]{1,5}" | cut -d: -f2 | xargs)"
+                }
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then
-            [[ "${get_actived_services}" == "get_actived_services" ]] && {
-                services_actived+=("${services_}")
-            } || {
-                printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
-            }
+            services_actived+=("${services_}")
+            printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
         fi
     done
 }
@@ -698,7 +698,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)")
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "pysocks" "v2ray" "x-ui")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "pysocks" "v2ray" "x-ui" "wireguard" "badvpn-udpgw")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
