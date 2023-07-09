@@ -631,7 +631,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 port_listen=$(service x-ui status 2>/dev/null | grep -Eo "\[\::\]:.*" | awk '{split($0,a,":"); print a[4]}' | xargs 2>/dev/null)
                 ;;
             "wireguard")
-                port_listen=$(wg show | grep "listening port.*" | cut -d: -f2 | xargs)
+                port_listen=$(wg show 2>/dev/null| grep "listening port.*" | cut -d: -f2 | xargs)
                 ;;
             "udpgw")
                 unset port_listen

@@ -7,6 +7,7 @@ source "/etc/FenixManager/funciones/install-pkt.bash"
 source "/etc/FenixManager/funciones/cfg-pkt.bash" 
 source "/etc/FenixManager/funciones/v2ray/v2ray.bash"
 source "/etc/FenixManager/funciones/other-cfg.bash" 
+source "/etc/FenixManager/funciones/wireguard-install.sh"
 
 simple_text_fenix(){
     line_separator 60
@@ -111,9 +112,8 @@ option_menu_configuration(){
     # relaod preferences.bash
     source "/etc/FenixManager/preferences.bash"
     line_separator 60
-    echo -e "${BLUE}〢 ───────────────── 〢 ${WHITE}CONFIGURACIONES${BLUE}   〢 ─────────────────── 〢"
+    echo -e "${BLUE}〢 ──────────────── 〢 ${WHITE}CONFIGURACIONES${BLUE}   〢 ────────────────── 〢"
     line_separator 60
-    
     
     option_color 1 "ADMINISTRAR HITMAN"
     option_color 2 "ADMINISTRAR FIREWALL ( UFW )"
@@ -181,7 +181,6 @@ option_menu() {
                 break
                 ;;
             3 ) option_menu_software ;;
-            3 ) option_menu_configuration ;;
             4 ) option_menu_configuration ;;
             5 ) create_free_subdomain ;;
             6 ) uninstall_fenixmanager ;;

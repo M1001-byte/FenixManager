@@ -71,6 +71,8 @@ function installQuestions() {
 
 function installWireGuard() {
 	# Run setup questions first
+	clear
+	echo -e "${BLUE}〢───────────────────〢 ${WHITE}INSTALANDO WIREGUARD${BLUE} 〢───────────────〢"
 	installQuestions
 
 	# Install WireGuard tools and module
@@ -316,9 +318,9 @@ function manageMenu() {
 }
 
 # Check if WireGuard is already installed and load params
-if [[ -e /etc/wireguard/params ]]; then
-	source /etc/wireguard/params
-	manageMenu
-else
-	installWireGuard
-fi
+# if [[ -e /etc/wireguard/params ]]; then
+	# source /etc/wireguard/params
+	# manageMenu
+# else
+	# installWireGuard
+# fi
