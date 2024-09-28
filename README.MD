@@ -1,6 +1,6 @@
 
 # FénixManager
-
+<!-- noto-fonts-cjk fonts to view 〢-->
 <div align="center">
 
   <a href="">![GitHub Lines Code](https://img.shields.io/tokei/lines/github/m1001-byte/fenixmanager?style=for-the-badge)</a>
@@ -21,7 +21,7 @@
 ```bash
 sudo apt-get update # Actualizar lista de paquetes
 sudo apt-get upgrade -y # Actualizar paquetes
-sudo apt-get install -y wget # Instalar wget
+sudo apt-get install -y wget git # Instalar wget, git
 wget https://raw.githubusercontent.com/M1001-byte/FenixManager/master/install.bash -O /tmp/install-fenix.bash # Descargar instalador
 sudo bash /tmp/install-fenix.bash # Instalar
 ```

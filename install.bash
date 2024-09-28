@@ -7,12 +7,11 @@ script_name=`basename "$0"`
 script_folder='/etc/FenixManager'
 [[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
 
-packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 debsums zip unzip mlocate ufw net-tools jq git make cmake at screen bc cron psmisc)
-updates_command=(update full-upgrade autoremove)
+kapackets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 zip unzip mlocate ufw net-tools jq make cmake at screen bc cron psmisc)
 pip_packages=(colorama argparse requests)
 
 if [ $(id -u) -ne 0 ]; then
-    error "Este escrip debe ser ejecutado como root: sudo ./$script_name"
+    echo -e  "Este script debe ser ejecutado como root: sudo ./$script_name"
     exit 1
 fi
 
@@ -59,22 +58,6 @@ change_dns(){
     echo "nameserver 1.0.0.1" > /etc/resolv.conf
     chattr +i /etc/resolv.conf
 }
-update_system(){
-    echo -e "${BLUE}〢───────────────〢 ${WHITE}ACTUALIZANDO EL SISTEMA ${BLUE}〢────────────────〢${WHITE}"
-    for i in "${updates_command[@]}" ; do
-        bar "apt-get $i -y" || {
-           if [ $? -eq 130 ];then
-               error 'Accion cancelada.'
-                exit 130
-           else
-               error "Fallo al instalar $packets."
-               info 'Pruebe ejecutando manualmente: sudo dpkg --configure -a '
-                exit $?
-            fi
-        }
-    done
-}
-
 install_packets(){
     echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO PAQUETES NECESARIOS ${BLUE}〢────────────〢${WHITE}"
     for packets in "${packets_to_install[@]}" ; do
@@ -98,7 +81,7 @@ install_python3_package(){
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
                 exit 130
-           else
+           elsesudo pacman -S noto-fonts-cjk
                error "Fallo al instalar $packets."
                 exit $?
             fi
@@ -154,12 +137,12 @@ add_basic_ufw_rules(){
 
 initial(){
     change_dns
+    update_system
+    install_packets
     clone_fenix
     source "/etc/FenixManager/funciones/funciones.bash"
     source "/etc/FenixManager/funciones/color.bash"
     
-    update_system
-    install_packets
     install_python3_package
     add_basic_ufw_rules
     config_bashrc
