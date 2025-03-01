@@ -7,7 +7,7 @@ script_name=`basename "$0"`
 script_folder='/etc/FenixManager'
 [[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
 
-kapackets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 zip unzip ufw net-tools jq make cmake at screen bc cron psmisc)
+packets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 zip unzip ufw net-tools jq make cmake at screen bc cron psmisc)
 pip_packages=(colorama argparse requests)
 
 if [ $(id -u) -ne 0 ]; then
