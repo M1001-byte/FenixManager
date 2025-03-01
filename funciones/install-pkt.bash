@@ -228,20 +228,18 @@ install_badvpn_udpgw(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Descargando badvpn-udpgw"
     rm -rf /tmp/badvpn &>/dev/null
-    bar "git clone https://github.com/ambrop72/badvpn /tmp/badvpn"  && {
-        cd "/tmp/badvpn" 
-        mkdir "build" && cd "build"
-        bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/" --title "Construyendo badvpn-udpgw" && {
-            bar "make install"
-            info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
-            local badvpn_udpgw=$(which badvpn-udpgw 2>/dev/null)
-            echo -e "\n@reboot root screen -dmS badvpn ${badvpn_udpgw} --loglevel 0  --listen-addr 127.0.0.1:7300 --udp-mtu 1500" >> "${fenixmanager_crontab}"
-            screen -dmS badvpn ${badvpn_udpgw} --listen-addr 127.0.0.1:7300
-        } || {
-            rm "/tmp/badvpn" -rf &>/dev/null
-            error "No se pudo compilar el repositorio ${badvpn_git}."
-            read
+    bar "git clone https://github.com/ambrop72/badvpn /tmp/badvpn"
+    cd "/tmp/badvpn" 
+    mkdir "build" && cd "build"
+    bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/" --title "Construyendo badvpn-udpgw" && {
+        bar "make install"
+        info "Por defecto,updgw escuchara en la direccion ${YELLOW}127.0.0.1:7300${WHITE} ."
+        local badvpn_udpgw=$(which badvpn-udpgw 2>/dev/null)
+        echo -e "\n@reboot root screen -dmS badvpn ${badvpn_udpgw} --loglevel 0  --listen-addr 127.0.0.1:7300 --udp-mtu 1500" >> "${fenixmanager_crontab}"
+        screen -dmS badvpn ${badvpn_udpgw} --listen-addr 127.0.0.1:7300
+    } || {
+        rm "/tmp/badvpn" -rf &>/dev/null
+        error "No se pudo compilar el repositorio ${badvpn_git}."
+        read
         }
-    }
-
 }
