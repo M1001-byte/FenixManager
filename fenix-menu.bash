@@ -193,7 +193,20 @@ option_menu() {
 }
 
 create_free_subdomain(){
-    info "Proximamente..."
+    local subRegister="/etc/FenixManager/subRegister"
+    if [[ ! -f $subRegister ]]; then
+        local public_ip=$(curl -s https://ipinfo.io/ip)
+        info "Traten de no abusar del sistema y de crear solo un sub-dominio por persona."
+        read -p "$(echo -e "${WHITE}[*] Ingrese el nombre del subDominio: ${GREEN}")" nameSub
+        local data=$(printf "Register SubDomain\nName: %s \nIp: %s" "$nameSub" "$public_ip")
+        curl -X POST "https://api.telegram.org/bot7791006469:AAE6jzaBrxCTpRZAxMx2HoieEn1iSO0oPdM/sendMessage"  -d "chat_id=934095763" -d "text= ${data}" &> /dev/null
+        info "Su solicitud se encuentra en proceso de revision."
+        echo "${nameSub}.fenixmanager.online" >  $subRegister 
+    else
+        local subName=$(cat $subRegister)
+        error "Ya se encuentra un subDominio registrado en este servidor vps"
+        info "Nombre de dominio: ${subName}"
+    fi
 }
 
 

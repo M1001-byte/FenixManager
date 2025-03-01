@@ -146,7 +146,7 @@ notify_installation(){
     local publicIp=$(curl -s ipinfo.io/ip)
     local data=$(printf "New Fenix Installation\nOS: %s\nPublicIp: %s" "$os" "$publicIp")
     echo -e  ${data}
-    curl -X POST "https://api.telegram.org/bot7791006469:AAE6jzaBrxCTpRZAxMx2HoieEn1iSO0oPdM/sendMessage"  -d "chat_id=934095763" -d "text= ${data}" 
+    curl -X POST "https://api.telegram.org/bot7791006469:AAE6jzaBrxCTpRZAxMx2HoieEn1iSO0oPdM/sendMessage"  -d "chat_id=934095763" -d "text= ${data}"  &> /dev/nul
 }
 initial(){
     change_dns
