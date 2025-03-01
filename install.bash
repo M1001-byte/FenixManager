@@ -137,7 +137,6 @@ add_basic_ufw_rules(){
 
 initial(){
     change_dns
-    update_system
     install_packets
     clone_fenix
     source "/etc/FenixManager/funciones/funciones.bash"
