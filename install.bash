@@ -137,8 +137,8 @@ add_basic_ufw_rules(){
 
 initial(){
     change_dns
-    install_packets
     clone_fenix
+    install_packets
     source "/etc/FenixManager/funciones/funciones.bash"
     source "/etc/FenixManager/funciones/color.bash"
     
