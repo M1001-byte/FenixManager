@@ -228,11 +228,7 @@ install_badvpn_udpgw(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
     info "Descargando badvpn-udpgw"
     rm -rf /tmp/badvpn &>/dev/null
-    bar  "git clone https://github.com/ambrop72/badvpn /tmp/badvpn" || {
-        rm "/tmp/badvpn" -rf &>/dev/null
-        error "No se pudo descargar el repositorio ${badvpn_git}."
-        return 1
-    } && {
+    bar "git clone https://github.com/ambrop72/badvpn /tmp/badvpn"  && {
         cd "/tmp/badvpn" 
         mkdir "build" && cd "build"
         bar --cmd "cmake .. -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1 -DCMAKE_INSTALL_PREFIX=/" --title "Construyendo badvpn-udpgw" && {

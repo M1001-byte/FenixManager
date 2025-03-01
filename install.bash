@@ -7,7 +7,7 @@ script_name=`basename "$0"`
 script_folder='/etc/FenixManager'
 [[ "${user}" == "root" ]] && userfolder="/root" || userfolder="/home/${user}"
 
-kapackets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 zip unzip mlocate ufw net-tools jq make cmake at screen bc cron psmisc)
+kapackets_to_install=(apt-transport-https python3 python3-pip neovim htop fail2ban sqlite3 zip unzip ufw net-tools jq make cmake at screen bc cron psmisc)
 pip_packages=(colorama argparse requests)
 
 if [ $(id -u) -ne 0 ]; then
@@ -77,7 +77,7 @@ install_packets(){
 install_python3_package(){
     echo -e "${BLUE}〢───────────〢 ${WHITE}INSTALANDO PAQUETES DE PYTHON3 ${BLUE}〢─────────────〢${WHITE}"
     for i in "${pip_packages[@]}" ; do
-        bar --title "$i" --cmd "pip3 install $i" || {
+        bar --title "$i" --cmd "pip3 install $i --break-system-packages" || {
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
                 exit 130

@@ -184,7 +184,7 @@ option_menu() {
             4 ) option_menu_configuration ;;
             5 ) create_free_subdomain ;;
             6 ) uninstall_fenixmanager ;;
-            "cls" | "CLS") clear && main ;;
+            "cls" | "CLS" | 'clear') clear && main ;;
             [eEqQ]) exit 0 ;;
             *)  tput cuu1 && tput el1 ;;
             esac
@@ -193,17 +193,7 @@ option_menu() {
 }
 
 create_free_subdomain(){
-    info "No es posible crear un subdominio gratis desde Fenix."
-    info "Lista de sitios que ${GREEN}SI${WHITE} lo permiten:"
-    local sites=("www.jagoanssh.com" "serverssh.net" "www.fastssh.com" "hidessh.com" "www.pointdns.net" "www.premiumssh.net" "opentunnel.net")
-    local sites_day_available=("15 dias" "30 dias" "3 meses" "30 dias" "30 dias" "30 dias" "10 dias")
-    for ((i=0;i<${#sites[@]};i++));do
-        local site=${sites[$i]}
-        local days_=${sites_day_available[$i]}
-        printf "${WHITE}〢  ${GREEN}%-${#i}s  ${YELLOW}( %${#days_}s )  ${WHITE}%$(echo 60 - ${#site} - ${#days_} - 7| bc)s\n" "${site}" "${days_}" "〢"
-        
-        
-    done
+    info "Proximamente..."
 }
 
 

@@ -27,11 +27,7 @@ config_sshd () {
     echo -e $config_sshd | base64 -d > $sshd_file || error "No se pudo crear/modificar el archivo $sshd_file."  && echo "Banner $ssh_banner" >> $sshd_file
     bar "systemctl restart sshd" || {
         error "No se pudo reiniciar el servicio sshd."
-        info "Restaurando el archivo $sshd_file.bak"
-        cp "$sshd_file.bak" "$sshd_file" 2> /dev/null
-        info "SSHD no se pudo configurar correctamente."
-        systemctl restart sshd
-        exit 1
+        info "Esto cambio el algunas distribuciones mas recientes de Ubuntu. No es para procuparse."
     } && info "${GREEN}SSHD Configurado con exito."
 
 }

@@ -596,7 +596,7 @@ cfg_shadowsocks(){
         bar "service shadowsocks-libev stop"
         bar "apt-get remove shadowsocks-libev -y"
         if [[ $? -eq 0 ]];then
-            local locate_files=$(locate shadowsocks-libev)
+            local locate_files=$(find shadowsocks-libev)
             for i in $locate_files;do rm -rf $i &>/dev/null ; done
             info "SHADOWSOCKS-LIBEV eliminado correctamente."
             read
@@ -697,11 +697,13 @@ cfg_shadowsocks(){
         prompt=$(date "+%x %X")
         read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option_shadowsocks
         case $option_shadowsocks in
-            0) #VER CONFIGURACION URI
+            0) 
+            #VER CONFIGURACION URI
                 _config_uri
                 echo -e "${GREEN}${uri_shadowsocks}"
                 ;;
-            1)  # cambiar puerto
+            1) 
+             # cambiar puerto
                 {
                     while true;do
                         trap ctrl_c SIGINT SIGTERM
@@ -729,7 +731,8 @@ cfg_shadowsocks(){
 
                 }
                 ;;
-            2)  # cambiar password
+            2)  
+            # cambiar password
                 {
                     while true;do
                         trap ctrl_c SIGINT SIGTERM
@@ -759,7 +762,8 @@ cfg_shadowsocks(){
                 clear
                 cfg_shadowsocks
                 ;;
-            3) # instalar/administrar plugin
+            3) 
+            # instalar/administrar plugin
                 {   
                     clear                            
                     echo -e "${BLUE}〢────────────〢 ${WHITE}SHADOWSOCKS-LIBEV | SIMPLE-OBFS${BLUE} 〢───────────〢"
@@ -778,7 +782,8 @@ cfg_shadowsocks(){
                             prompt=$(date "+%x %X")
                             read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option_plugin
                             case $option_plugin in 
-                                1 ) # INICIAR/DETENER OBFS-SERVER
+                                1 ) 
+                                # INICIAR/DETENER OBFS-SERVER
                                     {   
                                         # detener obfs-server
                                         if [[ ! -z "$obfs_server_pid" ]];then
@@ -797,7 +802,8 @@ cfg_shadowsocks(){
                                     clear
                                     cfg_shadowsocks
                                     ;;
-                                2 ) # TLS/HTTP
+                                2)
+                                 # TLS/HTTP
                                     {
                                         info "Seleccione el tipo de obuscacion:"
                                         echo -e "${WHITE}[ ${BLUE}1${WHITE} ] ${GREEN}TLS${WHITE}"
@@ -822,18 +828,22 @@ cfg_shadowsocks(){
                                     cfg_shadowsocks
                                     ;;
                                 
-                                [Bb]) # menu de instalacion de software
+                                [Bb]) 
+                                # menu de instalacion de software
                                     clear
                                     option_menu_software
                                     ;;
-                                [Mm]) # menu principal
+                                [Mm]) 
+                                # menu principal
                                     clear
                                     fenix
                                     ;;
-                                q|Q|e|E) # salir
+                                q|Q|e|E) 
+                                # salir
                                     exit 0
                                     ;;
-                                *) # opcion invalida
+                                *) 
+                                # opcion invalida
                                     continue
                                     ;;
                             esac
@@ -875,7 +885,8 @@ cfg_shadowsocks(){
                     }
                 }
                 ;;
-            4) # reiniciar/iniciar shadowsocks
+            4) 
+            # reiniciar/iniciar shadowsocks
                 {
                     if [[ $shadowsocks_is_running -eq 0 ]];then
                         killall ss-server &>/dev/null
@@ -900,7 +911,8 @@ cfg_shadowsocks(){
                     fi
                 }
                 ;;
-            5)  # detener/desinstalar shadowsocks
+            5)  
+            # detener/desinstalar shadowsocks
                 {
                     if [[ $shadowsocks_is_running -eq 0 ]];then
                         killall ss-server &>/dev/null
@@ -921,7 +933,8 @@ cfg_shadowsocks(){
                     fi
                 }
                 ;;
-            6)  # desinstalar/ver estado shadowsocksk
+            6) 
+             # desinstalar/ver estado shadowsocksk
                 {   
                     if [[ $shadowsocks_is_running -eq 0 ]];then
                         killall ss-server &>/dev/null
@@ -935,7 +948,8 @@ cfg_shadowsocks(){
                     fi
                 }
                 ;;
-            7) # ver estado de shadowsocks
+            7) 
+            # ver estado de shadowsocks
                 service shadowsocks-libev status
                 ;;
 
@@ -1024,7 +1038,8 @@ cfg_openvpn(){
         prompt=$(date "+%x %X")
         read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option_vpn
         case $option_vpn in
-            1) # AGREGAR UN PUERTO
+            1) 
+            # AGREGAR UN PUERTO
                 {
                     port_input
                     ovpn_new_port=${puertos_array[@]} && unset puertos_array
@@ -1043,7 +1058,8 @@ cfg_openvpn(){
                 clear
                 cfg_openvpn
                 ;;
-            2) # REMOVER UN PUERTO
+            2)
+             # REMOVER UN PUERTO
                 {
                     info 'Seleccione el puerto a eliminar:'
                     local count=0
@@ -1070,7 +1086,8 @@ cfg_openvpn(){
                 clear
                 cfg_openvpn
                 ;;
-            3) # CAMBIAR PROTOCOLO (tcp/udp)
+            3) 
+            # CAMBIAR PROTOCOLO (tcp/udp)
                 {
                      info "Seleccione el protocolo:"
                      local list_port_array=(tcp udp)
@@ -1092,7 +1109,8 @@ cfg_openvpn(){
                 sleep 1.5
                 cfg_openvpn
                 ;;
-            4) # CAMBIAR SERVIDORES DNS
+            4) 
+            # CAMBIAR SERVIDORES DNS
                 {
                     IFS=' ' read -ra dns_ <<< $(cat /etc/openvpn/server.conf | grep -Eo 'DNS .*"' | cut -d " " -f 2 | sed -e 's/"//g' | tr '\n' ' ')
                     info "Servidores DNS primario: ${dns_[0]}"
@@ -1135,7 +1153,8 @@ cfg_openvpn(){
                 sleep 1.5
                 cfg_openvpn
                 ;;
-            5) # INICIAR/REINICIAR OPENVPN
+            5) 
+            # INICIAR/REINICIAR OPENVPN
                 {
                  if [[ $oppenvpn_is_running -eq 0 ]];then
                     bar "systemctl start openvpn@server"
@@ -1146,7 +1165,8 @@ cfg_openvpn(){
                 sleep 1.5
                 cfg_openvpn
                 ;;
-            6) # DETENER/DESINSTALAR OPENVPN
+            6)
+             # DETENER/DESINSTALAR OPENVPN
                 {
                     if [[ $oppenvpn_is_running -eq 0 ]];then
                         remove_openvpn
@@ -1159,10 +1179,12 @@ cfg_openvpn(){
                 clear
                 option_menu_software
                 ;;
-            7) # DESINSTALAR/VER ESTADO OPENVPN
+            7) 
+            # DESINSTALAR/VER ESTADO OPENVPN
                 service openvpn@server status
                 ;;
-            8) # REMOVER OPENVPN    
+            8)
+             # REMOVER OPENVPN    
                 remove_openvpn
                 ;;
             "cls" | "CLS")
@@ -1258,7 +1280,8 @@ cfg_python3_proxy(){
         prompt=$(date "+%x %X")
         read -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " option
         case $option in
-            1) # AGREGAR PUERTO
+            1) 
+            # AGREGAR PUERTO
                 {
                     while true;do
                         port_input
@@ -1338,22 +1361,26 @@ cfg_python3_proxy(){
                 sleep 4
                 cfg_python3_proxy
                 ;;
-            2) # ELIMINAR PUERTO
+            2) 
+            # ELIMINAR PUERTO
                 pysocks_del_port 
                 cfg_python3_proxy
                 ;;
             3) systemctl status fenixmanager-pysocks ;;
-            4) # INICIAT/DETENER PYSOCKS
+            4) 
+            # INICIAT/DETENER PYSOCKS
                 [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" || bar "systemctl start fenixmanager-pysocks"
                 sleep 2
                 cfg_python3_proxy
                 ;;
-            5) # REINICIAR/DESHABILIAR PYSOCKS
+            5)
+            # REINICIAR/DESHABILIAR PYSOCKS
                 [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-pysocks"  || bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
                 cfg_python3_proxy
                 ;;
-            6) #DESHABILITAR PYSOCKS
+            6) 
+            #DESHABILITAR PYSOCKS
                 bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
                 cfg_python3_proxy
@@ -1506,7 +1533,8 @@ cfg_ssh_dropbear(){
         prompt=$(date "+%x %X")
         read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
         case $opt in 
-            1) # AGREGAR PUERTOS/INSTALAR DROPBEAR
+            1) 
+            # AGREGAR PUERTOS/INSTALAR DROPBEAR
                 [[ ${dropbear_is_installed} -eq 0 ]] && { # ADD PORT
                     port_input
                     local dropbear_new_port=${puertos_array[@]} && unset puertos_array
@@ -1516,7 +1544,8 @@ cfg_ssh_dropbear(){
                     bar "systemctl restart dropbear"
                     info "Puerto ${dropbear_new_port[@]} agregado correctamente."
                     sleep 2
-                } || { # INSTALL DROPBER
+                } || { 
+                    # INSTALL DROPBER
                     echo "/bin/false" >> /etc/shells # add /bin/false to shells, and prevent dropbear reject user with invalid shell
                     bar "apt-get install dropbear -y"
                     [[ $? -ne 0 ]] && {
@@ -1533,7 +1562,8 @@ cfg_ssh_dropbear(){
                 }
                 cfg_ssh_dropbear
                 ;;
-            2) # ELIMINAR PUERTOS DROPBEAR/OPENSSH
+            2) 
+            # ELIMINAR PUERTOS DROPBEAR/OPENSSH
                 [[ ${dropbear_is_installed} -eq 0 ]] && {
                     info "143, es el puerto por defecto de dropbear. No se puede eliminar." 
                     local dropbear_extra_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
@@ -1565,7 +1595,8 @@ cfg_ssh_dropbear(){
                 sleep 2
                 cfg_ssh_dropbear
                 ;;
-            3) # AGREGAR PUERTOS OPENSSH
+            3) 
+            # AGREGAR PUERTOS OPENSSH
                 port_input
                 local ssh_new_port=${puertos_array[@]} && unset puertos_array
                 for port in ${ssh_new_port[@]};do
@@ -1576,7 +1607,8 @@ cfg_ssh_dropbear(){
                 sleep 4
                 cfg_ssh_dropbear
                 ;;
-            4) # CAMBIAR BANNER
+            4) 
+            # CAMBIAR BANNER
                 # ! SELECT OPT BANNER
                 local fenixbanner='<br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Script: </strong><strong style="color:#ff0000;font-size: 30px;">FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Version: </strong><strong style="color:#ff0000;font-size: 30px;">replace_version</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Dev: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001_byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Github: </strong><strong style="color:#ff0000;font-size: 30px;">github.com/M1001-byte/FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001-byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@Mathiue1001</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢Gracias por utilizar FenixManager!〢</strong>'
                 change_banner(){
@@ -1618,11 +1650,13 @@ cfg_ssh_dropbear(){
                     done
                     
                     case $banner_option in 
-                        1 ) # ! LOAD BANNER FROM FILE
+                        1 ) 
+                        # ! LOAD BANNER FROM FILE
                             list_banners && local banner_file="${BANNER_FILE}" && unset BANNER_FILE
                             change_banner "${banner_file}"
                             ;;
-                        2 ) # ! LOAD BANNER FROM URL
+                        2 ) 
+                        # ! LOAD BANNER FROM URL
                             info "Tenga en cuenta que, todo el contenido que devuelve la URL sera usado como banner."
                             info "Es recomendable que el contenido sea solamente texto plano."
                             read -r -p "$(echo -e "${WHITE}[*] URL : ")" banner_url
@@ -1636,7 +1670,8 @@ cfg_ssh_dropbear(){
                                 exit 1
                             fi
                             ;;
-                        3 ) # ! COPY BANNER FROM SSH SERVER
+                        3 ) 
+                        # ! COPY BANNER FROM SSH SERVER
                             package_installed "sshpass" || {
                                 bar "apt-get install sshpass" || {
                                     error "No se pudo instalar sshpass."
@@ -1660,7 +1695,8 @@ cfg_ssh_dropbear(){
                             rm /tmp/banner_ssh_tmp
                             change_banner "${banner_file}"
                             ;;
-                        4 ) # ! INPUT BANNER
+                        4 ) 
+                        # ! INPUT BANNER
                             info "Cuando termine de introducir el banner, presiona la combinacion: ${YELLOW}CTRL + D ${WHITE}."
                             info "Puede que necesites presionar unas dos o tres veces la combinacion mencionada."
                             line_separator 62
@@ -1684,16 +1720,19 @@ cfg_ssh_dropbear(){
                     cfg_ssh_dropbear
                 }
                 ;;
-            5) #  REINICIAR DROPBEAR / OPENSSH
+            5) 
+            #  REINICIAR DROPBEAR / OPENSSH
                 [[ ${dropbear_is_installed} -eq 0 ]] && bar "service dropbear restart"
                 bar "service ssh restart"
                 sleep 4
                 cfg_ssh_dropbear
                 ;;
-            6) #  VER ESTADO DE DROPBEAR
+            6) 
+            #  VER ESTADO DE DROPBEAR
                 systemctl status dropbear
                 ;;
-            7) # ELIMINAR PUERTOS OPENSSH
+            7) 
+            # ELIMINAR PUERTOS OPENSSH
                 del_openssh_port
                 ;;
             "cls" | "CLS")
