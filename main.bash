@@ -113,8 +113,6 @@ fenix_create_cfg_dir(){
     local public_ip=$(curl -s http://api.ipify.org )
     echo "${public_ip}" > "/etc/FenixManager/ip"
 }
-
-
 main(){
     clear
     print_banner
