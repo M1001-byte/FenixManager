@@ -81,7 +81,7 @@ install_python3_package(){
            if [ $? -eq 130 ];then
                error 'Accion cancelada.'
                 exit 130
-           elsesudo pacman -S noto-fonts-cjk
+           else
                error "Fallo al instalar $packets."
                 exit $?
             fi
