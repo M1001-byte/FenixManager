@@ -761,7 +761,11 @@ uninstall_fenixmanager(){
         rm  "${badvpn_bin}" && {
             info "Eliminando ${GREEN}${badvpn_bin}${WHITE}."
         }
-
+        # * remove fenixssh
+        local fenixssh_bin=$(which fenixssh)
+        rm  "${fenixssh_bin}" && {
+            info "Eliminando ${GREEN}${fenixssh_bin}${WHITE}."
+        }
         # * remove stunnel4 dir
         rm /etc/{stunnel,stunnel4} -rf &>/dev/null
         # * delete /bin/false from /etc/shells
