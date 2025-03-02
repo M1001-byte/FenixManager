@@ -245,3 +245,40 @@ install_badvpn_udpgw(){
         read
         }
 }
+
+install_fenixssh(){
+    local arch=$(uname -m)
+    local rsa="${user_folder}/.ssh/id_rsa"
+    local binaries="${script_dir}/fenixssh/fenixssh-${arch}"
+    
+    if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
+        error "Arquitectura de cpu no sportadar."
+        info "Contacta con el administrador para darle soporte."
+        info "Telegram: @Mathiue1001"
+    fi
+    if [ ! -f "$binaries" ];then
+        error "No se encontro el binario de FenixSSH."
+        exit 1
+    fi
+
+    cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
+    chmod 777 "/usr/bin/fenixssh"&>/dev/null
+    
+    while true ;do
+        read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " port
+        check_if_port_is_open $port
+        if [[ $? -eq 0 ]];then ufw allow $port  &>/dev/null; break ; else continue ; fi
+    done
+    if [ ! -f "$rsa" ];then
+        error "No se encontro una clave ssh privada."
+        info "Genere una con ssh-keygen -t rsa ."
+        exit 1
+    fi
+    list_banners
+
+    screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "$rsa" && {
+        info "FenixSSH iniciado correctamente."
+    }
+    read
+    cfg_fenixssh
+}

@@ -57,6 +57,16 @@ sudo bash /tmp/install-fenix.bash # Instalar
     * Restaura el archivo ".bashrc" al estado original
     * Elimina la entrada "/bin/false" del archivo "/etc/shells" ( Agregada para el correcto funcionamiento de dropbear )
 
+## FenixSSH
+Agregamos un binario personalizado ssh para mostrar un banner muy util para los usuarios.
+Cada vez que un usuario se conecta, le mostrara su user,la fecha de expiracion y el numero maximo de conexiones permitidas.
+Por defecto viene con un banner, pero puedes cambiar.
+Ten en cuenta lo siguientes marcadores:
+*[user] = Usuario
+*[exp] = Fecha de expiracion
+*[maxConn] = Maximias conecciones
+*[author] = M1001-byte
+Agregen eso marcadores a sus banner, en el lugar que ustedes quieran, y mi script se encargara de reemplazar esas llaves con sus respectivos valores
 ### **Y mas por venir :)**
 
 ## Contacto

@@ -225,6 +225,8 @@ option_menu_package(){
                     }
                 elif [[ "${i}" == "wireguard" ]];then
                     wg show | grep "interface" -q && activo=0 || activo=1
+                elif [[ "${i}" == "fenixssh" ]];then
+                    pgrep fenixssh &>/dev/null && activo=0 || activo=1
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
@@ -323,6 +325,7 @@ package_installed () {
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
     if [[ "$package" == "wireguard" ]];then if [[ -e /etc/wireguard/params ]];then cmd=1 ; else cmd=0;fi ;fi
+    if [[ "$package" == "fenixssh" ]];then if [[ -f /usr/bin/fenixssh ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ $cmd == 1 ]]; then
         return 0
     else

@@ -1913,6 +1913,94 @@ cfg_wireguard(){
     done
 }
 
+cfg_fenixssh(){
+     local banner port
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO FENIXSSH${BLUE} 〢────────────────〢"
+    show_info(){
+        local str_ color_ args banner port
+        local pid=$(pgrep fenixssh)
+
+        if [ -n "$pid" ]; then
+            args=$(cat "/proc/${pid}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
+            banner=$(echo -e "${args}" | grep -Eo "/[^/]+(/[^/]+)*(/[^/]+\.(html|txt))")
+            port=$(echo ${args} | grep -o '[0-9]\{2,\}')
+            str_="[ ACTIVO ]"
+            color_="${GREEN}"
+        else
+            args=''
+            banner=''
+            port=''
+            str_="[ INACTIVO ]"
+            color_="${RED}"
+        fi
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((27-${#str_}-8))s \n" "BANNER:" "${banner}" "〢"
+        echo -e "${BLUE}〢───────────────────────────────────────────────────────────〢"
+    }
+    show_info
+    option_color 1 "CAMBIAR PUERTO"
+    option_color 2 "CAMBIAR BANNER"
+    option_color 3 "DETENER SERVICIO"
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        case $option in
+            1)
+                # Cambiar puerto
+                while true ;do
+                    read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
+                    check_if_port_is_open $porti
+                    if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
+                done
+                killall fenixssh
+                screen -dmS "fenixssh" fenixssh $porti "$banner" "${user_folder}/.ssh/id_rsa" && {
+                    info "FenixSSH iniciado correctamente."
+                    }
+                    read
+                    cfg_fenixssh
+                    ;;
+            2)
+               # Cambiar banner
+               list_banners
+               screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
+                    info "FenixSSH iniciado correctamente."
+                    }
+                read
+                cfg_fenixssh
+                ;;
+            3) 
+                # detener servicion
+                killall fenixssh
+                info "Servicion detenido con exito"
+                read
+                cfg_fenixssh
+                ;;
+            [Bb]) 
+            # menu de instalacion de software
+                clear
+                option_menu_software
+                ;;
+            [Mm]) 
+            # menu principal
+                clear
+                fenix
+                ;;
+            q|Q|e|E) 
+            # salir
+                exit 0
+                ;;
+            *) 
+            # opcion invalida
+                continue
+                ;;
+        esac
+    done
+}
+
+
 del_openssh_port(){
     local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))
     for ((i=0;i<${#ssh_ports[@]};i++));do
