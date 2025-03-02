@@ -261,9 +261,6 @@ install_fenixssh(){
         exit 1
     fi
 
-    cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
-    chmod 777 "/usr/bin/fenixssh"&>/dev/null
-    
     while true ;do
         read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " port
         check_if_port_is_open $port
@@ -275,7 +272,10 @@ install_fenixssh(){
         exit 1
     fi
     list_banners
-
+    
+    cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
+    chmod 777 "/usr/bin/fenixssh"&>/dev/null
+    
     screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "$rsa" && {
         info "FenixSSH iniciado correctamente."
     }

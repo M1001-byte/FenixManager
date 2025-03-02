@@ -62,10 +62,11 @@ Agregamos un binario personalizado ssh para mostrar un banner muy util para los 
 Cada vez que un usuario se conecta, le mostrara su user,la fecha de expiracion y el numero maximo de conexiones permitidas.
 Por defecto viene con un banner, pero puedes cambiar.
 Ten en cuenta lo siguientes marcadores:
-*[user] = Usuario
-*[exp] = Fecha de expiracion
-*[maxConn] = Maximias conecciones
-*[author] = M1001-byte
+* **[user]** = Usuario
+* **[exp]** = Fecha de expiracion
+* **[maxConn]** = Maximas conecciones
+* **[author]** = M1001-byte
+
 Agregen eso marcadores a sus banner, en el lugar que ustedes quieran, y mi script se encargara de reemplazar esas llaves con sus respectivos valores
 ### **Y mas por venir :)**
 
