@@ -1943,6 +1943,9 @@ cfg_fenixssh(){
     option_color 1 "CAMBIAR PUERTO"
     option_color 2 "CAMBIAR BANNER"
     option_color 3 "DETENER SERVICIO"
+    option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
+    option_color 'M' "MENU PRINCIPAL"
+    option_color 'E' "SALIR"
     while true;do
         trap ctrl_c SIGINT SIGTERM
         prompt=$(date "+%x %X")
