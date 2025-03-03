@@ -2028,7 +2028,7 @@ cfg_udpcustom(){
     echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO UDPCUSTOM${BLUE} 〢────────────────〢"
     show_info(){
         local ports exclude pid
-        pid=$(pgrep udp-custom 2>/dev/null)
+        local pid=$(pgrep udp-custom 2>/dev/null)
         if [ -n "$pid" ]; then
             ports=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
             exclude=$(cat "/proc/${pid}/cmdline" | tr '\0' ' ' | grep -oP '-exclude[[:space:]]+([0-9,]+)' | sed "s/xclude/ /g" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
@@ -2048,11 +2048,10 @@ cfg_udpcustom(){
     }
     show_info
     option_color 1 "CAMBIAR PUERTO"
-    option_color 2 "CAMBIAR PUERTOS A EXCLUIR"
     if [ -z $is_active ];then
-        option_color 3 "INICIAR SERVICIO"
+        option_color 2 "INICIAR SERVICIO"
     else
-        option_color 3 "DETENER SERVICIO"
+        option_color 2 "DETENER SERVICIO"
     fi
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
@@ -2072,16 +2071,6 @@ cfg_udpcustom(){
                 cfg_udpcustom
                 ;;
             2)
-               # Cambiar puertos a excluir
-                read -p "$(echo -e "$YELLOW[*] Ingrese los puertos a excluir, separados por , ( coma ) :${endcolor}") " porti
-                jq ".exclude = \"${porti}\"" config.json > /root/udp/config.json
-                bar "systemctl restart udp-custom" || {
-                    error "Fallo al agregar los puertos"
-                    exit 1
-                }
-                cfg_udpcustom
-                ;;
-            3) 
                 [ -n $is_active ] && {
                     bar "systemctl stop udp-custom"
                 } || {
