@@ -227,6 +227,8 @@ option_menu_package(){
                     wg show | grep "interface" -q && activo=0 || activo=1
                 elif [[ "${i}" == "fenixssh" ]];then
                     pgrep fenixssh &>/dev/null && activo=0 || activo=1
+                elif [[ "${i}" == "udpcustom" ]];then
+                    pgrep udp-custom &>/dev/null && activo=0 || activo=1
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
@@ -324,8 +326,9 @@ package_installed () {
     if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
-    if [[ "$package" == "wireguard" ]];then if [[ -e /etc/wireguard/params ]];then cmd=1 ; else cmd=0;fi ;fi
-    if [[ "$package" == "fenixssh" ]];then if [[ -f /usr/bin/fenixssh ]];then cmd=1 ; else cmd=0;fi ;fi
+    if [[ "$package" == "wireguard" ]];then if [[ -e "/etc/wireguard/params" ]];then cmd=1 ; else cmd=0;fi ;fi
+    if [[ "$package" == "fenixssh" ]];then if [[ -f "/usr/bin/fenixssh" ]];then cmd=1 ; else cmd=0;fi ;fi
+    if [[ "$package" == "udpcustom" ]];then if [[ -f "/etc/systemd/system/udp-custom.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
     if [[ $cmd == 1 ]]; then
         return 0
     else
@@ -568,7 +571,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     #local get_actived_services="$1"
     local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev)
+    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -585,6 +588,10 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             pgrep obfs-server &> /dev/null || {
                 pgrep ss-server &>/dev/null
             }
+        elif [[ "${services_}" == "udpcustom" ]];then
+            systemctl status udp-custom &> /dev/null
+        elif [[ "${services_}" == "fenixssh" ]];then
+            pgrep fenixssh &> /dev/null
         else
             systemctl status "${services_//wireguard/wg-quick@wg0}" &>/dev/null
         fi
@@ -646,6 +653,14 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 } || {
                     port_listen="$(cat "/etc/cron.d/fenixmanager" | grep "/bin/badvpn-udpgw" | grep -Eo "127.0.0.1:[0-9]{1,5}" | cut -d: -f2 | xargs)"
                 }
+                ;;
+            "udpcustom")
+                port_listen=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
+                ;;
+            "fenixssh")
+                local pid=$(pgrep fenixssh)
+                local args=$(cat "/proc/${pid}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
+                port_listen=$(echo ${args} | grep -o '[0-9]\{2,\}')
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then

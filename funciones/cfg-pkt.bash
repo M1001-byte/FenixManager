@@ -1914,12 +1914,12 @@ cfg_wireguard(){
 }
 
 cfg_fenixssh(){
-     local banner port
+    local banner port
+    local pid=$(pgrep fenixssh)
     clear
     echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO FENIXSSH${BLUE} 〢────────────────〢"
     show_info(){
-        local str_ color_ args banner port
-        local pid=$(pgrep fenixssh)
+        local str_ color_ args port
 
         if [ -n "$pid" ]; then
             args=$(cat "/proc/${pid}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
@@ -1937,12 +1937,16 @@ cfg_fenixssh(){
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((27-${#str_}-8))s \n" "BANNER:" "${banner}" "〢"
-        echo -e "${BLUE}〢───────────────────────────────────────────────────────────〢"
+        line_separator 60
     }
     show_info
     option_color 1 "CAMBIAR PUERTO"
     option_color 2 "CAMBIAR BANNER"
-    option_color 3 "DETENER SERVICIO"
+    if [ -z $pid ];then
+        option_color 3 "INICIAR SERVICIO"    
+    else
+        option_color 3 "DETENER SERVICIO"
+    fi
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
@@ -1975,9 +1979,21 @@ cfg_fenixssh(){
                 cfg_fenixssh
                 ;;
             3) 
-                # detener servicion
-                killall fenixssh
-                info "Servicion detenido con exito"
+                if [ -z $pid ];then
+                    while true ;do
+                        read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
+                        check_if_port_is_open $porti
+                            if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
+                    done
+                    list_banners
+                    screen -dmS "fenixssh" fenixssh $porti "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
+                        info "FenixSSH iniciado correctamente."
+                    }
+                else
+                    # detener servicion
+                    killall fenixssh
+                    info "Servicion detenido con exito"
+                fi
                 read
                 cfg_fenixssh
                 ;;
@@ -2003,6 +2019,98 @@ cfg_fenixssh(){
     done
 }
 
+
+cfg_udpcustom(){
+    local config="/root/udp/config.json"
+    local is_active=$(pgrep udp-custom 2>/dev/null)
+    
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO UDPCUSTOM${BLUE} 〢────────────────〢"
+    show_info(){
+        local ports exclude pid
+        pid=$(pgrep udp-custom 2>/dev/null)
+        if [ -n "$pid" ]; then
+            ports=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
+            exclude=$(cat "/proc/${pid}/cmdline" | tr '\0' ' ' | grep -oP '-exclude[[:space:]]+([0-9,]+)' | sed "s/xclude/ /g" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            str_="[ ACTIVO ]"
+            color_="${GREEN}"
+        else
+            ports=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
+            exclude=''
+            str_="[ INACTIVO ]"
+            color_="${RED}"
+        fi
+        
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((60-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((56-${#ports}-8))s \n" "PUERTO:" "${ports}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((44-${#exclude}-8))s \n" "PUERTOS EXCLUIDOS:" "${exclude}" "〢"
+        line_separator 60
+    }
+    show_info
+    option_color 1 "CAMBIAR PUERTO"
+    option_color 2 "CAMBIAR PUERTOS A EXCLUIR"
+    if [ -z $is_active ];then
+        option_color 3 "INICIAR SERVICIO"
+    else
+        option_color 3 "DETENER SERVICIO"
+    fi
+    option_color 'M' "MENU PRINCIPAL"
+    option_color 'E' "SALIR"
+        while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        case $option in
+            1)
+                # Cambiar puertos
+                read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha :${endcolor}") " porti
+                jq ".listen = \":${porti}\"" config.json > /root/udp/config.json
+                bar "systemctl restart udp-custom" || {
+                    error "Fallo al agregar los puertos"
+                    exit 1
+                }
+                cfg_udpcustom
+                ;;
+            2)
+               # Cambiar puertos a excluir
+                read -p "$(echo -e "$YELLOW[*] Ingrese los puertos a excluir, separados por , ( coma ) :${endcolor}") " porti
+                jq ".exclude = \"${porti}\"" config.json > /root/udp/config.json
+                bar "systemctl restart udp-custom" || {
+                    error "Fallo al agregar los puertos"
+                    exit 1
+                }
+                cfg_udpcustom
+                ;;
+            3) 
+                [ -n $is_active ] && {
+                    bar "systemctl stop udp-custom"
+                } || {
+                    bar "systemctl start udp-custom"
+                }
+                cfg_udpcustom
+                ;;
+            [Bb]) 
+            # menu de instalacion de software
+                clear
+                option_menu_software
+                ;;
+            [Mm]) 
+            # menu principal
+                clear
+                fenix
+                ;;
+            q|Q|e|E) 
+            # salir
+                exit 0
+                ;;
+            *) 
+            # opcion invalida
+                continue
+                ;;
+        esac
+    done
+
+}
 
 del_openssh_port(){
     local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))

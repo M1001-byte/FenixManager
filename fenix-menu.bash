@@ -76,7 +76,7 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks" "badvpn-udpgw", "fenixssh")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks" "badvpn-udpgw" "fenixssh" "udpcustom")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -99,6 +99,7 @@ option_menu_software () {
             # 9) [[ ${installed_packages[*]} =~ wireguard ]] && cfg_wireguard || installWireGuard ;;
             9) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
             10) [[ ${installed_packages[*]} =~ fenixssh ]] && cfg_fenixssh || install_fenixssh ;;
+            11) [[ ${installed_packages[*]} =~ udpcustom ]] && cfg_udpcustom || install_udpcustom ;;
             "cls" | "CLS") clear && option_menu_software ;;
             [mM]) fenix  ;;
             q|Q|e|E) exit 0 ;;

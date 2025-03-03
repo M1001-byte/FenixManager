@@ -39,8 +39,10 @@ sudo bash /tmp/install-fenix.bash # Instalar
     * Shadowsocks-libev ( incluye plug-ins )
     * Openvpn
     * V2ray / X-UI
-    * Un simple proxy de redireccionamiento de puertos. ( Escrito en python3 )
+    * FenixPysocks (Un simple proxy de redireccionamiento de puertos.Escrito en python3  )
     * badvpn udpgw
+    * fenixssh  ( Un binario personalizado de ssh,para mostrar un banner acorde al usuario a conectar)
+    * udp-custom ( Solo funciona con HTTP Custom)
 * Configuracion
     * Administrar Hitman ( Encargado de eliminar usuarios expirados,o que superen el número máximo de conexiones permitidas)
     * Administrar Firewall ( UFW )

@@ -282,3 +282,58 @@ install_fenixssh(){
     read
     cfg_fenixssh
 }
+
+install_udpcustom(){
+    local bin="${script_dir}/bin/udpcustom/udp-custom"
+    local config="${script_dir}/bin/udpcustom/config.json"
+    
+    rm -rf /root/udp    &> /dev/null
+    mkdir -p /root/udp  &> /dev/null
+    info "Se recomienda excluir el puerto de badvpn-udpgw. Por defecto es el 7300 ."
+    read -p "$(echo -e "$YELLOW[*] Ingrese los puertos a excluir ( separados por , (coma) ):${endcolor}") " exclude_port
+    cp "$bin" /root/udp/          &> /dev/null   
+    cp "$config" /root/udp/          &> /dev/null   
+    chmod +x /root/udp/udp-custom &> /dev/null
+    info "Creando servicio systemd"
+    if [ -z "$exclude_port" ]; then
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Tea
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server -c config.json
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2
+[Install]
+WantedBy=default.target
+EOF
+else
+cat <<EOF > /etc/systemd/system/udp-custom.service
+[Unit]
+Description=UDP Custom by ePro Dev. Tea
+[Service]
+User=root
+Type=simple
+ExecStart=/root/udp/udp-custom server -exclude $exclude_port -c config.json
+WorkingDirectory=/root/udp/
+Restart=always
+RestartSec=2
+[Install]
+WantedBy=default.target
+EOF
+fi
+    bar --title "systemctl start udp-custom" --cmd "systemctl start udp-custom" || {
+        rm "/etc/systemd/system/udp-custom.service" &>/dev/null
+        rm -rf /root/udp    &> /dev/null
+        error "Fallo al ininiar udp-custom"
+        exit 1 
+    } && {
+        bar --title "systemctl enable udp-custom" --cmd "systemctl enable udp-custom"
+        bar --cmd "ufw disable"
+    }
+    info "Presione enter para reiniciar su vps"
+    read
+    reboot
+}
