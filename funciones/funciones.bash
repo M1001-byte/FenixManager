@@ -644,7 +644,6 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 port_listen=$(wg show 2>/dev/null| grep "listening port.*" | cut -d: -f2 | xargs)
                 ;;
             "udpgw")
-                unset port_listen
                 local badvpn_pids=$(pgrep badvpn-udpgw)
                 [[ -n "${badvpn_pids}" ]] && {
                     for i in $badvpn_pids;do
@@ -660,6 +659,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 fi
                 ;;
             "fenixssh")
+                unset port_listen
                 local pidf=$(pgrep fenixssh 2>/dev/null)
                 if [ -n "$pidf" ];then
                     local args=$(cat "/proc/${pidf}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
