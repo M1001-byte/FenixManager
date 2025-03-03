@@ -655,12 +655,16 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 }
                 ;;
             "udpcustom")
-                port_listen=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
+                if [ -f "/root/udp/config.json" ];then
+                    port_listen=$(jq -r '.listen' "/root/udp/config.json" | sed "s/:/ /g" )
+                fi
                 ;;
             "fenixssh")
-                local pid=$(pgrep fenixssh)
-                local args=$(cat "/proc/${pid}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
-                port_listen=$(echo ${args} | grep -o '[0-9]\{2,\}')
+                local pidf=$(pgrep fenixssh 2>/dev/null)
+                if [ -n "$pidf" ];then
+                    local args=$(cat "/proc/${pidf}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
+                    port_listen=$(echo ${args} | grep -o '[0-9]\{2,\}')
+                fi
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then
@@ -715,8 +719,8 @@ show_users_and_port_template(){
 
 
 uninstall_fenixmanager(){
-    local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)")
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "pysocks" "v2ray" "x-ui" "wireguard" "badvpn-udpgw")
+    local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)" )
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "pysocks" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixssh" "udpcustom")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -754,6 +758,13 @@ uninstall_fenixmanager(){
                 # ! V2RAY 
                 elif [[ "${service}" == "v2ray" ]];then
                     /etc/FenixManager/funciones/v2ray/v2ray-install-release.bash --remove
+                # ! FENIX SSH
+                elif [[ "${service}" == "fenixssh" ]];then
+                    rm /usr/bin/fenixssh &>/dev/null
+                # ! UDP CUSTOM
+                elif [[ "${service}" == "udpcustom" ]];then
+                    systemctl disable udp-custom
+                    rm /root/udp/ -r &>/dev/null
                 else
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
                 fi
