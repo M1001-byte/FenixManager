@@ -59,6 +59,8 @@ sudo bash /tmp/install-fenix.bash # Instalar
     * Restaura el archivo ".bashrc" al estado original
     * Elimina la entrada "/bin/false" del archivo "/etc/shells" ( Agregada para el correcto funcionamiento de dropbear )
 
+### **Y mas por venir :)**
+
 ## FenixSSH
 Agregamos un binario personalizado ssh para mostrar un banner muy util para los usuarios.
 Cada vez que un usuario se conecta, le mostrara su user,la fecha de expiracion y el numero maximo de conexiones permitidas.
@@ -70,7 +72,19 @@ Ten en cuenta lo siguientes marcadores:
 * **[author]** = M1001-byte
 
 Agregen eso marcadores a sus banner, en el lugar que ustedes quieran, y mi script se encargara de reemplazar esas llaves con sus respectivos valores
-### **Y mas por venir :)**
+
+## Donaciones
+FenixManager es y siempre sera **gratis**. Si quieren apoyarme lo pueden hacer donando la cantidad que quieran o simplemente dando una estrellita a este repo.
+**Muchas Gracias**
+
+![USDT](https://img.shields.io/badge/Donate-USDT-26a17b?style=for-the-badge&logo=tether)
+**Dirección USDT-TRC20:**  
+
+`TTMGFXCbPnCvtVR7gwKUMfJV51i71tUqrF`  
+
+**Recuerda usar la red TRC20** para evitar pérdidas.  
+
+
 
 ## Contacto
 **Unicos medios de contactos.**
