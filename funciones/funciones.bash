@@ -322,7 +322,7 @@ package_installed () {
     package=$1
     cmd=$(dpkg-query -W --showformat='${Status}\n' "$package" 2>/dev/null| grep -c "install ok installed" && return 0 || return 1)
     
-    if [[ "$package" == "v2ray" ]];then if [[ -f "/usr/local/bin/v2ray" ]];then cmd=1 ; else cmd=0 ; fi ; fi
+    if [[ "$package" == "x-ui" ]];then if [[ -f "/usr/bin/x-ui" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
@@ -659,7 +659,6 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 fi
                 ;;
             "fenixssh")
-                unset port_listen
                 local pidf=$(pgrep fenixssh 2>/dev/null)
                 if [ -n "$pidf" ];then
                     local args=$(cat "/proc/${pidf}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
@@ -670,6 +669,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         if [[ -n "${port_listen}" ]];then
             services_actived+=("${services_}")
             printf "${WHITE}〢 ${color_}%-${#services_}s${WHITE}: ${YELLOW}%-10s ${WHITE}%$((62 - ${#services_} - 13))s\n" "${services_^^}" "${port_listen}"  "〢"
+            unset port_listen
         fi
     done
 }

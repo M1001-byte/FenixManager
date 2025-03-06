@@ -137,7 +137,7 @@ add_basic_ufw_rules(){
     bar "ufw logging on"
     bar "ufw reload"
     # disabled ipv6
-    sed -i "s/IPV6=yes/IPV6=no/" "${ufw_file}" &>/dev/null
+    # sed -i "s/IPV6=yes/IPV6=no/" "${ufw_file}" &>/dev/null
 }
 
 notify_installation(){

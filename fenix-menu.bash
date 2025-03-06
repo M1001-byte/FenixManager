@@ -5,7 +5,7 @@ source "/etc/FenixManager/funciones/ssh-user.bash"
 source "/etc/FenixManager/funciones/color.bash"
 source "/etc/FenixManager/funciones/install-pkt.bash"
 source "/etc/FenixManager/funciones/cfg-pkt.bash" 
-source "/etc/FenixManager/funciones/v2ray/v2ray.bash"
+source "/etc/FenixManager/funciones/x-ui/x-ui.bash"
 source "/etc/FenixManager/funciones/other-cfg.bash" 
 source "/etc/FenixManager/funciones/wireguard-install.sh"
 
@@ -76,7 +76,7 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "v2ray" "fenixmanager-pysocks" "badvpn-udpgw" "fenixssh" "udpcustom")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "x-ui" "fenixmanager-pysocks" "badvpn-udpgw" "fenixssh" "udpcustom")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -94,7 +94,7 @@ option_menu_software () {
             4 ) [[ ${installed_packages[*]} =~ slowdns ]] && cfg_slowdns || install_slowdns ;;
             5 ) [[ ${installed_packages[*]} =~ shadowsocks-libev ]] && cfg_shadowsocks || install_shadowsocks ;;
             6 ) [[ ${installed_packages[*]} =~ openvpn ]] && cfg_openvpn || install_openvpn ;;
-            7) [[ ${installed_packages[*]} =~ v2ray ]] && cfg_v2ray  || des_install_v2ray_core 1 ;;
+            7) [[ ${installed_packages[*]} =~ x-ui ]] && cfg_x_ui  || install_x-ui 1 ;;
             8) [[ ${installed_packages[*]} =~ fenixmanager-pysocks ]] && cfg_python3_proxy || install_python3_proxy ;;
             # 9) [[ ${installed_packages[*]} =~ wireguard ]] && cfg_wireguard || installWireGuard ;;
             9) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
