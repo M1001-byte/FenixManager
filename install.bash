@@ -22,7 +22,8 @@ clone_fenix(){
     echo -e "\\033[34m〢────────────────〢 \\033[1;37mCLONANDO FENIXMANAGER \\033[34m〢─────────────────〢"
     local branch="master"
     local gitlog=$(mktemp -t gitlog.XXXXXXXX)
-    local os=$(cat /etc/os-release | grep -E '^NAME=.*"' | cut -d= -f2 | xargs)
+    local os=$(cat /etc/os-release | grep -E '^NAME=.*"' | cut -d= -f2 | sed 's/ /-/g' |xargs)
+    local version_id=$(cat /etc/os-release | grep -E '^VERSION_ID=.*"' | cut -d= -f2 | xargs)
     local url="https://github.com/M1001-byte/FenixManager"
     if [ -d /etc/FenixManager ];then
         rm -rf /etc/FenixManager/ &>/dev/null
@@ -42,7 +43,7 @@ clone_fenix(){
     echo -e 'alias fenix="sudo /etc/FenixManager/main.bash"' >> "${userfolder}/.bashrc"
     echo "#!/bin/bash" > "/etc/FenixManager/preferences.bash"
     echo "# No modificar " >> "/etc/FenixManager/preferences.bash"
-    echo "os=${os}" >> "/etc/FenixManager/preferences.bash"
+    echo "os=${os}_${version_id}" >> "/etc/FenixManager/preferences.bash"
     echo "user_folder='${userfolder}'" >> "/etc/FenixManager/preferences.bash"
     echo "script_dir='${script_folder}'" >> "/etc/FenixManager/preferences.bash"
     echo "branch_clone='${branch}'" >> "/etc/FenixManager/preferences.bash"
@@ -142,9 +143,10 @@ add_basic_ufw_rules(){
 
 notify_installation(){
     # si vez esto, porfavor no hagas mal uso.
-    local os=$(lsb_release -a | grep "Description" | cut -d: -f2)
+    local os=$(cat /etc/os-release | grep -E '^NAME=.*"' | cut -d= -f2 | sed 's/ /-/g' |xargs)
+    local version_id=$(cat /etc/os-release | grep -E '^VERSION_ID=.*"' | cut -d= -f2 | xargs)
     local publicIp=$(curl -s ipinfo.io/ip)
-    local data=$(printf "New Fenix Installation\nOS: %s\nPublicIp: %s" "$os" "$publicIp")
+    local data=$(printf "New Fenix Installation\nOS: %s_%s\nPublicIp: %s" "$os" "$version_id" "$publicIp")
     curl -X POST "https://api.telegram.org/bot7791006469:AAE6jzaBrxCTpRZAxMx2HoieEn1iSO0oPdM/sendMessage"  -d "chat_id=934095763" -d "text= ${data}"  &> /dev/nul
 }
 initial(){
