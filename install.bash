@@ -52,13 +52,6 @@ clone_fenix(){
     return 0
 }
 
-change_dns(){
-    chattr -i /etc/resolv.conf &>/dev/null
-    mv /etc/resolv.conf /etc/resolv.conf.bak
-    echo "nameserver 1.1.1.1" > /etc/resolv.conf
-    echo "nameserver 1.0.0.1" > /etc/resolv.conf
-    chattr +i /etc/resolv.conf
-}
 install_packets(){
     echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO PAQUETES NECESARIOS ${BLUE}〢────────────〢${WHITE}"
     for packets in "${packets_to_install[@]}" ; do
@@ -150,7 +143,6 @@ notify_installation(){
     curl -X POST "https://api.telegram.org/bot7791006469:AAE6jzaBrxCTpRZAxMx2HoieEn1iSO0oPdM/sendMessage"  -d "chat_id=934095763" -d "text= ${data}"  &> /dev/nul
 }
 initial(){
-    change_dns
     clone_fenix
     
     source "/etc/FenixManager/funciones/funciones.bash"
