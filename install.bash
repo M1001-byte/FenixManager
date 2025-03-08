@@ -114,6 +114,9 @@ config_bashrc(){
         echo -e "$banner"
         echo -e "${WHITE}Para mostrar el panel: ${GREEN}fenix${WHITE}"
         }
+        if [ -z "$SSH_TTY" ]; then # sftp sesion
+            return
+        fi
         print_fenix_banner
 '
     if  ! grep -q "print_fenix_banner" <<< "$(declare -F)";then
