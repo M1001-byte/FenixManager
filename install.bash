@@ -130,6 +130,7 @@ add_basic_ufw_rules(){
     bar "ufw allow https"
     bar "ufw logging on"
     bar "ufw reload"
+    bar "ufw disable"
     # disabled ipv6
     # sed -i "s/IPV6=yes/IPV6=no/" "${ufw_file}" &>/dev/null
 }
