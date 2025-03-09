@@ -68,26 +68,6 @@ install_packets(){
     sed -i /etc/hosts -e "s/^127.0.0.1 localhost$/127.0.0.1 localhost $(hostname)/" &>/dev/null
 }
 
-install_python3_package(){
-    local pip3_version=$(pip3 --version | awk '{print $2}')
-    local args_pip=''
-    if [[ $(echo -e "$installed_version\n$required_version" | sort -V | head -n1) != "$required_version" ]]; then
-        args_pip='--break-system-packages'
-    fi
-    echo -e "${BLUE}〢───────────〢 ${WHITE}INSTALANDO PAQUETES DE PYTHON3 ${BLUE}〢─────────────〢${WHITE}"
-    for i in "${pip_packages[@]}" ; do
-        bar --title "$i" --cmd "pip3 install $i $args_pip" || {
-           if [ $? -eq 130 ];then
-               error 'Accion cancelada.'
-                exit 130
-           else
-               error "Fallo al instalar $packets."
-                exit $?
-            fi
-        }
-    done
-}
-
 config_bashrc(){
     local print_fenix_banner='print_fenix_banner () {
         local version="$(cat /etc/FenixManager/version 2>/dev/null)"
@@ -153,7 +133,6 @@ initial(){
     source "/etc/FenixManager/funciones/color.bash"
     
     install_packets
-    install_python3_package
     add_basic_ufw_rules
     config_bashrc
     chmod -x /etc/update-motd.d/* & > /dev/null # remove all motd message
