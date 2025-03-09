@@ -12,9 +12,9 @@ def kill_port(port:int) -> int:
         os.system(f"kill -9 $(lsof -t -i:{port})")
         return 0
     except:pass
-def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,connection_type:str,action:str="start") -> None:
-    args_parse_to_script = f"--port {bind_port} --connect {connect_to} --custom-response '{custom_response}' --connection-type {connection_type}"
-    tmp_proc = subprocess.Popen([f'python3 {proxy_file} {args_parse_to_script} &'],shell=True)
+def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,action:str="start") -> None:
+    args_parse_to_script = f"-ListenPort {bind_port} -ServerAddr {connect_to} -customResponse '{custom_response}' "
+    tmp_proc = subprocess.Popen([f'fenixproxy {args_parse_to_script} &'],shell=True)
     #os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
     #return tmp_proc.pid
@@ -27,13 +27,11 @@ def main(config:str):
     
     for index,section in enumerate(parser.sections()):
         try:
-            bind_port = parser.get(section, 'accept')
-            connect_to = parser.get(section, 'connect')
-            custom_response = parser.get(section, 'custom_response')
-            connection_type = parser.get(section, 'connection_type')
+            bind_port = parser.get(section, 'ListenPort')
+            connect_to = parser.get(section, 'ServerAddr')
+            custom_response = parser.get(section, 'customResponse')
         except Exception as er:
-            if "connection_type" in str(er):
-                connection_type = "SSH"
+            print(er)
         #log_file = f"/var/log/FenixManager/pysocks:{bind_port}-{connect_to}.log"
         
         is_open = port_is_open(int(bind_port))
@@ -42,11 +40,11 @@ def main(config:str):
                 continue
             else:
                 show_info(index,bind_port,connect_to)
-                run_proxy_server(bind_port, connect_to, custom_response, connection_type)
+                run_proxy_server(bind_port, connect_to, custom_response)
         else:
             #print(f"Log File [#{index}] : {log_file}")
             show_info(index,bind_port,connect_to)
-            run_proxy_server(bind_port, connect_to, custom_response, connection_type)
+            run_proxy_server(bind_port, connect_to, custom_response)
 
 
 if __name__ == "__main__":
@@ -62,7 +60,7 @@ if __name__ == "__main__":
                 user_dir = line.split("=")[1].strip().replace("'","")
                 break
 
-    config_file = f"{user_dir}/FenixManager/py-socks.conf"
-    proxy_file = '/etc/FenixManager/funciones/py-proxy/direct_proxy.py'#'/etc/FenixManager/funciones/py-proxy/direct_proxy.py'
+    config_file = f"{user_dir}/FenixManager/fenixproxy.conf"
+    proxy_file = '/usr/bin/fenixproxy'#'/etc/FenixManager/funciones/py-proxy/direct_proxy.py'
     print(f"Config file: {config_file}")
     main(config_file)

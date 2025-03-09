@@ -229,6 +229,8 @@ option_menu_package(){
                     pgrep fenixssh &>/dev/null && activo=0 || activo=1
                 elif [[ "${i}" == "udpcustom" ]];then
                     pgrep udp-custom &>/dev/null && activo=0 || activo=1
+                elif [[ "${i}" == "fenixproxy" ]];then
+                    systemctl is-active "${i}" &>/dev/null && activo=0 || activo=1
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
@@ -323,7 +325,7 @@ package_installed () {
     cmd=$(dpkg-query -W --showformat='${Status}\n' "$package" 2>/dev/null| grep -c "install ok installed" && return 0 || return 1)
     
     if [[ "$package" == "x-ui" ]];then if [[ -f "/usr/bin/x-ui" ]];then cmd=1 ; else cmd=0 ; fi ; fi
-    if [[ "$package" == "fenixmanager-pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
+    if [[ "$package" == "fenixproxy" ]];then if [[ -f "/etc/systemd/system/fenixmanager-fenixproxy.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
     if [[ "$package" == "wireguard" ]];then if [[ -e "/etc/wireguard/params" ]];then cmd=1 ; else cmd=0;fi ;fi
@@ -352,8 +354,8 @@ redirect_to_service() {
     # ! La variable global 'SERVICE_REDIRECT',contiene el puerto del servicio seleccionado.
     # Despues listar los puertos disponibles por pysocks
     local hidden_service="$1"
-    local service_available=("ssh" "dropbear" "openvpn" "pysocks")
-    [[ "${hidden_service}" == "pysocks" ]] && service_available=(${service_available[@]/'pysocks'})
+    local service_available=("ssh" "dropbear" "openvpn" "fenixproxy")
+    [[ "${hidden_service}" == "fenixproxy" ]] && service_available=(${service_available[@]/'fenixproxy'})
     
     openvpn_ports=$(grep -oP '^\s*port\s+\K[0-9]+' /etc/openvpn/server.conf 2>/dev/null &)
     # check service is running
@@ -365,8 +367,8 @@ redirect_to_service() {
         (( count++ ))
         if [[ $service == "openvpn" ]]; then
             service openvpn@server status &>/dev/null
-        elif [[ $service =~ "pysocks" ]]; then
-            systemctl is-active fenixmanager-pysocks &>/dev/null
+        elif [[ $service =~ "fenixproxy" ]]; then
+            systemctl is-active fenixmanager-fenixproxy &>/dev/null
         else
             pgrep "$service" &> /dev/null
         fi
@@ -374,9 +376,9 @@ redirect_to_service() {
         if [[ $? == 0 ]]; then
             if [[ "$service" == "openvpn" ]];then
                 ports_used_by_service=$openvpn_ports
-            elif [[ "${service}" == "pysocks" ]];then
-                local pysocks_conf_fil="${user_folder}/FenixManager/py-socks.conf"
-                ports_used_by_service=$(grep "^accept=.*" "${pysocks_conf_fil}" | awk '{split($0,a,"=");print a[2]}' | tr "\n" " ")
+            elif [[ "${service}" == "fenixproxy" ]];then
+                local pysocks_conf_fil="${user_folder}/FenixManager/fenixproxy.conf"
+                ports_used_by_service=$(grep "^ListenPort=.*" "${pysocks_conf_fil}" | awk '{split($0,a,"=");print a[2]}' | tr "\n" " ")
             else
                 ports_used_by_service=$(netstat -ltnp | grep "$service" | awk '{split($4,a,":"); print a[2]}' | tr '\n' ' ')
             fi

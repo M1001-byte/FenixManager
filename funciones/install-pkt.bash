@@ -205,22 +205,37 @@ install_shadowsocks() {
 
 }
 
-install_python3_proxy(){
+install_fenixproxy(){
     trap ctrl_c SIGINT SIGTERM SIGKILL
+    local arch=$(uname -m)
+    local binaries="${script_dir}/funciones/fenixproxy/fenixproxy-${arch}"
+    
+    if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
+        error "Arquitectura de cpu no soportada."
+        info "Contacta con el administrador para darle soporte."
+        info "Telegram: @Mathiue1001"
+    fi
+    if [ ! -f "$binaries" ];then
+        error "No se encontro el binario de FenixSSH."
+        exit 1
+    fi
     clear
     echo -e "${BLUE}〢────────────〢 ${WHITE}INSTALANDO FENIXMANAGER-PYSOCKS ${BLUE}〢───────────〢"
     
+    cp $binaries /usr/bin/fenixproxy &> /dev/null
+    chmod 777 /usr/bin/fenixproxy    &> /dev/null
+
     info "Agregado un servicio a systemd."
-    sed -i "s|user_dir_replace_with_sed|${user_folder}/|g" "${script_dir}/funciones/py-proxy/main_service.py"
-    cp "${script_dir}/funciones/py-proxy/fenixmanager-pysocks.service" /etc/systemd/system/fenixmanager-pysocks.service
+    sed -i "s|user_dir_replace_with_sed|${user_folder}/|g" "${script_dir}/funciones/fenixproxy/main_service.py"
+    cp "${script_dir}/funciones/fenixproxy/fenixmanager-fenixproxy.service" /etc/systemd/system/fenixmanager-fenixproxy.service
     bar "systemctl daemon-reload"
-    bar "systemctl enable fenixmanager-pysocks.service"
+    bar "systemctl enable fenixmanager-fenixproxy.service"
     info "Creando directorio de configuracion."
     mkdir -p "${user_folder}/FenixManager/config" &>/dev/null
-    bar "systemctl enable fenixmanager-pysocks.service"
+    bar "systemctl enable fenixmanager-fenixproxy.service"
     info "Servicio agregado correctamente."
     sleep 3
-    cfg_python3_proxy
+    cfg_fenixproxy
     
 }
 
@@ -249,7 +264,7 @@ install_badvpn_udpgw(){
 install_fenixssh(){
     local arch=$(uname -m)
     local rsa="${user_folder}/.ssh/id_rsa"
-    local binaries="${script_dir}/fenixssh/fenixssh-${arch}"
+    local binaries="${script_dir}/funciones/fenixssh/fenixssh-${arch}"
     
     if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
         error "Arquitectura de cpu no sportadar."
