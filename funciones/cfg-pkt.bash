@@ -1337,7 +1337,7 @@ cfg_fenixproxy(){
                     }
                     select_status_code
                     select_string_msg
-                    local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
+                    local base_response="HTTP/1.1 ${status_code} ${string_banner}\r\nContent-length: 0\r\n\r\n"
 
                     local base_cfg="[CUSTOM#${number_of_custom_config}]\nListenPort=${port}\nServerAddr=127.0.0.1:${port_to_redirect}\ncustomResponse=${base_response}\n"
                     echo -e "${base_cfg}" >> "${config_file}" 

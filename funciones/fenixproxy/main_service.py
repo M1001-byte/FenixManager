@@ -13,7 +13,7 @@ def kill_port(port:int) -> int:
         return 0
     except:pass
 def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,action:str="start") -> None:
-    args_parse_to_script = f"-ListenPort {bind_port} -ServerAddr {connect_to} -customResponse '{custom_response}' "
+    args_parse_to_script = f"-ListenPort {bind_port} -ServerAddr '{connect_to}' -customResponse '{custom_response}' "
     tmp_proc = subprocess.Popen([f'fenixproxy {args_parse_to_script} &'],shell=True)
     #os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
