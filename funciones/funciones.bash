@@ -354,7 +354,7 @@ get_all_ip_from_adapters() {
 redirect_to_service() {
     # ! La variable global 'SERVICE_REDIRECT',contiene el puerto del servicio seleccionado.
     local hidden_service="$1"
-    local service_available=("sshd" "dropbear" "openvpn" "fenixproxy" "fenixssh")
+    local service_available=("ssh" "dropbear" "openvpn" "fenixproxy" "fenixssh")
     local service_open=()
     [[ "${hidden_service}" == "fenixproxy" ]] && service_available=(${service_available[@]/'fenixproxy'})
     
@@ -383,7 +383,7 @@ redirect_to_service() {
             #     ports_used_by_service=$(grep "^ListenPort=.*" "${pysocks_conf_fil}" | awk '{split($0,a,"=");print a[2]}' | tr "\n" " ")
             else
                 #ports_used_by_service=$(netstat -ltnp | grep "$service" | awk '{split($4,a,":"); print a[2]}' | tr '\n' ' ')
-                local ports_used_by_service=$(netstat -ltnp | grep "$service"  2>/dev/null| grep -Eo ":[0-9]{2,4}" | sed 's|:||g')
+                local ports_used_by_service=$(netstat -ltnp | grep "$service"  2>/dev/null| grep -Eo ":[0-9]{2,4}" | sed 's|:||g' | head -n1)
             fi
 
             printf "〢${green}[ %-2s]${WHITE}| ${green}%-12s${WHITE}| ${green}%-31s${WHITE}| ${green}%-8s${WHITE}〢\n" "$count" "$service" "$ports_used_by_service" "ACTIVO"
