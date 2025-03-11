@@ -134,6 +134,7 @@ check_if_port_is_open() {
 
 
 print_banner () {
+    local version1=$(cat /etc/FenixManager/version 2>/dev/null)
     banner="[1;31m
              _/|       |\_
             /  |       |  \ 
@@ -147,7 +148,7 @@ print_banner () {
                  \ _ /
                 _/   \_[m [33m    Mathiue 1001[m
               [1;31m / _/|\_ \ [m [33m  Fenix Manager[m
-               [1;31m /  |  \   [33m  Version: ${GREEN}${version}[m
+               [1;31m /  |  \   [33m  Version: ${GREEN}${version1}[m
                 [1;31m / v \ 
 "
     echo -e "$banner"
