@@ -265,6 +265,7 @@ install_fenixssh(){
     local arch=$(uname -m)
     local rsa="${user_folder}/.ssh/id_rsa"
     local binaries="${script_dir}/funciones/fenixssh/fenixssh-${arch}"
+    local port=0
     
     if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
         error "Arquitectura de cpu no sportadar."
@@ -277,7 +278,7 @@ install_fenixssh(){
     fi
 
     while true ;do
-        read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " port
+        read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( Recomendado: 2222 ):${endcolor}") " port
         check_if_port_is_open $port
         if [[ $? -eq 0 ]];then ufw allow $port  &>/dev/null; break ; else continue ; fi
     done
