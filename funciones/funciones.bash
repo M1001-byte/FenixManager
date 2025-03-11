@@ -350,18 +350,20 @@ get_all_ip_from_adapters() {
     IPS_LISTS+=("$public_ip")
 }
 
+
 redirect_to_service() {
     # ! La variable global 'SERVICE_REDIRECT',contiene el puerto del servicio seleccionado.
-    # Despues listar los puertos disponibles por pysocks
     local hidden_service="$1"
-    local service_available=("ssh" "dropbear" "openvpn" "fenixproxy")
+    local service_available=("ssh" "dropbear" "openvpn" "fenixproxy" "fenixssh")
+    local service_open=()
     [[ "${hidden_service}" == "fenixproxy" ]] && service_available=(${service_available[@]/'fenixproxy'})
     
     openvpn_ports=$(grep -oP '^\s*port\s+\K[0-9]+' /etc/openvpn/server.conf 2>/dev/null &)
+    
     # check service is running
     line_separator 62
     printf "${WHITE}〢[ %-2s]| %-12s| %-31s| %-8s〢\n" "#" "Servicio" "Puerto" "Estado"
-    local count=0
+    count=0
     local array_service=()
     for service in "${service_available[@]}"; do
         (( count++ ))
@@ -375,15 +377,18 @@ redirect_to_service() {
 
         if [[ $? == 0 ]]; then
             if [[ "$service" == "openvpn" ]];then
-                ports_used_by_service=$openvpn_ports
-            elif [[ "${service}" == "fenixproxy" ]];then
-                local pysocks_conf_fil="${user_folder}/FenixManager/fenixproxy.conf"
-                ports_used_by_service=$(grep "^ListenPort=.*" "${pysocks_conf_fil}" | awk '{split($0,a,"=");print a[2]}' | tr "\n" " ")
+                local ports_used_by_service=$openvpn_ports
+            # elif [[ "${service}" == "fenixproxy" ]];then
+            #     local pysocks_conf_fil="${user_folder}/FenixManager/fenixproxy.conf"
+            #     ports_used_by_service=$(grep "^ListenPort=.*" "${pysocks_conf_fil}" | awk '{split($0,a,"=");print a[2]}' | tr "\n" " ")
             else
-                ports_used_by_service=$(netstat -ltnp | grep "$service" | awk '{split($4,a,":"); print a[2]}' | tr '\n' ' ')
+                #ports_used_by_service=$(netstat -ltnp | grep "$service" | awk '{split($4,a,":"); print a[2]}' | tr '\n' ' ')
+                local ports_used_by_service=$(netstat -ltnp | grep "$service" | grep -Eo ":[0-9]{2,4}" | sed 's|:||g')
             fi
+
             printf "〢${green}[ %-2s]${WHITE}| ${green}%-12s${WHITE}| ${green}%-31s${WHITE}| ${green}%-8s${WHITE}〢\n" "$count" "$service" "$ports_used_by_service" "ACTIVO"
             array_service+=("$count:$ports_used_by_service")
+            service_open+=($service)
 
         else
             (( count-- ))
@@ -413,8 +418,9 @@ redirect_to_service() {
     fi
 
     export SERVICE_REDIRECT=${port_number:-$service_number}
-    export SERVICE_NAME=${service_available[$service_number-1]}
+    export SERVICE_NAME=${service_open[$service_number-1]}
     echo -e "${WHITE}[*] El servicio seleccionado es: ${green}${SERVICE_NAME}${WHITE} y el puerto es: ${green}${SERVICE_REDIRECT}${WHITE}"
+
 
 }
 
