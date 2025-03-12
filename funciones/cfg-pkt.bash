@@ -1914,6 +1914,21 @@ cfg_fenixssh(){
     local pid=$(pgrep fenixssh)
     clear
     echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO FENIXSSH${BLUE} 〢────────────────〢"
+    reactive(){
+        error "El estado de FenixSSH es inactivo. Vuelve a configurarlo"
+        while true ;do
+            read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
+            check_if_port_is_open $porti
+            if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
+        done
+        list_banners
+        local rsa="${user_folder}/.ssh/id_rsa"
+        screen -dmS "fenixssh" fenixssh $porti "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
+            info "FenixSSH iniciado correctamente."
+            }
+            read
+            cfg_fenixssh
+    }
     show_info(){
         local str_ color_ args port
 
@@ -1929,6 +1944,7 @@ cfg_fenixssh(){
             port=''
             str_="[ INACTIVO ]"
             color_="${RED}"
+            reactive
         fi
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
