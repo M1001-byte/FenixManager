@@ -1286,7 +1286,7 @@ cfg_fenixproxy(){
                     while true;do
                         port_input
                         local port="${puertos_array[0]}" && unset puertos_array
-                        local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/fenixproxy.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
+                        local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
                         [[ $port_in_file -ne 0 ]] && {
                             error "El puerto existe en el archivo de configuracion."
                             continue
@@ -1337,7 +1337,7 @@ cfg_fenixproxy(){
                     }
                     select_status_code
                     select_string_msg
-                    local base_response="HTTP/1.1 ${status_code} ${string_banner}\r\nContent-length: 0\r\n\r\n"
+                    local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
 
                     local base_cfg="[CUSTOM#${number_of_custom_config}]\nListenPort=${port}\nServerAddr=127.0.0.1:${port_to_redirect}\ncustomResponse=${base_response}\n"
                     echo -e "${base_cfg}" >> "${config_file}" 
