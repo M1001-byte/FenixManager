@@ -728,7 +728,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)" )
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixssh" "udpcustom")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixproxy" "udpcustom")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
