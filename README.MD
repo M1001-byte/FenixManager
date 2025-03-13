@@ -13,7 +13,7 @@
 
 ## 💻 Requisitos
  * Ubuntu 18.04 LTS o superior.
- * Debian 9 o superior.
+ * Debian 12 o superior.
 
 ## 🚀 Instalacion
 
