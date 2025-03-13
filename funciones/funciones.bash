@@ -579,7 +579,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     #local get_actived_services="$1"
     local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh)
+    local list_services=(sshd dropbear stunnel4 squid fenixproxy openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -601,7 +601,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         elif [[ "${services_}" == "fenixssh" ]];then
             pgrep fenixssh &> /dev/null
         else
-            systemctl status "${services_//wireguard/wg-quick@wg0}" &>/dev/null
+            systemctl status "${services_//fenixproxy/fenixmanager-fenixproxy}" &>/dev/null
         fi
         
         if [[ $? -eq 0 ]];then
@@ -630,8 +630,8 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             "squid")
                 port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
-            "pysocks")
-                port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
+            "fenixproxy")
+                port_listen=$(cat ${user_folder}/FenixManager/fenixproxy.conf 2>/dev/null |  grep "^ListenPort=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
             "shadowsocks-libev")
                 pidof obfs-server &>/dev/null && services_+=" obfs"

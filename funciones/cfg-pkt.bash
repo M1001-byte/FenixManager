@@ -1969,11 +1969,7 @@ cfg_fenixssh(){
         case $option in
             1)
                 # Cambiar puerto
-                while true ;do
-                    read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
-                    check_if_port_is_open $porti
-                    if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
-                done
+                port_input && local porti="${puertos_array[0]}" && unset puertos_array
                 killall fenixssh
                 screen -dmS "fenixssh" fenixssh $porti "$banner" "${user_folder}/.ssh/id_rsa" && {
                     info "FenixSSH iniciado correctamente."
@@ -2074,7 +2070,7 @@ cfg_udpcustom(){
         case $option in
             1)
                 # Cambiar puertos
-                read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha :${endcolor}") " porti
+                port_input && local porti="${puertos_array[0]}" && unset puertos_array
                 jq ".listen = \":${porti}\"" config.json > /root/udp/config.json
                 bar "systemctl restart udp-custom" || {
                     error "Fallo al agregar los puertos"
