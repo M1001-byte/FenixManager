@@ -125,12 +125,14 @@ main(){
     sqlite3_config
     add_alias_to_fenix
     add_cron_job_for_hitman
+    info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
+    info "Presione enter para continuar"
+    read 
     install_badvpn_udpgw
     echo -e "${BLUE}| ────────────── | ${WHITE}FIN DE LA INSTALACION${BLUE} | ─────────────────── |"
-    info "${RED}Tomate el tiempo de leer todo lo que se muestra en pantalla.${WHITE}(${WHITE} ${RED}Es de utilidad ${WHITE})"
-    info "Su session de usuario se cerrara automaticamente,para terminar con el proceso de instalacion."
+    info "Su vps tendra el ultimo proceso de reincio para terminar con la instalacion."
     read -p 'Presione enter para continuar...'
-    pkill -u "$(logname)"
+    reboot
 }
 
 main
