@@ -1392,7 +1392,7 @@ cfg_fenixproxy(){
     done
 
 }
-cfg_fenixproxy
+
 cfg_slowdns(){
     trap ctrl_c SIGINT SIGTERM
     clear
