@@ -1228,7 +1228,7 @@ cfg_fenixproxy(){
             color_2="${BLUE}"
             color_3="${YELLOW}"
         fi
-        local custom_quantity=$(grep -E "^[CUSTOM#[0-9]{0,9}]" ${config_file} 2>/dev/null| cut -d# -f 2 | tr "]" " " | xargs)
+        local custom_quantity=$(grep -oP '\[CUSTOM#\K\d+' ${config_file} 2>/dev/null)
         local conf_key=(ListenPort ServerAddr customResponse)
         printf "${WHITE}〢 ${color_1}%-10s ${color_2}%26s ${color_3}%20s ${WHITE}%$((60 - 10 - 26 - 20))s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
         
@@ -1392,7 +1392,7 @@ cfg_fenixproxy(){
     done
 
 }
-
+cfg_fenixproxy
 cfg_slowdns(){
     trap ctrl_c SIGINT SIGTERM
     clear
