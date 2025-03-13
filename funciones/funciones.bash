@@ -231,7 +231,7 @@ option_menu_package(){
                 elif [[ "${i}" == "udpcustom" ]];then
                     pgrep udp-custom &>/dev/null && activo=0 || activo=1
                 elif [[ "${i}" == "fenixproxy" ]];then
-                    systemctl is-active "${i}" &>/dev/null && activo=0 || activo=1
+                    systemctl is-active "fenixmanager-${i}" &>/dev/null && activo=0 || activo=1
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
