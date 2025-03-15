@@ -2208,6 +2208,7 @@ cfg_udpzivpn(){
                 done
 
                     jq --arg passwd "${passwd}" '.auth.config += [$passwd]' $cfg_file > "tmp.json" && mv "tmp.json" "/etc/zivpn/config.json" && {
+                        bar "systemctl restart zivpn"
                         info "Contraseña agregada correctamente"
                         sqlite3 "/etc/FenixManager/database/usuario.db"  "INSERT INTO zivpn (password, exp_date) VALUES ('$passwd', '$fecha_final');"
                     }
