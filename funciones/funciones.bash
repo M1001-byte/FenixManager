@@ -590,8 +590,8 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     
     for services_ in "${list_services[@]}";do
         if [[ "${services_}" == "pysocks" ]];then
-            systemctl status "fenixmanager-pysocks" &>/dev/null
-        elif [[ "${services_}" == "openvpn" ]];then
+            systemctl status "fenixmanager-pysocks" &>/dev/null 
+        elif [[ "${services_}" == "openvpn" ]];then 
             systemctl status "openvpn@server" &>/dev/null
         elif [[ "${services_}" == "udpgw" ]];then
             pgrep badvpn-udpgw &> /dev/null
@@ -603,10 +603,10 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             systemctl status udp-custom &> /dev/null
         elif [[ "${services_}" == "fenixssh" ]];then
             pgrep fenixssh &> /dev/null
+        elif [[ "$services_" == "fenixproxy" ]];then
+            systemctl status fenixmanager-fenixproxy &>/dev/null ;
         else
-            local services="${services_//fenixproxy/fenixmanager-fenixproxy}"
-            services="${services_//zivpn-udp/zivpn}"
-            systemctl status "${services}" &>/dev/null
+            systemctl status "${services_}" &>/dev/null
         fi
         
         if [[ $? -eq 0 ]];then
