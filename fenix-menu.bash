@@ -72,11 +72,11 @@ option_menu_software () {
     line_separator 60
     
     
-    [[ "${hide_ports_open_services_in_protocol_menu=}" == 'false' ]] && {
+    [[ "${hide_ports_open_services_in_protocol_menu}" == 'false' ]] && {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "x-ui" "fenixproxy" "badvpn-udpgw" "fenixssh" "udpcustom")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "x-ui" "fenixproxy" "badvpn-udpgw" "fenixssh" "udpcustom" "zivpn-udp")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -100,6 +100,7 @@ option_menu_software () {
             9) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
             10) [[ ${installed_packages[*]} =~ fenixssh ]] && cfg_fenixssh || install_fenixssh ;;
             11) [[ ${installed_packages[*]} =~ udpcustom ]] && cfg_udpcustom || install_udpcustom ;;
+            12) [[ ${installed_packages[*]} =~ zivpn-udp ]] && cfg_udpzivpn || install_udpzivpn ;;
             "cls" | "CLS") clear && option_menu_software ;;
             [mM]) fenix  ;;
             q|Q|e|E) exit 0 ;;

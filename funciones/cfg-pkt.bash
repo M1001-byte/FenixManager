@@ -2061,6 +2061,7 @@ cfg_udpcustom(){
     else
         option_color 2 "DETENER SERVICIO"
     fi
+    option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
         while true;do
@@ -2087,6 +2088,157 @@ cfg_udpcustom(){
                 cfg_udpcustom
                 ;;
             [Bb]) 
+            # menu de instalacion de software
+                clear
+                option_menu_software
+                ;;
+            [Mm]) 
+            # menu principal
+                clear
+                fenix
+                ;;
+            q|Q|e|E) 
+            # salir
+                exit 0
+                ;;
+            *) 
+            # opcion invalida
+                continue
+                ;;
+        esac
+    done
+
+}
+
+cfg_udpzivpn(){
+    local cfg_file="/etc/zivpn/config.json"
+    local db_file="/etc/FenixManager/database/usuario.db"
+    local pid=$(pgrep zivpn 2>/dev/null)
+    list_password(){
+        local arg="$1"
+        if [[ ! $arg == "simple" ]];then
+            line_separator 59
+            printf "${WHITE}〢${RED}%-32s${YELLOW} %-10s${BLUE} %10s${WHITE}\n" "CONTRASEÑA" "FECHA DE EXPIRACION" "〢"
+            line_separator 59
+        fi
+        local passwords=$(jq ".auth.config[]" $cfg_file | sed 's/[[:space:]]*$//')
+        local count=0
+        local IFS=$'\n'
+
+        for passwd in $passwords; do
+            passwd=${passwd//\"/}
+            if [[ $arg == "simple" ]];then
+                printf "${WHITE} ${BLUE}[%-2s]${YELLOW} %-2s${BLUE}${WHITE}\n" "$count" "$passwd"
+            else
+                local exp=$(sqlite3 ${db_file} "SELECT exp_date FROM zivpn WHERE password = '${passwd}';")
+                printf "${WHITE}〢${RED}%-32s${YELLOW} %-10s${BLUE} %10s${WHITE}\n" "${passwd}" $exp
+            fi
+            count=$((count + 1))  # Incrementar el contador
+        done
+        if [[ ! $arg == "simple" ]];then
+            line_separator 59
+        fi
+    }
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO ZIVPN-UDP${BLUE} 〢────────────────〢"
+    show_info(){
+        local str_ color_
+        if [ -z "$pid" ];then
+            str_="[ INACTIVO ]"
+            color_=${RED}
+        else
+            str_="[ ACTIVO ]"
+            color_=${GREEN}
+        fi
+        local port=$(jq -r ".listen" $cfg_file | sed "s/://g")
+        local cert=$(jq -r ".cert" $cfg_file| sed 's/ //g')
+        local key=$(jq -r ".key" $cfg_file  | sed 's/ //g')
+        local totalPasswords=$(jq -r ".auth.config|length" $cfg_file)
+
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((60-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((60-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((50-${#str_}-8))s \n" "CERT:" "${cert}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((50-${#str_}-8))s \n" "KEY:" "${key}" "〢"
+        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((47-${#str_}-8))s \n" "TOTAL DE CONTRASEÑAS:" "${totalPasswords}" "〢"
+        line_separator 60
+    }
+    show_info
+    option_color 1 "AGREGAR CONTRASEÑA"
+    option_color 2 "ELIMINAR CONTRANSEÑA"
+    option_color 3 "LISTAR CONTRANSEÑA"
+    option_color 4 "VER ESTADO DE ZIVPN-UDP"
+    option_color 5 "REINICIAR ZIVPN-UDP"
+    option_color "B" "MENU DE INSTALACION DE SOFTWARE"
+    option_color "M" "MENU PRINCIPAL"
+    option_color "E" "SALIR"
+
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
+        case $option in
+            1)
+                # agregar passwd
+                while true;do
+                    read -r -p "$(echo -e "${WHITE}[*] Contraseña : ")" passwd
+                    if [ -z $passwd ];then 
+                        error "La contraseña esta vacia"
+                        continue
+                    elif [[ ${#passwd} -gt 32 ]];then
+                        error "La contraseña no puede tener mas de 30 caracteres"
+                        continue
+                    else
+                        break
+                    fi
+                done
+
+                while true;do
+                    read -ep "$(echo -e $GREEN'[*] Cantidad de dias para expirar : ' )" date_exp
+                    if [[ "$date_exp" =~ ^-$ ]];then
+                        create_temp_user
+                        break
+                    elif [[ ! "${date_exp}" =~ ^[0-9]+$ ]];then
+                        error "El valor ingresado no es valido."
+                    else
+                        fecha_final=$(date -d "$date_exp days" +%Y-%m-%d 2>/dev/null)
+                        fecha_final=($fecha_final + $(date +'%T'))
+                        break
+                    fi
+                done
+
+                    jq --arg passwd "${passwd}" '.auth.config += [$passwd]' $cfg_file > "tmp.json" && mv "tmp.json" "/etc/zivpn/config.json" && {
+                        info "Contraseña agregada correctamente"
+                        sqlite3 "/etc/FenixManager/database/usuario.db"  "INSERT INTO zivpn (password, exp_date) VALUES ('$passwd', '$fecha_final');"
+                    }
+                    read
+                cfg_udpzivpn
+                ;;
+            2)
+                # eliminar passwd
+                list_password "simple"
+                read -r -p "$(echo -e "${WHITE}[*] Seleccione el index a eliminar : ")" index
+                
+                local passwd=$(jq --arg index_ $index  '.auth.config[($index_ | tonumber)]' $cfg_file | sed 's/"//g')
+                jq --arg index_ $index 'del(.auth.config[($index_ | tonumber)])' $cfg_file > tmp.json && mv tmp.json "$cfg_file" && {
+                    sqlite3 "${db_file}" "DELETE FROM zivpn WHERE password = '${passwd}';" && {
+                        bar "systemctl restart zivpn"
+                        info "Contranseña eliminada con exito. "
+                    } || error "Fallo el eliminar de la base de datos: ${passwd} ."
+                }
+                read
+                cfg_udpzivpn
+                ;;
+            3)
+                list_password
+                ;;
+            4)
+                systemctl status zivpn
+                ;;
+            5)
+                bar "systemctl restart zivpn"
+                cfg_udpzivpn
+                ;;
+            [Bb])
             # menu de instalacion de software
                 clear
                 option_menu_software
@@ -2177,3 +2329,4 @@ fenixproxy_del_port() {
     sed '/^[[:space:]]*$/d' -i ${config_file} 
     systemctl restart fenixmanager-fenixproxy &>/dev/null
 }
+

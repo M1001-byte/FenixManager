@@ -353,3 +353,68 @@ fi
     read
     reboot
 }
+
+install_udpzivpn(){
+    local arch=$(uname -m)
+    local url="https://github.com/zahidbd2/udp-zivpn/releases/download/udp-zivpn_1.4.9/udp-zivpn-linux-"
+
+    if [[ $arch == "x86_64" ]]; then
+        url+="amd64"
+    else
+        url+="arm64"
+    fi
+
+    systemctl stop zivpn.service &>/dev/null 
+    bar --title "Descargando zivpn-udp" --cmd "wget ${url} -O /usr/local/bin/zivpn"
+    chmod +x /usr/local/bin/zivpn
+    mkdir /etc/zivpn &>/dev/null
+    bar --title "Descargando archivo de configuracion" --cmd "wget https://raw.githubusercontent.com/zahidbd2/udp-zivpn/main/config.json -O /etc/zivpn/config.json"
+
+    info  "Generando certificados:"
+    openssl req -new -newkey rsa:4096 -days 365 -nodes -x509 -subj "/C=US/ST=California/L=Los Angeles/O=Example Corp/OU=IT Department/CN=zivpn" -keyout "/etc/zivpn/zivpn.key" -out "/etc/zivpn/zivpn.crt"
+    sysctl -w net.core.rmem_max=16777216 &>/dev/null
+    sysctl -w net.core.wmem_max=16777216 &>/dev/null
+
+    cat <<EOF > /etc/systemd/system/zivpn.service
+    [Unit]
+    Description=zivpn VPN Server
+    After=network.target
+
+    [Service]
+    Type=simple
+    User=root
+    WorkingDirectory=/etc/zivpn
+    ExecStart=/usr/local/bin/zivpn server -c /etc/zivpn/config.json
+    Restart=always
+    RestartSec=3
+    Environment=ZIVPN_LOG_LEVEL=info
+    CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW
+    AmbientCapabilities=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_RAW
+    NoNewPrivileges=true
+
+    [Install]
+    WantedBy=multi-user.target
+EOF
+
+    info "Creando la tabla '${YELLOW}ssh${WHITE}' dentro de la base de datos '${YELLOW}usuarios${WHITE}'"
+    sqlite3 "/etc/FenixManager/database/usuario.db"  'CREATE TABLE zivpn (password VARCHAR(32) NOT NULL,exp_date DATETIME);' || {
+        erro "Fallo al crear la table."
+    }
+    info "Esa contraseña no tendra fecha de expiracion. Las que agreges despues si, las tendran."
+    read -p "$(echo -e "$YELLOW[*] Ingrese una contraseña. ( Default: fenix ):${endcolor}") " input_config
+    info "Despues podras agregar mas, desde el respectivo menu de configuracion"
+    if [ -z "$input_config" ];then
+        input_config="fenix"
+    fi
+    
+    jq  --arg passwd  "${input_config}" '.auth.config += [$passwd]' /etc/zivpn/config.json > /etc/zivpn/config.json
+
+    bar "systemctl enable zivpn.service"
+    bar "systemctl start zivpn.service"
+    iptables -t nat -A PREROUTING -i $(ip -4 route ls|grep default|grep -Po '(?<=dev )(\S+)'|head -1) -p udp --dport 6000:19999 -j DNAT --to-destination :5667
+    ufw allow 6000:19999/udp &>/dev/null
+    ufw allow 5667/udp        &>/dev/null
+    rm zi.* 1> /dev/null 2> /dev/null
+    info "ZIVPN UDP instalado"
+    cfg_udpzivpn
+}

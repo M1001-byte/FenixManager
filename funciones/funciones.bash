@@ -232,6 +232,8 @@ option_menu_package(){
                     pgrep udp-custom &>/dev/null && activo=0 || activo=1
                 elif [[ "${i}" == "fenixproxy" ]];then
                     systemctl is-active "fenixmanager-${i}" &>/dev/null && activo=0 || activo=1
+                elif [[ "${i}" == "zivpn-udp" ]];then
+                    systemctl is-active "zivpn" &>/dev/null && activo=0 || activo=1
                 else
                     systemctl is-active "${i//"openvpn"/"openvpn@server"}" &>/dev/null && activo=0 || activo=1
                 fi
@@ -332,6 +334,7 @@ package_installed () {
     if [[ "$package" == "wireguard" ]];then if [[ -e "/etc/wireguard/params" ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ "$package" == "fenixssh" ]];then if [[ -f "/usr/bin/fenixssh" ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ "$package" == "udpcustom" ]];then if [[ -f "/etc/systemd/system/udp-custom.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
+    if [[ "$package" == "zivpn-udp" ]];then if [[ -f "/etc/systemd/system/zivpn.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
     if [[ $cmd == 1 ]]; then
         return 0
     else
@@ -579,7 +582,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     #local get_actived_services="$1"
     local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid fenixproxy openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh)
+    local list_services=(sshd dropbear stunnel4 squid fenixproxy openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh zivpn-udp)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -601,7 +604,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         elif [[ "${services_}" == "fenixssh" ]];then
             pgrep fenixssh &> /dev/null
         else
-            systemctl status "${services_//fenixproxy/fenixmanager-fenixproxy}" &>/dev/null
+            local services="${services_//fenixproxy/fenixmanager-fenixproxy}"
+            services="${services_//zivpn-udp/zivpn}"
+            systemctl status "${services}" &>/dev/null
         fi
         
         if [[ $? -eq 0 ]];then
@@ -671,6 +676,11 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 if [ -n "$pidf" ];then
                     local args=$(cat "/proc/${pidf}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
                     port_listen=$(echo ${args} | grep -o '[0-9]\{2,\}')
+                fi
+                ;;
+            "zivpn-udp")
+                if [ -f "/etc/zivpn/config.json" ];then
+                    port_listen=$(jq -r '.listen' "/etc/zivpn/config.json" | sed "s/:/ /g" )
                 fi
                 ;;
         esac

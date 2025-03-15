@@ -27,6 +27,17 @@ check_for_expire_ovpn_acc(){
 
 }
 
+check_for_expire_zivpn_acc(){
+    local index=0
+    local cfg_file="/etc/zivpn/config.json"    
+    for password in $(sqlite3 "$db" "SELECT password,exp_date FROM zivpn WHERE exp_date == '${fecha_actual}'"); do
+        IFS='|' read -r -a array <<< "$user"
+        sqlite3 "$db" "DELETE FROM zivpn WHERE password == '${array[0]}'"
+        jq --arg index_ $index 'del(.auth.config[($index_ | tonumber)])' $cfg_file > tmp.json && mv tmp.json "$cfg_file"
+        write_log_file "[ ZIVPN : $index:${array[0]} ] expiro el dia ${fecha_actual}"
+    done
+}
+
 check_if_user_exceded_limit_max_conn(){
     for user in $(sqlite3 "$db" "SELECT nombre,password,max_conn FROM ssh"); do
         IFS='|' read -r -a array <<< "$user"
@@ -64,8 +75,11 @@ view_log_file(){
 
 check_exp_date_from_all_acc(){
     local used_ovpn=$(sqlite3 "$db" "SELECT count(*) FROM ovpn" &>/dev/null;echo $?)
+    local used_zivpn=$(sqlite3 "$db" "SELECT count(*) FROM zivpn" &>/dev/null;echo $?)
     if [[ "${used_ovpn}" == 0 ]];then
         check_for_expire_ovpn_acc &
+    elif [[ "${used_zivpn}" == 0 ]];then
+        check_for_expire_zivpn_acc &
     fi
     check_for_expire_ssh
 }
