@@ -772,9 +772,11 @@ uninstall_fenixmanager(){
                 # ! UDP CUSTOM
                 elif [[ "${service}" == "udpcustom" ]];then
                     systemctl disable udp-custom
+                    rm /etc/systemd/system/udp-custom.service &>/dev/null
                     rm /root/udp/ -r &>/dev/null
                 elif [[ "${service}" == "fenixproxy" ]];then
                     systemctl disable fenixmanager-fenixproxy
+                    rm /etc/systemd/system/fenixmanager-fenixproxy.service &> /dev/null
                     rm /usr/bin/fenixproxy -r &>/dev/null
                 else
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
