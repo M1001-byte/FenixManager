@@ -738,7 +738,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)" )
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixproxy" "udpcustom")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixproxy" "udpcustom" "zivpn")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -788,6 +788,10 @@ uninstall_fenixmanager(){
                     systemctl disable fenixmanager-fenixproxy
                     rm /etc/systemd/system/fenixmanager-fenixproxy.service &> /dev/null
                     rm /usr/bin/fenixproxy -r &>/dev/null
+                elif [[ "${service}" == "zivpn" ]];then
+                    systemctl disable zivpn
+                    rm /etc/systemd/system/zivpn.service &> /dev/null
+                    rm /etc/zivpn/ -r &>/dev/null
                 else
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
                 fi
