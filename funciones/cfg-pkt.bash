@@ -1207,19 +1207,18 @@ cfg_openvpn(){
     
 }
 
-
-cfg_fenixproxy(){
+cfg_python3_proxy(){
     trap ctrl_c SIGINT SIGTERM
     clear
-    echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO FENIXPROXY ${BLUE}〢──────────────────〢${WHITE}"
-    local config_file="${user_folder}/FenixManager/fenixproxy.conf"
+    echo -e "${BLUE}〢─────────────────〢${WHITE} CONFIGURANDO PYSOCKS ${BLUE}〢──────────────────〢${WHITE}"
+    local config_file="${user_folder}/FenixManager/py-socks.conf"
     [[ ! -f $config_file ]] && touch $config_file 2>/dev/null
-    local proxy_is_active=$(systemctl is-active fenixmanager-fenixproxy &>/dev/null;echo $?)
-    if [[ "$proxy_is_active" -eq 0 ]];then local pysocks_pid=$(systemctl show --property MainPID --value fenixmanager-fenixproxy); fi
+    local pysocks_is_actived=$(systemctl is-active fenixmanager-pysocks &>/dev/null;echo $?)
+    if [[ "$pysocks_is_actived" -eq 0 ]];then local pysocks_pid=$(systemctl show --property MainPID --value fenixmanager-pysocks); fi
 
     show_info(){
         local color_1 color_2 color_3
-        if [[ ! $proxy_is_active -eq 0 ]];then
+        if [[ ! $pysocks_is_actived -eq 0 ]];then
             color_1="${RED}"
             color_2="${RED}"
             color_3="${RED}"
@@ -1228,26 +1227,31 @@ cfg_fenixproxy(){
             color_2="${BLUE}"
             color_3="${YELLOW}"
         fi
-        local custom_quantity=$(grep -oP '\[CUSTOM#\K\d+' ${config_file} 2>/dev/null)
-        local conf_key=(ListenPort ServerAddr customResponse)
+
+        local custom_quantity=$(grep -E "^[CUSTOM#[0-9]{0,9}]" ${config_file} 2>/dev/null| cut -d# -f 2 | tr "]" " " | xargs)
+        local conf_key=(accept connect custom_response)
+
         printf "${WHITE}〢 ${color_1}%-10s ${color_2}%26s ${color_3}%20s ${WHITE}%$((60 - 10 - 26 - 20))s\n" "ACCEPT" "RESPONSE CODE" "CONNECT" '〢'
-        
+
         if [[ -z "${custom_quantity}" ]];then
             [[ -f "${config_file}" ]] || touch "${config_file}"
             line_separator 60
             return 0
         else
+
             for count in ${custom_quantity};do
                 local array_cfg=()
                 for key in ${conf_key[@]};do
                     local sed_string="/^\[CUSTOM#${count}]/ { :l /^${key}[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}"
                     local ${key}="$(sed -n "${sed_string}" "${config_file}")"
-                    if [[ ${key} == "ListenPort" ]];then
+
+                    if [[ ${key} == "accept" ]];then
                         # re check if port is open
                         local is_open=$(ss -lptn "sport = :${!key}" | grep "${!key}" -c)
                         if [[ $is_open -eq 0 ]];then local color_1=${RED} ; local color_2=${RED} ; local color_3=${RED}; fi
                     fi
-                    if [[ "${key}" == *"customResponse"* ]];then
+
+                    if [[ "${key}" == *"custom_response"* ]];then
                         local ${key}="$(grep -E "HTTP/[0-9]\.?[0-9]? [0-9]{1,9}" -o <<< ${!key})"
                     fi
                     array_cfg+=("${!key}")
@@ -1256,25 +1260,23 @@ cfg_fenixproxy(){
             done
         fi
         line_separator 60
-        
     }
     show_info
-
     option_color 1 "AGREGAR UN PUERTO"
     option_color 2 "ELIMINAR UN PUERTO"
-    option_color 3 "VER ESTADO DE FENIXPROXY"
-    if [[ "$proxy_is_actived" -eq 0 ]];then
-    option_color 4 "DETENER PROXY"
-        option_color 5 "REINICIAR PROXY"
-        option_color 6 "${RED}DESHABILITAR PROXY"
+    option_color 3 "VER ESTADO DE PYSOCKS"
+    if [[ "$pysocks_is_actived" -eq 0 ]];then
+    option_color 4 "DETENER PYSOCKS"
+        option_color 5 "REINICIAR PYSOCKS"
+        option_color 6 "${RED}DESHABILITAR PYSOCKS"
     else
-        option_color 4 "${WHITE}INICIAR PROXY"
-        option_color 5 "${RED}DESHABILITAR PROXY"
+        option_color 4 "${WHITE}INICIAR PYSOCKS"
+        option_color 5 "${RED}DESHABILITAR PYSOCKS"
     fi
     option_color B "MENU DE CONFIGURACION"
     option_color M "MENU PRINCIPAL"
     option_color E "SALIR"  
-
+    
     while true;do
         trap ctrl_c SIGINT
         prompt=$(date "+%x %X")
@@ -1287,21 +1289,25 @@ cfg_fenixproxy(){
                         port_input
                         local port="${puertos_array[0]}" && unset puertos_array
                         local port_in_file=$(grep -E "^accept=[0-9]{1,6}" "${user_folder}/FenixManager/py-socks.conf" 2>/dev/null| cut -d= -f2 | grep -c -w "${port}")
+
                         [[ $port_in_file -ne 0 ]] && {
                             error "El puerto existe en el archivo de configuracion."
                             continue
                         } || break
                     done
-                    redirect_to_service "fenixproxy"
+                    redirect_to_service "pysocks"
+
                     local port_to_redirect="${SERVICE_REDIRECT}" && unset SERVICE_REDIRECT
+
                     local number_of_custom_config=($(grep -Eo "#[0-9]{1,}" ${config_file} | cut -d# -f2 | xargs ))
+
                     [[ -z "${number_of_custom_config}" ]] && number_of_custom_config=0 || number_of_custom_config="$((${number_of_custom_config[-1]}+1))"
                     
                     select_status_code(){
-                    
                         while true;do
                             read -p "$(echo -e "${BLUE}[*] Seleccione el codigo de estado HTTP  [100-599] : ")" status_code
                             if [[ -z "$status_code" ]];then continue ; fi
+
                             if [[ $status_code =~ ^[0-9]+$ ]];then
                                 if [[ $status_code -ge 100 && $status_code -le 599 ]];then
                                     break
@@ -1309,12 +1315,17 @@ cfg_fenixproxy(){
                             fi
                         done
                     }
+
                     select_string_msg(){
                         local array_colors=(RED GREEN BLUE YELLOW MAGENTA)
                         local html_colors=("#ff3333" "#0500ff" "#0cff00" "#ffef00" "#ff0078" "#ffffff" "#000000")
+
                         info "${RED}No ${WHITE}utilizar: codigos ${RED}html${WHITE}, ${RED}emojis${WHITE} o cualquier otro caracter ${RED}invalido${WHITE}."
+
                         read -p "$(echo -e "${WHITE}[*] Escriba el texto de conexion : ")" string_banner
+
                         string_banner="${string_banner^^}"
+                        
                         if [[ -z "$string_banner" ]];then
                             string_banner="<font color=\"${html_colors[0]}\"><b>FenixManager<b></font>"
                         else
@@ -1327,6 +1338,7 @@ cfg_fenixproxy(){
                             echo -e "\t${WHITE}[ 5 ] ${WHITE}${string_banner}"
                             echo -e "\t${WHITE}[ 6 ] \e[30;107m${string_banner}${END_COLOR} ( Solamente negro. El fondo es blanco por obvias razones )"
                             read -p "$(echo -e "${BLUE}[*] opcion [1-7] : ${END_COLOR}")" color_code
+                            
                             if [[ -z "$color_code" ]];then color_code=1 ; fi
                             if [[ $color_code =~ ^[0-9]+$ ]];then
                                 if [[ $color_code -ge 1 && $color_code -le 7 ]];then
@@ -1335,60 +1347,76 @@ cfg_fenixproxy(){
                             fi
                         fi
                     }
+
                     select_status_code
                     select_string_msg
+
                     local base_response="HTTP/1.1 ${status_code} ${string_banner}[crlf]Content-length: 0[crlf][crlf]"
 
-                    local base_cfg="[CUSTOM#${number_of_custom_config}]\nListenPort=${port}\nServerAddr=127.0.0.1:${port_to_redirect}\ncustomResponse=${base_response}\n"
-                    echo -e "${base_cfg}" >> "${config_file}" 
-                    local service_status=$(systemctl status fenixmanager-fenixproxy &>/dev/null;echo $?)
+                    local base_cfg="[CUSTOM#${number_of_custom_config}]\naccept=${port}\nconnect=127.0.0.1:${port_to_redirect}\ncustom_response=${base_response}\n"
+                    echo -e "${base_cfg}" >> "${config_file}"
+                    local service_status=$(systemctl status fenixmanager-pysocks &>/dev/null;echo $?)
+
                     if [[ $service_status -eq 0 ]];then
-                        bar "systemctl reload fenixmanager-fenixproxy"
+                        bar "systemctl reload fenixmanager-pysocks"
                     else
-                        bar "systemctl restart fenixmanager-fenixproxy"
+                        bar "systemctl restart fenixmanager-pysocks"
                     fi
+
                     if [[ $? -eq 0 ]];then
                         info "El puerto ${port} se ha agregado correctamente."
                     else
                         error "Fallo al agregar el puerto ${port}."
-                        #fenixproxy_del_port ${port}
+                        pysocks_del_port ${port}
                     fi
                 }
+
                 sleep 4
-                cfg_fenixproxy
+                cfg_python3_proxy
+
                 ;;
+
             2) 
             # ELIMINAR PUERTO
-                fenixproxy_del_port
-                cfg_fenixproxy
+                pysocks_del_port 
+                cfg_python3_proxy
                 ;;
-            3) systemctl status fenixmanager-fenixproxy ;;
+            3) systemctl status fenixmanager-pysocks ;;
+
             4) 
             # INICIAT/DETENER PYSOCKS
-                [[ "$proxy_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-fenixproxy" || bar "systemctl start fenixmanager-pysocks"
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl stop fenixmanager-pysocks" || bar "systemctl start fenixmanager-pysocks"
                 sleep 2
-                cfg_fenixproxy
+                cfg_python3_proxy
                 ;;
+
             5)
             # REINICIAR/DESHABILIAR PYSOCKS
-                [[ "$proxy_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-fenixproxy"  || bar "systemctl disable fenixmanager-pysocks"
+                [[ "$pysocks_is_actived" -eq 0 ]] && bar "systemctl restart fenixmanager-pysocks"  || bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
-                cfg_fenixproxy
+                cfg_python3_proxy
                 ;;
+
             6) 
             #DESHABILITAR PYSOCKS
-                bar "systemctl disable fenixmanager-fenixproxy"
+                bar "systemctl disable fenixmanager-pysocks"
                 sleep 3
-                cfg_fenixproxy
+                cfg_python3_proxy
                 ;;
+
             cls|CLS)
                 clear
-                cfg_fenixproxy
+                cfg_python3_proxy
                 ;;
+
             [bB]) option_menu_software ;;
+
             [Mm]) fenix ;;
+
             q|Q|e|E) exit 0 ;;
+
         esac
+
     done
 
 }
@@ -2336,3 +2364,40 @@ fenixproxy_del_port() {
     systemctl restart fenixmanager-fenixproxy &>/dev/null
 }
 
+pysocks_del_port() {
+    local port_to_delete
+    if [[ -z ${@} ]];then
+        local ports_list=$(grep "accept" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
+        local ports_list_array=(${ports_list})
+        local number_of_ports=${#ports_list_array[@]}
+        if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
+        
+        info "Seleccione el puerto a eliminar :"
+        for (( i=0; i<${number_of_ports}; i++ ));do
+            echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
+        done
+
+        while true;do
+            trap ctrl_c SIGINT SIGTERM
+            read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
+            if [[ $port_to_delete =~ ^[0-9]+$ ]];then
+                if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then break ; fi
+            else
+                error "Opcion invalida."
+                continue
+            fi
+        done
+    fi
+    [[ -n "${1}" ]] && port_to_delete=${1} || port_to_delete="${ports_list_array[$port_to_delete]}"
+    local line_of_port=$(grep "accept=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
+    local line_of_port=$((line_of_port-1))
+    local array_lines_delete
+    for (( i=$line_of_port; i<$((line_of_port+5)); i++ ));do array_lines_delete+="${i}d;" ; done
+    sed -i "${array_lines_delete}" ${config_file}
+
+    sed '/^[[:space:]]*$/d' -i ${config_file} 
+
+    kill -9 $(lsof -t -i :${port_to_delete}) &>/dev/null
+    systemctl restart fenixmanager-pysocks &>/dev/null
+
+}

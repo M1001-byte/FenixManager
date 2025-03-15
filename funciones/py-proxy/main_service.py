@@ -13,9 +13,10 @@ def kill_port(port:int) -> int:
         return 0
     except:pass
 def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,action:str="start") -> None:
-    args_parse_to_script = f"-ListenPort {bind_port} -ServerAddr '{connect_to}' -customResponse '{custom_response}' "
-    tmp_proc = subprocess.Popen([f'fenixproxy {args_parse_to_script} &'],shell=True)
-    #os.system(f"python3 {proxy_file} {args_parse_to_script} &")
+    proxy_file='/etc/FenixManager/funciones/py-proxy/pysocks.py'
+    args_parse_to_script = f"{bind_port} '{connect_to}' '{custom_response}' "
+    tmp_proc = subprocess.Popen([f'python3 {proxy_file} {args_parse_to_script} &'],shell=True)
+    os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
     #return tmp_proc.pid
 
@@ -27,9 +28,9 @@ def main(config:str):
     
     for index,section in enumerate(parser.sections()):
         try:
-            bind_port = parser.get(section, 'ListenPort')
-            connect_to = parser.get(section, 'ServerAddr')
-            custom_response = parser.get(section, 'customResponse')
+            bind_port = parser.get(section, 'accept')
+            connect_to = parser.get(section, 'connect')
+            custom_response = parser.get(section, 'custom_response')
         except Exception as er:
             print(er)
         #log_file = f"/var/log/FenixManager/pysocks:{bind_port}-{connect_to}.log"
@@ -60,7 +61,6 @@ if __name__ == "__main__":
                 user_dir = line.split("=")[1].strip().replace("'","")
                 break
 
-    config_file = f"{user_dir}/FenixManager/fenixproxy.conf"
-    proxy_file = '/usr/bin/fenixproxy'#'/etc/FenixManager/funciones/py-proxy/direct_proxy.py'
+    config_file = f"{user_dir}/FenixManager/py-socks.conf"
     print(f"Config file: {config_file}")
     main(config_file)

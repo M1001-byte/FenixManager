@@ -328,7 +328,7 @@ package_installed () {
     cmd=$(dpkg-query -W --showformat='${Status}\n' "$package" 2>/dev/null| grep -c "install ok installed" && return 0 || return 1)
     
     if [[ "$package" == "x-ui" ]];then if [[ -f "/usr/bin/x-ui" ]];then cmd=1 ; else cmd=0 ; fi ; fi
-    if [[ "$package" == "fenixproxy" ]];then if [[ -f "/etc/systemd/system/fenixmanager-fenixproxy.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
+    if [[ "$package" =~ "pysocks" ]];then if [[ -f "/etc/systemd/system/fenixmanager-pysocks.service" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "slowdns" ]];then if [[ -f "/etc/FenixManager/bin/slowdns" ]];then cmd=1 ; else cmd=0 ; fi ; fi
     if [[ "$package" == "badvpn-udpgw" ]];then which badvpn-udpgw &> /dev/null && cmd=1 || cmd=0 ; fi
     if [[ "$package" == "wireguard" ]];then if [[ -e "/etc/wireguard/params" ]];then cmd=1 ; else cmd=0;fi ;fi
@@ -358,9 +358,9 @@ get_all_ip_from_adapters() {
 redirect_to_service() {
     # ! La variable global 'SERVICE_REDIRECT',contiene el puerto del servicio seleccionado.
     local hidden_service="$1"
-    local service_available=("ssh" "dropbear" "openvpn" "fenixproxy" "fenixssh")
+    local service_available=("ssh" "dropbear" "openvpn" "pysocks" "fenixssh")
     local service_open=()
-    [[ "${hidden_service}" == "fenixproxy" ]] && service_available=(${service_available[@]/'fenixproxy'})
+    [[ "${hidden_service}" == "pysocks" ]] && service_available=(${service_available[@]/'pysocks'})
     
     openvpn_ports=$(grep -oP '^\s*port\s+\K[0-9]+' /etc/openvpn/server.conf 2>/dev/null &)
     
@@ -373,8 +373,8 @@ redirect_to_service() {
         (( count++ ))
         if [[ $service == "openvpn" ]]; then
             service openvpn@server status &>/dev/null
-        elif [[ $service =~ "fenixproxy" ]]; then
-            systemctl is-active fenixmanager-fenixproxy &>/dev/null
+        elif [[ $service =~ "pysocks" ]]; then
+            systemctl is-active fenixmanager-pysocks &>/dev/null
         else
             pgrep "$service" &> /dev/null
         fi
@@ -582,7 +582,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     #local get_actived_services="$1"
     local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid fenixproxy openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh zivpn-udp)
+    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh zivpn-udp)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -601,8 +601,10 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             systemctl status udp-custom &> /dev/null
         elif [[ "${services_}" == "fenixssh" ]];then
             pgrep fenixssh &> /dev/null
-        elif [[ "$services_" == "fenixproxy" ]];then
-            systemctl status fenixmanager-fenixproxy &>/dev/null ;
+        elif [[ "$services_" == "pysocks" ]];then
+            systemctl status fenixmanager-pysocks &>/dev/null ;
+        elif [[ "$services_" == "zivpn-udp" ]];then
+            systemctl status zivpn &>/dev/null ;
         else
             systemctl status "${services_}" &>/dev/null
         fi
@@ -633,7 +635,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
             "squid")
                 port_listen=$(cat /etc/squid/squid.conf 2>/dev/null | grep -o "^http_port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
                 ;;
-            "fenixproxy")
+            "upcustom")
                 port_listen=$(cat ${user_folder}/FenixManager/fenixproxy.conf 2>/dev/null |  grep "^ListenPort=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
             "shadowsocks-libev")
@@ -680,6 +682,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 if [ -f "/etc/zivpn/config.json" ];then
                     port_listen=$(jq -r '.listen' "/etc/zivpn/config.json" | sed "s/:/ /g" )
                 fi
+                ;;
+            "pysocks")
+                port_listen=$(cat ${user_folder}/FenixManager/py-socks.conf 2>/dev/null | grep "^accept=.*" | awk '{split($0,a,"=");print a[2]}' | xargs)
                 ;;
         esac
         if [[ -n "${port_listen}" ]];then
@@ -736,7 +741,7 @@ show_users_and_port_template(){
 
 uninstall_fenixmanager(){
     local fenix_rm=("/etc/FenixManager/" "/var/log/FenixManager/" "${user_folder}/FenixManager/" "/etc/cron.d/fenixmanager" "$(which fenix)" )
-    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "fenixproxy" "udpcustom" "zivpn")
+    local services_to_remove=("dropbear" "stunnel4" "squid" "openvpn" "shadowsocks-libev" "fenixssh" "v2ray" "x-ui" "wireguard" "badvpn-udpgw" "pysocks" "udpcustom" "zivpn")
     clear
     echo -e "${BLUE}〢────────────〢 ${RED}DESINSTALANDO FENIX-MANAGER${BLUE} 〢───────────────〢"
     info "Los siguientes directorios/archivos seran eliminados:"
@@ -782,10 +787,6 @@ uninstall_fenixmanager(){
                     systemctl disable udp-custom &>/dev/null
                     rm /etc/systemd/system/udp-custom.service &>/dev/null
                     rm /root/udp/ -r &>/dev/null 
-                elif [[ "${service}" == "fenixproxy" ]];then
-                    systemctl disable fenixmanager-fenixproxy &>/dev/null
-                    rm /etc/systemd/system/fenixmanager-fenixproxy.service &> /dev/null
-                    rm /usr/bin/fenixproxy -r &>/dev/null
                 elif [[ "${service}" == "zivpn" ]];then
                     systemctl disable zivpn &>/dev/null
                     rm /etc/systemd/system/zivpn.service &> /dev/null
