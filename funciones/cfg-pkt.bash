@@ -2168,6 +2168,7 @@ cfg_udpzivpn(){
     option_color 3 "LISTAR CONTRANSEÑA"
     option_color 4 "VER ESTADO DE ZIVPN-UDP"
     option_color 5 "REINICIAR ZIVPN-UDP"
+    option_color 6 "DESHABILITAR ZIVPN-UDP"
     option_color "B" "MENU DE INSTALACION DE SOFTWARE"
     option_color "M" "MENU PRINCIPAL"
     option_color "E" "SALIR"
@@ -2236,6 +2237,10 @@ cfg_udpzivpn(){
                 ;;
             5)
                 bar "systemctl restart zivpn"
+                cfg_udpzivpn
+                ;;
+            6)
+                bar "systemctl disable zivpn"
                 cfg_udpzivpn
                 ;;
             [Bb])
