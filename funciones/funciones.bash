@@ -781,15 +781,15 @@ uninstall_fenixmanager(){
                     rm /usr/bin/fenixssh &>/dev/null
                 # ! UDP CUSTOM
                 elif [[ "${service}" == "udpcustom" ]];then
-                    systemctl disable udp-custom
+                    systemctl disable udp-custom &>/dev/null
                     rm /etc/systemd/system/udp-custom.service &>/dev/null
-                    rm /root/udp/ -r &>/dev/null
+                    rm /root/udp/ -r &>/dev/null 
                 elif [[ "${service}" == "fenixproxy" ]];then
-                    systemctl disable fenixmanager-fenixproxy
+                    systemctl disable fenixmanager-fenixproxy &>/dev/null
                     rm /etc/systemd/system/fenixmanager-fenixproxy.service &> /dev/null
                     rm /usr/bin/fenixproxy -r &>/dev/null
                 elif [[ "${service}" == "zivpn" ]];then
-                    systemctl disable zivpn
+                    systemctl disable zivpn &>/dev/null
                     rm /etc/systemd/system/zivpn.service &> /dev/null
                     rm /etc/zivpn/ -r &>/dev/null
                 else
