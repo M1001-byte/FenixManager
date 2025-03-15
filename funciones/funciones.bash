@@ -589,9 +589,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     local c=0    
     
     for services_ in "${list_services[@]}";do
-        if [[ "${services_}" == "pysocks" ]];then
-            systemctl status "fenixmanager-pysocks" &>/dev/null 
-        elif [[ "${services_}" == "openvpn" ]];then 
+        if [[ "${services_}" == "openvpn" ]];then 
             systemctl status "openvpn@server" &>/dev/null
         elif [[ "${services_}" == "udpgw" ]];then
             pgrep badvpn-udpgw &> /dev/null
