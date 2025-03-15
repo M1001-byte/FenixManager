@@ -398,7 +398,7 @@ EOF
 
     info "Creando la tabla '${YELLOW}zivpn${WHITE}' dentro de la base de datos '${YELLOW}usuarios${WHITE}'"
     sqlite3 "/etc/FenixManager/database/usuario.db"  'CREATE TABLE zivpn (password VARCHAR(32) NOT NULL,exp_date DATETIME);' || {
-        erro "Fallo al crear la table."
+        error "Fallo al crear la tabla."
     }
     info "Esa contraseña no tendra fecha de expiracion. Las que agreges despues si."
     read -p "$(echo -e "$YELLOW[*] Ingrese una contraseña. ( Default: fenix ):${endcolor}") " input_config
@@ -407,7 +407,7 @@ EOF
         input_config="fenix"
     fi
     
-    jq  --arg passwd  "${input_config}" '.auth.config += [$passwd]' /etc/zivpn/config.json > tmp.json && mv tmp.json /etc/zivpn/config.json 
+    jq  --arg passwd  "${input_config}" '.auth.config = [$passwd]' /etc/zivpn/config.json > tmp.json && mv tmp.json /etc/zivpn/config.json 
 
     bar "systemctl enable zivpn.service"
     bar "systemctl start zivpn.service"
