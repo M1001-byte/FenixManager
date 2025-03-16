@@ -2007,7 +2007,8 @@ cfg_fenixssh(){
                     ;;
             2)
                # Cambiar banner
-               list_banners
+               list_banners               
+               killall fenixssh
                screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
                     info "FenixSSH iniciado correctamente."
                     }
@@ -2330,39 +2331,6 @@ del_openssh_port(){
     done
 }
 
-
-fenixproxy_del_port() {
-    local port_to_delete
-    if [[ -z ${@} ]];then
-        local ports_list=$(grep "ListenPort" ${config_file} | cut -d "=" -f 2 | cut -d ":" -f 2 | cut -d "]" -f 1 | sort -u)
-        local ports_list_array=(${ports_list})
-        local number_of_ports=${#ports_list_array[@]}
-        if [[ $number_of_ports -eq 0 ]];then error "No hay puertos configurados." ; fi
-            info "Seleccione el puerto a eliminar :"
-        for (( i=0; i<${number_of_ports}; i++ ));do
-            echo -e "\t${WHITE}[ ${i} ] ${GREEN}${ports_list_array[$i]}${WHITE}"
-        done
-        while true;do
-            trap ctrl_c SIGINT SIGTERM
-            read -p "$(echo -e "${BLUE}[*] opcion  : ${END_COLOR}")" port_to_delete
-            if [[ $port_to_delete =~ ^[0-9]+$ ]];then
-                if [[ $port_to_delete -ge 0 && $port_to_delete -le ${number_of_ports} ]];then break ; fi
-            else
-                error "Opcion invalida."
-                continue
-            fi
-        done
-    fi
-    [[ -n "${1}" ]] && port_to_delete=${1} || port_to_delete="${ports_list_array[$port_to_delete]}"
-    local line_of_port=$(grep "ListenPort=${port_to_delete}" --line-number ${config_file} | cut -d: -f1 | head -1) 
-    local line_of_port=$((line_of_port-1))
-    local array_lines_delete
-    for (( i=$line_of_port; i<$((line_of_port+5)); i++ ));do array_lines_delete+="${i}d;" ; done
-    sed -i "${array_lines_delete}" ${config_file}
-    fuser  ${port_to_delete}/tcp -k &>/dev/null
-    sed '/^[[:space:]]*$/d' -i ${config_file} 
-    systemctl restart fenixmanager-fenixproxy &>/dev/null
-}
 
 pysocks_del_port() {
     local port_to_delete
