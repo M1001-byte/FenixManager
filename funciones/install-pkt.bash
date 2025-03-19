@@ -272,6 +272,8 @@ install_fenixssh(){
         error "No se encontro el binario de FenixSSH."
         exit 1
     fi
+    
+    touch /var/log/FenixManager/connFenixssh.json &>/dev/null
 
     while true ;do
         read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( Recomendado: 2222 ):${endcolor}") " port
@@ -301,7 +303,7 @@ install_udpcustom(){
     
     rm -rf /root/udp    &> /dev/null
     mkdir -p /root/udp  &> /dev/null
-    info "Se recomienda excluir el puerto de badvpn-udpgw. Por defecto es el 7300 ."
+    info "Se recomienda excluir el puerto de badvpn-udpgw. Por defecto es el 7300, o los de otros servicios: zivpn-udp."
     read -p "$(echo -e "$YELLOW[*] Ingrese los puertos a excluir ( separados por , (coma) ):${endcolor}") " exclude_port
     cp "$bin" /root/udp/          &> /dev/null   
     cp "$config" /root/udp/          &> /dev/null   
@@ -353,7 +355,7 @@ fi
 install_udpzivpn(){
     local arch=$(uname -m)
     local url="https://github.com/zahidbd2/udp-zivpn/releases/download/udp-zivpn_1.4.9/udp-zivpn-linux-"
-
+    local iface=$(ip -4 route ls|grep default|grep -Po '(?<=dev )(\S+)'|head -1)
     if [[ $arch == "x86_64" ]]; then
         url+="amd64"
     else
@@ -407,7 +409,11 @@ EOF
 
     bar "systemctl enable zivpn.service"
     bar "systemctl start zivpn.service"
-    iptables -t nat -A PREROUTING -i $(ip -4 route ls|grep default|grep -Po '(?<=dev )(\S+)'|head -1) -p udp --dport 6000:19999 -j DNAT --to-destination :5667
+    iptables -t nat -A PREROUTING -i ${iface} -p udp --dport 6000:19999 -j DNAT --to-destination :5667 ||  {
+        error "Fallo al agregar la regla iptable."
+        info "Puedes probar agregandola manualmente."
+        info "iptables -t nat -A PREROUTING -i ${iface} -p udp --dport 6000:19999 -j DNAT --to-destination :5667"
+    }
     ufw allow 6000:19999/udp &>/dev/null
     ufw allow 5667/udp        &>/dev/null
     rm zi.* 1> /dev/null 2> /dev/null

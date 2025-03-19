@@ -42,23 +42,23 @@ check_if_user_exceded_limit_max_conn(){
     for user in $(sqlite3 "$db" "SELECT nombre,password,max_conn FROM ssh"); do
         IFS='|' read -r -a array <<< "$user"
         local user_conn_openssh=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "${array[0]}")
-        
+        local number_session=$user_conn_openssh
+
         process_is_running "dropbear" && {
             user_conn_dropbear=$(ps auxwww | grep 'dropbear' | awk '{print $1 }' | grep -w -c "${array[0]}")
-            number_session=$((number_session_openssh + number_session_dropbear))
-        } || {
-            number_session=$user_conn_openssh
+            number_session=$((user_conn_openssh + user_conn_dropbear))
+        } || process_is_running "fenixssh" && { 
+            number_session=$(jq ".${array[0]}.connection" "/var/log/FenixManager/connFenixssh.json") 
         }
-        if (( $user_conn > ${array[2]} )) ; then
-            write_log_file "${array[0]}:${array[1]} excedio el limite de conexiones ( ${array[2]} < ${user_conn} )"
+
+        if [[ -n "$number_session" && $number_session -gt ${array[2]} ]]; then
+            write_log_file "${array[0]}:${array[1]} excedió el límite de conexiones ( ${array[2]} < ${number_session} )"
             pkill -u "${array[0]}"
             userdel "${array[0]}"
             sqlite3 "$db" "DELETE FROM ssh WHERE nombre == '${array[0]}'"
         fi
     done
 }
-
-
 write_log_file(){
     local msg="$1"
     echo "[ $(date "+%Y-%m-%d %H:%M:%S") ] $msg" >> "$log_file"

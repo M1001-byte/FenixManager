@@ -2090,6 +2090,7 @@ cfg_udpcustom(){
     else
         option_color 2 "DETENER SERVICIO"
     fi
+    option_color 3 "DESHABILITAR UDP-CUSTOM"
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
@@ -2109,12 +2110,16 @@ cfg_udpcustom(){
                 cfg_udpcustom
                 ;;
             2)
-                [ -n $is_active ] && {
-                    bar "systemctl stop udp-custom"
-                } || {
+                [ -z $is_active ] && {
                     bar "systemctl start udp-custom"
+                } || {
+                    bar "systemctl stop udp-custom"
                 }
                 cfg_udpcustom
+                ;;
+            3)
+                bar "systemctl disable udp-custom"
+                option_menu_software
                 ;;
             [Bb]) 
             # menu de instalacion de software
