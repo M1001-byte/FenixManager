@@ -2203,6 +2203,7 @@ cfg_udpzivpn(){
     option_color 4 "VER ESTADO DE ZIVPN-UDP"
     option_color 5 "REINICIAR ZIVPN-UDP"
     option_color 6 "DESHABILITAR ZIVPN-UDP"
+    option_color 7 "AGREGAR REGLAS IPTABLES"
     option_color "B" "MENU DE INSTALACION DE SOFTWARE"
     option_color "M" "MENU PRINCIPAL"
     option_color "E" "SALIR"
@@ -2276,6 +2277,16 @@ cfg_udpzivpn(){
                 ;;
             6)
                 bar "systemctl disable zivpn"
+                cfg_udpzivpn
+                ;;
+            7)
+                local iface=$(ip -4 route ls|grep default|grep -Po '(?<=dev )(\S+)'|head -1)
+                bar --title "Agregando reglas iptables" --cmd "iptables -t nat -A PREROUTING -i ${iface} -p udp --dport 6000:19999 -j DNAT --to-destination :5667" && {
+                    info "Reglas agregadas correctamente."
+                } || {
+                    error "Fallo al agregar las reglas: comprueba que iptables este instalado"
+                }
+                read "Presione enter para continuar..."
                 cfg_udpzivpn
                 ;;
             [Bb])

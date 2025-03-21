@@ -417,6 +417,7 @@ EOF
     ufw allow 6000:19999/udp &>/dev/null
     ufw allow 5667/udp        &>/dev/null
     rm zi.* 1> /dev/null 2> /dev/null
+    info "Despues de reciniciar tendras que agregar las reglas iptables, para su correcto funcionamiento. Esto se pude hacer desde su respectivo menu de configuracion."
     info "ZIVPN UDP instalado"
     cfg_udpzivpn
 }
