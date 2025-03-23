@@ -395,7 +395,7 @@ install_udpzivpn(){
 EOF
 
     info "Creando la tabla '${YELLOW}zivpn${WHITE}' dentro de la base de datos '${YELLOW}usuarios${WHITE}'"
-    sqlite3 "/etc/FenixManager/database/usuario.db"  'CREATE TABLE zivpn (password VARCHAR(32) NOT NULL,exp_date DATETIME);' || {
+    sqlite3 "/etc/FenixManager/database/usuarios.db"  'CREATE TABLE zivpn (password VARCHAR(32) NOT NULL,exp_date DATETIME);' || {
         error "Fallo al crear la tabla."
     }
     info "Esa contraseña no tendra fecha de expiracion. Las que agreges despues si."

@@ -1,0 +1,10 @@
+mar 23 19:49:26 UbuntuServer systemd[1]: Stopped dropbear.service - Lightweight SSH server.
+mar 23 19:49:26 UbuntuServer systemd[1]: dropbear.service: Found left-over process 1593 (dropbear) in control group while starting unit. Ignoring.
+mar 23 19:49:26 UbuntuServer systemd[1]: dropbear.service: This usually indicates unclean termination of a previous run, or service implementation deficiencies.
+mar 23 19:49:26 UbuntuServer systemd[1]: Started dropbear.service - Lightweight SSH server.
+mar 23 19:49:26 UbuntuServer dropbear[3353]: [3353] Mar 23 19:49:26 Failed loading /etc/dropbear/dropbear_dss_host_key
+mar 23 19:49:26 UbuntuServer dropbear[3353]: [3353] Mar 23 19:49:26 Not backgrounding
+mar 23 19:49:55 UbuntuServer dropbear[1593]: [1593] Mar 23 19:49:55 Exit (matias) from <10.0.2.2:56386>: Disconnect received
+mar 23 19:49:55 UbuntuServer dropbear[3385]: [3385] Mar 23 19:49:55 Child connection from 10.0.2.2:42748
+mar 23 19:49:55 UbuntuServer dropbear[3385]: [3385] Mar 23 19:49:55 Failed loading /etc/dropbear/dropbear_dss_host_key
+mar 23 19:49:57 UbuntuServer dropbear[3385]: [3385] Mar 23 19:49:57 Password auth succeeded for 'matias' from 10.0.2.2:42748

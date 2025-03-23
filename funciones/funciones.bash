@@ -543,7 +543,7 @@ process_is_running(){
     # 0 = process is running 
     # 1 = process is not running
     process="$1"
-    if [[ $(ps -ef | grep "$process" | grep -v grep | wc -l) -gt 0 ]];then return 1 ; else return 0 ; fi
+    [[ $(ps -ef | grep "$process" | grep -v grep | wc -l) -gt 0 ]] && return 0 || return 1
 }
 
 list_banners(){

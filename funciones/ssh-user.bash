@@ -232,6 +232,33 @@ list_user() {
 
 
 }
+get_conn_dropbear() {
+    # Conectado = 0, Desconectado = 1
+    local userFind="$1"
+    local UserConnected=0
+    local userConnections=0
+    local pids=$(pgrep dropbear)
+
+    local userCheck=""
+    # if [[ -n "$userFind" ]]; then
+    #     local date=$(date "+%b %e")  # %e permite un solo dígito en el día
+    #     local user=$(journalctl -u dropbear.service 2>/dev/null | grep -o "${date}.*Password.*${userFind}" | tail -n1)
+    #     echo $user
+    #     [[ -z "$user" ]] && ((userConnections++))
+    # else
+    IFS=$'\n'  # Evitar problemas con múltiples líneas
+    for pid in $pids; do
+        local user=$(journalctl -u dropbear.service 2>/dev/null | grep -o "$pid.*Password.*" | grep -o "'.*'" | tr -d "'")
+        [[ -n "${user}" ]] && {
+            if [[ ! " ${userCheck} " =~ " ${user} " ]]; then
+                ((UserConnected++))
+                userCheck+=" ${user}"
+            fi
+        }
+        [[ "$user" == "${userFind}" ]] && ((userConnections++))
+    done
+    [[ -n "${userFind}" ]] && echo $userConnections || echo $UserConnected
+} 
 
 monitor_users(){
     local user_count=$(sqlite3 $userdb "select count(*) from ssh")
@@ -248,7 +275,7 @@ monitor_users(){
         local user=${var_val[1]}
         number_session_openssh=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$user")
         process_is_running "dropbear" && {
-            number_session_dropbear=$(ps auxwww | grep 'dropbear' | awk '{print $1 }' | grep -w -c "$user")
+            number_session_dropbear=$(get_conn_dropbear "${user}")
             number_session=$((number_session_openssh + number_session_dropbear))
         } || {
             number_session=$number_session_openssh
@@ -611,7 +638,9 @@ show_acc_ssh_info(){
     local online_user=0
     for i in ${users_[@]};do
         local number_session=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$i")
-        [[ "${number_session}" -ne '0' ]] &&  ((online_user++))
+        local number_session_dropbear=$(get_conn_dropbear "${i}")
+        [[ "${number_session}" -ne '0' ]] && ((online_user++))
+        [[ "${number_session_dropbear}" -ne '0' ]] && ((online_user++))
     done
     local offline_users=$(echo ${get_total_users} - ${online_user} | bc)
     

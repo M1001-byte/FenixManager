@@ -2146,7 +2146,7 @@ cfg_udpcustom(){
 
 cfg_udpzivpn(){
     local cfg_file="/etc/zivpn/config.json"
-    local db_file="/etc/FenixManager/database/usuario.db"
+    local db_file="/etc/FenixManager/database/usuarios.db"
     local pid=$(pgrep zivpn 2>/dev/null)
     list_password(){
         local arg="$1"
@@ -2245,7 +2245,7 @@ cfg_udpzivpn(){
                     jq --arg passwd "${passwd}" '.auth.config += [$passwd]' $cfg_file > "tmp.json" && mv "tmp.json" "/etc/zivpn/config.json" && {
                         bar "systemctl restart zivpn"
                         info "Contraseña agregada correctamente"
-                        sqlite3 "/etc/FenixManager/database/usuario.db"  "INSERT INTO zivpn (password, exp_date) VALUES ('$passwd', '$fecha_final');"
+                        sqlite3 "/etc/FenixManager/database/usuarios.db"  "INSERT INTO zivpn (password, exp_date) VALUES ('$passwd', '$fecha_final');"
                     }
                     read
                 cfg_udpzivpn
