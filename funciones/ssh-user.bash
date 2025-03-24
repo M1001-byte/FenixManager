@@ -240,13 +240,7 @@ get_conn_dropbear() {
     local pids=$(pgrep dropbear)
 
     local userCheck=""
-    # if [[ -n "$userFind" ]]; then
-    #     local date=$(date "+%b %e")  # %e permite un solo dígito en el día
-    #     local user=$(journalctl -u dropbear.service 2>/dev/null | grep -o "${date}.*Password.*${userFind}" | tail -n1)
-    #     echo $user
-    #     [[ -z "$user" ]] && ((userConnections++))
-    # else
-    IFS=$'\n'  # Evitar problemas con múltiples líneas
+    IFS=$'\n' 
     for pid in $pids; do
         local user=$(journalctl -u dropbear.service 2>/dev/null | grep -o "$pid.*Password.*" | grep -o "'.*'" | tr -d "'")
         [[ -n "${user}" ]] && {
@@ -605,7 +599,8 @@ restore_backup () {
         local pass="${user_array[2]}"
         local password=$(perl -e 'print crypt($ARGV[0], "password")' $pass)
         printf "${WHITE} %-32s${YELLOW}%-20s" "${user}" "${pass}" && tput sc
-        local user_add_stderr=$(useradd -g "ssh_user" --no-create-home --shell /bin/false --gid "ssh_user"  -p "$pass" "$user" 2>&1)
+        
+        local user_add_stderr=$(useradd -g "ssh_user" --no-create-home --shell /bin/false --gid "ssh_user"  -p "${password}" "${user}")
         [ -z "$user_add_stderr" ] && {
             printf "${GREEN}%-10s${WHITE}" "[ OK ]" && tput cud1
         } || {
