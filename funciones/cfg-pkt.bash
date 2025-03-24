@@ -1475,7 +1475,7 @@ cfg_slowdns(){
 
     
 }
-
+cfg_ssh_dropbear
 cfg_ssh_dropbear(){
     trap ctrl_c SIGINT SIGTERM
     clear
@@ -1590,9 +1590,12 @@ cfg_ssh_dropbear(){
             # ELIMINAR PUERTOS DROPBEAR/OPENSSH
                 [[ ${dropbear_is_installed} -eq 0 ]] && {
                     info "143, es el puerto por defecto de dropbear. No se puede eliminar." 
-                    local dropbear_extra_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
-                    IFS=" " read -r -a ports_array <<< $dropbear_extra_ports
-                    for ((i=0;i<${#ports_array[@]};i++));do
+                    local dropbear_extra_ports=$(cat "/etc/default/dropbear" | grep -oP '(-p\s+)([^\s]+)' | awk '{print $2}' | sed "s/'//g"  )
+                    dropbear_extra_ports=$(echo "$dropbear_extra_ports" | tr -s '[:space:]' ' ')
+                
+                    IFS=" " read -r -a ports_array <<< "${dropbear_extra_ports}"
+                
+                    for ((i=0; i < ${#ports_array[@]} ; i++));do
                         local port=${ports_array[$i]}
                         echo -e "\t${WHITE}[ ${BLUE}${i}${WHITE} ] ${GREEN}${port}${WHITE}"
                     done
