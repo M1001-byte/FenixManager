@@ -1475,7 +1475,7 @@ cfg_slowdns(){
 
     
 }
-cfg_ssh_dropbear
+
 cfg_ssh_dropbear(){
     trap ctrl_c SIGINT SIGTERM
     clear
