@@ -1515,7 +1515,7 @@ cfg_ssh_dropbear(){
                 local drop_str="[ DETENIDO ]"
                 local color_1="${RED}"
             fi
-            dropbear_ports=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s/-p/ /g" | xargs)
+            dropbear_ports=$(grep -o "\-p .*" "/etc/default/dropbear" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
             dropbear_ports+=" $(grep "^DROPBEAR_PORT=.*" /etc/default/dropbear | awk '{split($0,a,"="); print a[2]}')"
             local dropbear_banner=$(grep -o "^DROPBEAR_BANNER=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s|${user_folder}|~|g" | xargs)
         
@@ -1579,7 +1579,7 @@ cfg_ssh_dropbear(){
                     info "Por defecto, drobear escuchara en el puerto 143"
                     info "Luego de instalar, puede agregar/quitar los puertos."
                     ufw allow 143/tcp &>/dev/null
-                    local drop_cfg="NO_START=0\nDROPBEAR_PORT=143\nDROPBEAR_EXTRA_ARGS=''\nDROPBEAR_BANNER='${user_folder}/FenixManager/banner/fenix.html'\nDROPBEAR_RECEIVE_WINDOW=65536"
+                    local drop_cfg="NO_START=0\nDROPBEAR_PORT=143\nDROPBEAR_EXTRA_ARGS='-b '${user_folder}/FenixManager/banner/fenix.html' '\nDROPBEAR_RECEIVE_WINDOW=65536"
                     echo -e "${drop_cfg}" > "${dropbear_file}"
                     bar "service dropbear restart"
                     sleep 2
@@ -1645,8 +1645,7 @@ cfg_ssh_dropbear(){
                         return 1
                     fi
                     local ssh_banner_line=$(grep -n "^Banner" ${ssh_file} | cut -d: -f1)
-                    local dropbear_banner_line=$(grep -n "^DROPBEAR_BANNER" ${dropbear_file} | cut -d: -f1)
-
+                    
                     # ! OPENSSH
                     [[ -z ${ssh_banner_line} ]] && {
                         echo "Banner ${banner_file}" >> ${ssh_file}
@@ -1655,11 +1654,8 @@ cfg_ssh_dropbear(){
                     }
                     bar "service ssh restart"
                     # ! DROPBEAR
-                    [[ -z ${dropbear_banner_line} ]] && {
-                        echo "DROPBEAR_BANNER='${banner_file}'" >> ${dropbear_file}
-                    } || {
-                        sed -i "${dropbear_banner_line}s|^DROPBEAR_BANNER=.*|DROPBEAR_BANNER='${banner_file}'|g" ${dropbear_file}
-                    }
+                    local str="${banner_file//\//\\/}"
+                    sed -i "s|\/[a-zA-Z0-9_\-\/\.]\+|${str}|g" "/etc/default/dropbear"
                     bar "service dropbear restart"
                 }
                 banner_select() {
