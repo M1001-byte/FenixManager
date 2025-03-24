@@ -845,3 +845,17 @@ uninstall_fenixmanager(){
     fi
     
 }
+random_rulet_info(){
+    local randint=$((RANDOM % 10 + 1))
+    [[ $randint -eq 1 ]] && {
+        info "¿Estás disfrutando de mi script? ¿Qué te parece dejarle una estrellita en su GitHub?"
+        info "Únete a los canales y grupos de Telegram para estar al tanto de las novedades y sugerir mejoras."
+        info "📢  Canal: ${RED}FenixManager${WHITE} ( ${BLUE}https://t.me/ScriptFenixManager${WHITE} )"
+        info "💬  Grupo: ${RED}FenixManager [GROUP]${WHITE} ( ${BLUE}https://t.me/ScriptFenixManager${WHITE} )"
+        info "💻 Autor: ${RED}Mathiue1001${WHITE} ( ${BLUE}https://t.me/@Mathiue1001${WHITE} )"
+        info "Este mensaje tiene 1 entre 10 posibilidades de aparecer."
+
+        read -p "Presione [ enter ] para continuar."
+    }
+
+}

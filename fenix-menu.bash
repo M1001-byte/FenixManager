@@ -10,6 +10,7 @@ source "/etc/FenixManager/funciones/other-cfg.bash"
 source "/etc/FenixManager/funciones/wireguard-install.sh"
 
 simple_text_fenix(){
+    random_rulet_info
     line_separator 60
     printf "${WHITE}〢 ${GREEN}%-20s ${RED}%-25s ${GREEN}%10s ${WHITE}%4s\n" "M1001-BYTE" "FENIX-MANAGER" "${version}" "〢"
     line_separator 60
