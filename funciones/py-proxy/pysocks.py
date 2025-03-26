@@ -1,13 +1,14 @@
-from threading import Thread
-import sys, socket, select, os, re
+# -*- coding: utf-8 -*-
+import socket
+import threading
+import select
+import sys
+import time
 
 
-def show_info(**kwargs):
-    for key, value in kwargs.items():
-        value = f"{value[0]}:{value[1]}" if key == "Reenvia_a" else value
-        key = key.replace("_", " ")
-        print(f"\033[37m\033[33m[*] \033[37m{key.upper()} : \033[32m{value}\033[37m")
-
+# este script solo es una modificacion del script que usaban los brasucas en su adm.
+# Yo solo lo traslade a python3 y elimine cosas inecesarioas.
+# BY: tg://Mathiue1001
 
 replace_payload = (
     lambda payload: payload.replace("[lf]", "\n")
@@ -17,145 +18,173 @@ replace_payload = (
 )
 
 
-class main(object):
-    def __init__(self) -> None:
+args = sys.argv
+desc = f"""Simple proxy forwarding. \033[33mclient\033[37m <--> \033[32mserver_socket\033[37m <--> \033[34mremote_server\033[37m"""
+usage = """Python3 pysocks.py {listen-port} {connect-to} {custom-response}"""
 
-        self.args = self.parse_args()
-        self.log_file = ""
-        self.regex_ssh_hotkey = re.compile("SSH-2.0-.*")
+if len(args) == 1:
+    print(desc)
+    print(usage)
+    print("By: https://github.com/M1001-byte/ @tg:Mathiue1001")
+    sys.exit(1)
 
-    def parse_args(self) -> dict:
-        args = sys.argv
-        desc = f"""Simple proxy forwarding. \033[33mclient\033[37m <--> \033[32mserver_socket\033[37m <--> \033[34mremote_server\033[37m"""
-        usage = """Python3 pysocks.py {listen-port} {connect-to} {custom-response}"""
-        
-        if len(args) == 1:
-            print(desc)
-            print(usage)
-            print("By: https://github.com/M1001-byte/ @tg:Mathiue1001")
-            sys.exit(1)
-        return args
+BIND_PORT = int(args[1])
+connect_str = args[2]
+CONNECT_TO = (connect_str.split(":")[0], int(connect_str.split(":")[1]))
+CUSTOM_RESPONSE = replace_payload(args[3])
 
-    def run_the_server(self) -> None:
-        try:
-            bind_port = int(self.args[1])
-            connect_str = self.args[2]
-            connect_to = (connect_str.split(":")[0], int(connect_str.split(":")[1]))
-            custom_response = replace_payload(self.args[3])
-            self.log_file = (
-                f"/var/log/FenixManager/pysocks:{bind_port}-{connect_str}.log"
-            )
+BUFLEN = 4096 * 4
+TIMEOUT = 60
 
-            os.remove(self.log_file) if os.path.exists(self.log_file) else None
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            sock.bind(("0.0.0.0", bind_port))
-            sock.listen(0)
-            while True:
-                client_socket, address = sock.accept()
-                client_socket.settimeout(30)
-                proxy_socket(client_socket, custom_response, connect_to, address).start()
-
-        except KeyboardInterrupt as er:
-            sys.exit(130)
-        except Exception as er:
-            print(f"[ ERROR ]\033[31m{bind_port}:{connect_str} {er} \033[37m")
-            exit(1)
-
-
-class proxy_socket(Thread, main):
-    def __init__(
-        self,
-        client_soket: tuple,
-        custom_response: bytes,
-        forwarding_to: tuple,
-        addr: tuple,
-    ) -> None:
-
-        Thread.__init__(self)
-
-        main.__init__(self)
-
-        self.s = None
-        self.conn, self.addr = client_soket, "{}:{}".format(addr[0], addr[1])
-        self.connect_to = forwarding_to
-        self.buffer_size = 4096
-        self.custom_response = custom_response
-        self.client_buffer = ""
+class Server(threading.Thread):
+    def __init__(self, host, port):
+        super().__init__()
+        self.running = False
+        self.host = host
+        self.port = port
+        self.threads = []
+        self.threadsLock = threading.Lock()
+        self.logLock = threading.Lock()
 
     def run(self):
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.soc.settimeout(2)
+        self.soc.bind((self.host, self.port))
+        self.soc.listen(5)
+        self.running = True
 
-        count_packet = 0
-        while True:
-                payload = self.conn.recv(self.buffer_size)
-                if not payload:
-                    break
-                else:
-                    print(f"\033[37m\033[32m[+] \033[37mPayload \033[33m{self.addr}\033[37m {payload}")
-                    if count_packet == 0:
-                        self.conn.sendall(self.custom_response)
-                        count_packet += 1
-                    try:
-                        ssh_identifier = self.regex_ssh_hotkey.findall(str(payload.decode("utf-8")))
-                        self.forward()
-                        self.remote.sendall(f"{ssh_identifier[0]}\r\n".encode())
-                        self.incoming_connections()
-                        break
-                    except:
-                        pass
-
-    def forward(self):
         try:
-            self.remote = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.remote.connect(self.connect_to)
+            while self.running:
+                try:
+                    c, addr = self.soc.accept()
+                    print("New Connection from:",addr)
+                    c.setblocking(1)
+                except socket.timeout:
+                    continue
 
-        except KeyboardInterrupt:
-            sys.exit(130)
+                conn = ConnectionHandler(c, self, addr)
+                conn.start()
+                self.addConn(conn)
+        finally:
+            self.running = False
+            self.soc.close()
 
-        except Exception as er:
-            print(f"[ ERROR ] Fallo al conectar con el servidor remoto: \033[33m{self.connect_to}\033[37m")
-            self.conn.sendall("HTTP/1.1 503 Service Unavailable\r\n\r\n".encode())
-            self.conn.close()
-            exit(1)
+    def addConn(self, conn):
+        with self.threadsLock:
+            if self.running:
+                self.threads.append(conn)
 
-    def incoming_connections(self):
-        err = False
-        self.inputs = [self.remote, self.conn]
-        while True:
-            read, _, err = select.select(self.inputs, [], self.inputs, 3)
-            if read:
-                for self.s in read:
-                    try:
-                        data = self.s.recv(self.buffer_size)
-                        if len(data) == 0:
-                            self.close()
-                            break
-                        else:
-                            if self.s == self.remote:
-                                self.conn.sendall(data)
-                            else:
-                                while data:
-                                    byte = self.remote.send(data)
-                                    data = data[byte:]
-                    except KeyboardInterrupt:
-                        sys.exit(130)
-                    except Exception as er:
-                        # write_to_log(log_file,er)
-                        break
-            if err:
-                break
+    def removeConn(self, conn):
+        with self.threadsLock:
+            if conn in self.threads:
+                self.threads.remove(conn)
 
     def close(self):
-        self.inputs = []
-        self.remote.close()
-        self.conn.close()
+        self.running = False
+        with self.threadsLock:
+            for c in list(self.threads):
+                c.close()
 
+class ConnectionHandler(threading.Thread):
+    def __init__(self, socClient, server, addr):
+        super().__init__()
+        self.clientClosed = False
+        self.targetClosed = True
+        self.client = socClient
+        self.client_buffer = b''
+        self.server = server
+        self.target = None
 
-def write_to_log(log_file: str, msg: str):
-    with open(log_file, "a") as f:
-        f.write(f"{msg}\n")
+    def close(self):
+        try:
+            if not self.clientClosed:
+                self.client.shutdown(socket.SHUT_RDWR)
+                self.client.close()
+        except:
+            pass
+        finally:
+            self.clientClosed = True
 
+        try:
+            if not self.targetClosed and self.target:
+                self.target.shutdown(socket.SHUT_RDWR)
+                self.target.close()
+        except:
+            pass
+        finally:
+            self.targetClosed = True
 
-if __name__ == "__main__":
+    def run(self):
+        try:
+            self.client_buffer = self.client.recv(BUFLEN)
 
-    main().run_the_server()
+            self.method_CONNECT()
+            
+        except Exception as e:
+            self.log += f" - error: {str(e)}"
+            self.server.printLog(self.log)
+        finally:
+            self.close()
+            self.server.removeConn(self)
+
+    def connect_target(self, host):
+        try:
+            self.target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.targetClosed = False
+            self.target.connect(CONNECT_TO)
+        except Exception as e:
+            print(f"Error al conectar con {CONNECT_TO} - {e}")
+
+    def method_CONNECT(self):
+        try:
+            self.connect_target(CONNECT_TO)
+            self.doCONNECT()
+            self.client.sendall(CUSTOM_RESPONSE)
+            self.client_buffer = b''
+
+            self.server.printLog(self.log)
+        except Exception as er :
+            print(er)
+
+    def doCONNECT(self):
+        
+        socs = [self.client, self.target]
+        count = 0
+        error = False
+        while True:
+            count += 1
+            recv, _, err = select.select(socs, [], socs, 3)
+            if err:
+                error = True
+            if recv:
+                for in_ in recv:
+                    try:
+                        data = in_.recv(BUFLEN)
+                        if data:
+                            if in_ is self.target:
+                                self.client.send(data)
+                            else:
+                                while data:
+                                    byte = self.target.send(data)
+                                    data = data[byte:]
+                            count = 0
+                        else:
+                            break
+                    except:
+                        error = True
+                        break
+            if count == TIMEOUT or error:
+                break
+
+def main():
+    server = Server('0.0.0.0', BIND_PORT)
+    server.start()
+    try:
+        while True:
+            time.sleep(2)
+    except KeyboardInterrupt:
+        server.close()
+
+if __name__ == '__main__':
+    main()
