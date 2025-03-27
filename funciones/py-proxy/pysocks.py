@@ -63,7 +63,7 @@ class Server(threading.Thread):
                 except socket.timeout:
                     continue
 
-                conn = ConnectionHandler(c, self, addr)
+                conn = ConnectionHandler(c, self)
                 conn.start()
                 self.addConn(conn)
         finally:
@@ -87,7 +87,7 @@ class Server(threading.Thread):
                 c.close()
 
 class ConnectionHandler(threading.Thread):
-    def __init__(self, socClient, server, addr):
+    def __init__(self, socClient, server):
         super().__init__()
         self.clientClosed = False
         self.targetClosed = True
@@ -122,13 +122,12 @@ class ConnectionHandler(threading.Thread):
             self.method_CONNECT()
             
         except Exception as e:
-            self.log += f" - error: {str(e)}"
-            self.server.printLog(self.log)
+            print('error:',str(e))
         finally:
             self.close()
             self.server.removeConn(self)
 
-    def connect_target(self, host):
+    def connect_target(self):
         try:
             self.target = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.targetClosed = False
@@ -138,12 +137,10 @@ class ConnectionHandler(threading.Thread):
 
     def method_CONNECT(self):
         try:
-            self.connect_target(CONNECT_TO)
+            self.connect_target()
             self.doCONNECT()
             self.client.sendall(CUSTOM_RESPONSE)
             self.client_buffer = b''
-
-            self.server.printLog(self.log)
         except Exception as er :
             print(er)
 
