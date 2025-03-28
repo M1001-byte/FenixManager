@@ -24,6 +24,10 @@ sudo apt-get install -y wget git # Instalar wget, git
 wget https://raw.githubusercontent.com/M1001-byte/FenixManager/master/install.bash -O /tmp/install-fenix.bash # Descargar instalador
 sudo bash /tmp/install-fenix.bash # Instalar
 ```
+O instalacion en una sola linea.
+```bash
+sudo apt-get update; sudo apt-get upgrade -y ; sudo apt-get install -y wget git ; wget https://raw.githubusercontent.com/M1001-byte/FenixManager/master/install.bash -O /tmp/install-fenix.bash ; sudo bash /tmp/install-fenix.bash
+```
 ## 🧉 Características
 
 * Administrar usuarios ssh
