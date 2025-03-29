@@ -39,10 +39,6 @@ def main(config:str):
         if reload_:
             if is_open == 0:
                 continue
-            else:
-                show_info(index,bind_port,connect_to)
-                run_proxy_server(bind_port, connect_to, custom_response)
-        else:
             #print(f"Log File [#{index}] : {log_file}")
             show_info(index,bind_port,connect_to)
             run_proxy_server(bind_port, connect_to, custom_response)
