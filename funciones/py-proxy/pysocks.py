@@ -106,9 +106,7 @@ class proxy_socket(Thread, main):
                             self.incoming_connections()
                             break
                     try:
-                        ssh_identifier = self.regex_ssh_hotkey.findall(str(payload.decode("utf-8")))
                         self.forward()
-                        self.remote.sendall(f"{ssh_identifier[0]}\r\n".encode())
                         self.incoming_connections()
                         break
                     except:
