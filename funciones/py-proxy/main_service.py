@@ -42,6 +42,9 @@ def main(config:str):
             #print(f"Log File [#{index}] : {log_file}")
             show_info(index,bind_port,connect_to)
             run_proxy_server(bind_port, connect_to, custom_response)
+        else:
+            show_info(index,bind_port,connect_to)
+            run_proxy_server(bind_port, connect_to, custom_response)
 
 
 if __name__ == "__main__":
