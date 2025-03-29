@@ -285,6 +285,10 @@ install_fenixssh(){
         info "Genere una con ssh-keygen -t rsa ."
         exit 1
     fi
+    info "El banner 'fenixssh.html' fue diseñado para ser utilizado con fenixssh."
+    local fenixssh_banner="<font color=#0000FF>〢 ──────────────────────── 〢</font><br><b><font color=#FFFFFF>〢 Script: </font><font color=#FF0000>FenixManager</font><font color=#FFFFFF> 〢</font></b><br><font color=#FFFFFF>〢 Usuario: </font><font color=#FF0000>[user]</font><font color=#FFFFFF> 〢</font><br><font color=#FFFFFF>〢 Expira: </font><font color=#FF00FF>[exp]</font><font color=#FFFFFF> 〢</font><br><font color=#FFFFFF>〢 Máxima conexiones: </font><font color=#FF0000>[maxConn]</font><font color=#FFFFFF> 〢</font><br><font color=#0000FF>〢 ──────────────────────── 〢</font><br>"
+   
+    echo "${fenixssh_banner}" > "${user_folder}/FenixManager/banner/fenixssh.html"
     list_banners
     
     cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
