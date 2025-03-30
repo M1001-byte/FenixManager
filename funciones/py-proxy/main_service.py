@@ -16,7 +16,6 @@ def run_proxy_server(bind_port:int, connect_to:str, custom_response:str,action:s
     proxy_file='/etc/FenixManager/funciones/py-proxy/pysocks.py'
     args_parse_to_script = f"{bind_port} '{connect_to}' '{custom_response}' "
     tmp_proc = subprocess.Popen([f'python3 {proxy_file} {args_parse_to_script} &'],shell=True)
-    os.system(f"python3 {proxy_file} {args_parse_to_script} &")
     time.sleep(1)
     #return tmp_proc.pid
 

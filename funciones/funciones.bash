@@ -600,9 +600,9 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         elif [[ "${services_}" == "udpcustom" ]];then
             systemctl status udp-custom &> /dev/null
         elif [[ "${services_}" == "fenixssh" ]];then
-            pgrep fenixssh &> /dev/null
+            systemctl status fenixmanager-fenixssh &>/dev/null 
         elif [[ "$services_" == "pysocks" ]];then
-            systemctl status fenixmanager-pysocks &>/dev/null ;
+            systemctl status fenixmanager-pysocks &>/dev/null
         elif [[ "$services_" == "zivpn-udp" ]];then
             systemctl status zivpn &>/dev/null ;
         else
@@ -622,9 +622,11 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 ;;
             "dropbear")
                 local file="/etc/default/dropbear"
-                local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
-                local dropbear_extra_arg_port=$(grep -o "\-p .*" "${file}" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
+                [[ -f $file ]] && {
+                    local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
+                    local dropbear_extra_arg_port=$(grep -o "\-p .*" "${file}" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
                 
+                }
                 [[ -n "${dropbear_port}" ||  -n "${dropbear_extra_arg_port}" ]] && {
                     port_listen="$dropbear_port ${dropbear_extra_arg_port}"
                 } || port_listen=""
@@ -672,11 +674,8 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
                 fi
                 ;;
             "fenixssh")
-                local pidf=$(pgrep fenixssh 2>/dev/null)
-                if [ -n "$pidf" ];then
-                    local args=$(cat "/proc/${pidf}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
-                    port_listen=$(echo ${args} | grep -o '[0-9]\{2,\}')
-                fi
+                local cfg="${user_folder}/FenixManager/fenixssh.json"
+                port_listen=$(jq -r '.bind_port' "${cfg}" 2>/dev/null)
                 ;;
             "zivpn-udp")
                 if [ -f "/etc/zivpn/config.json" ];then

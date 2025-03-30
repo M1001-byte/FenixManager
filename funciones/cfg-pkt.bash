@@ -1939,39 +1939,21 @@ cfg_wireguard(){
 cfg_fenixssh(){
     local banner port
     local pid=$(pgrep fenixssh)
+    local cfg_file="${user_folder}/FenixManager/fenixssh.json"
     clear
     echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO FENIXSSH${BLUE} 〢────────────────〢"
-    reactive(){
-        error "El estado de FenixSSH es inactivo. Vuelve a configurarlo"
-        while true ;do
-            read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
-            check_if_port_is_open $porti
-            if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
-        done
-        list_banners
-        local rsa="${user_folder}/.ssh/id_rsa"
-        screen -dmS "fenixssh" fenixssh $porti "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
-            info "FenixSSH iniciado correctamente."
-            }
-            read
-            cfg_fenixssh
-    }
     show_info(){
         local str_ color_ args port
+        
+        banner=$(jq '.banner'  "${cfg_file}")
+        port=$(jq '.bind_port' "${cfg_file}")
 
         if [ -n "$pid" ]; then
-            args=$(cat "/proc/${pid}/cmdline" | sed 's/[^a-zA-Z0-9_.\/]/ /g')
-            banner=$(echo -e "${args}" | grep -Eo "/[^/]+(/[^/]+)*(/[^/]+\.(html|txt))")
-            port=$(echo ${args} | grep -o '[0-9]\{2,\}')
             str_="[ ACTIVO ]"
             color_="${GREEN}"
         else
-            args=''
-            banner=''
-            port=''
             str_="[ INACTIVO ]"
             color_="${RED}"
-            reactive
         fi
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
         printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
@@ -1986,6 +1968,7 @@ cfg_fenixssh(){
     else
         option_color 3 "DETENER SERVICIO"
     fi
+    option_color 4 "VER ESTADO DE FENIXSSH"
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
@@ -1997,41 +1980,38 @@ cfg_fenixssh(){
             1)
                 # Cambiar puerto
                 port_input && local porti="${puertos_array[0]}" && unset puertos_array
-                killall fenixssh
-                screen -dmS "fenixssh" fenixssh $porti "$banner" "${user_folder}/.ssh/id_rsa" && {
-                    info "FenixSSH iniciado correctamente."
-                    }
+                jq --argjson bind_port "$porti" '.bind_port = $bind_port' "${cfg_file}" > "${cfg_file}.tmp" && mv "${cfg_file}.tmp" "${cfg_file}"
+                bar "systemctl restart fenixssh" || {
+                    error "Fallo al agregar el puerto"
                     read
-                    cfg_fenixssh
-                    ;;
+                }
+                cfg_fenixssh
+                ;;
             2)
                # Cambiar banner
                list_banners               
-               killall fenixssh
-               screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
-                    info "FenixSSH iniciado correctamente."
-                    }
-                read
+               jq --arg banner "$BANNER_FILE" '.banner = $banner' "${cfg_file}" > "${cfg_file}.tmp" && mv "${cfg_file}.tmp" "${cfg_file}"
+               bar "systemctl restart fenixssh" || {
+                    error "Fallo al agregar el puerto"
+                    read
+                }
                 cfg_fenixssh
                 ;;
             3) 
                 if [ -z $pid ];then
-                    while true ;do
-                        read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( solo uno ):${endcolor}") " porti
-                        check_if_port_is_open $porti
-                            if [[ $? -eq 0 ]];then ufw allow $porti &>/dev/null; break ; else continue ; fi
-                    done
-                    list_banners
-                    screen -dmS "fenixssh" fenixssh $porti "$BANNER_FILE" "${user_folder}/.ssh/id_rsa" && {
-                        info "FenixSSH iniciado correctamente."
+                    bar "systemctl start fenixssh" || {
+                        error "Fallo al agregar el puerto"
                     }
+                    cfg_fenixssh
                 else
-                    # detener servicion
-                    killall fenixssh
+                    bar "systemctl stop fenixmanager-fenixssh"
                     info "Servicion detenido con exito"
+                    option_menu_software
                 fi
-                read
-                cfg_fenixssh
+                
+                ;;
+            4)
+                systemctl status fenixmanager-fenixssh
                 ;;
             [Bb]) 
             # menu de instalacion de software

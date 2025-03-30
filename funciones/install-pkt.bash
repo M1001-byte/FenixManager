@@ -214,26 +214,12 @@ install_python3_proxy(){
     cp "${script_dir}/funciones/py-proxy/fenixmanager-pysocks.service" /etc/systemd/system/fenixmanager-pysocks.service
 
     bar "systemctl daemon-reload"
-
-
     bar "systemctl enable fenixmanager-pysocks.service"
-
-    info "Creando directorio de configuracion."
-
-    mkdir -p "${user_folder}/FenixManager/config" &>/dev/null
-
-
     bar "systemctl enable fenixmanager-pysocks.service"
-
     info "Servicio agregado correctamente."
-
     sleep 3
 
-
     cfg_python3_proxy
-
-
-
 }
 install_badvpn_udpgw(){
     local fenixmanager_crontab="/etc/cron.d/fenixmanager"
@@ -293,11 +279,22 @@ install_fenixssh(){
     
     cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
     chmod 777 "/usr/bin/fenixssh"&>/dev/null
+
+    rm "${user_folder}/FenixManager/config/fenixssh.json"
     
-    screen -dmS "fenixssh" fenixssh $port "$BANNER_FILE" "$rsa" && {
-        info "FenixSSH iniciado correctamente."
-    }
-    read
+    echo '{}' | jq --argjson bind_port "$port" \
+   --arg banner "$BANNER_FILE" \
+   --arg ssh_key "$rsa" \
+   '.bind_port = $bind_port | .banner = $banner | .ssh_key = $ssh_key' > temp.json && mv temp.json "${user_folder}/FenixManager/fenixssh.json"
+
+    cp "${script_dir}/funciones/fenixssh/fenixmanager-fenixssh.service" /etc/systemd/system/fenixmanager-fenixssh.service
+
+    bar "systemctl daemon-reload"
+    bar "systemctl enable fenixmanager-fenixssh.service"
+    bar "systemctl enable fenixmanager-fenixssh.service"
+    info "Servicio agregado correctamente."
+    
+    sleep 3
     cfg_fenixssh
 }
 
