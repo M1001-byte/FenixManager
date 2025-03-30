@@ -1,0 +1,15 @@
+# No modificar. Excepto si sabes lo que hace.
+
+[Unit]
+Description=FenixManager fenixssh
+After=network.target
+
+[Service]
+Type=forking
+User=root
+TimeoutSec=8
+ExecStart=/etc/FenixManager/funciones/fenixssh/fenixssh_service.py
+
+
+[Install]
+WantedBy=multi-user.target
