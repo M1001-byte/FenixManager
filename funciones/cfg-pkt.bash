@@ -1999,7 +1999,7 @@ cfg_fenixssh(){
                 ;;
             3) 
                 if [ -z $pid ];then
-                    bar "systemctl start fenixssh" || {
+                    bar "systemctl start fenixmanager-fenixssh" || {
                         error "Fallo al agregar el puerto"
                     }
                     cfg_fenixssh
