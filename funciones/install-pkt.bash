@@ -280,9 +280,9 @@ install_fenixssh(){
     cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
     chmod 777 "/usr/bin/fenixssh"&>/dev/null
 
-    rm "${user_folder}/FenixManager/config/fenixssh.json"
+    rm "${user_folder}/FenixManager/config/fenixssh.json" &>/dev/null
     
-    echo '{}' | jq --argjson bind_port "$port" \
+    echo '{}' | jq --arg bind_port "$port" \
    --arg banner "$BANNER_FILE" \
    --arg ssh_key "$rsa" \
    '.bind_port = $bind_port | .banner = $banner | .ssh_key = $ssh_key' > temp.json && mv temp.json "${user_folder}/FenixManager/fenixssh.json"
@@ -292,6 +292,7 @@ install_fenixssh(){
     bar "systemctl daemon-reload"
     bar "systemctl enable fenixmanager-fenixssh.service"
     bar "systemctl enable fenixmanager-fenixssh.service"
+    bar "systemctl start fenixmanager-fenixssh.service"
     info "Servicio agregado correctamente."
     
     sleep 3
