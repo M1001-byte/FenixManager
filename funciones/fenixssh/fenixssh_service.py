@@ -1,5 +1,18 @@
 #!/usr/bin/python3
-import json, subprocess, os,socket, time
+import json, subprocess, os,socket, time, signal, sys
+
+def handle_signal(signal_number, frame):
+    """ Manejador de señales para detectar detención o reinicio """
+    if signal_number == signal.SIGTERM:
+        os.remove('/var/log/FenixManager/connFenixssh.json')
+    elif signal_number == signal.SIGHUP:
+        os.remove('/var/log/FenixManager/connFenixssh.json')
+    sys.exit(0)  # Salir con éxito
+
+# Registrar las señales que deseas manejar
+signal.signal(signal.SIGTERM, handle_signal)  # Manejar la señal de terminación
+signal.signal(signal.SIGHUP, handle_signal)   # Manejar la señal de reinicio
+
 
 def port_is_open(port:int) -> int:
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
