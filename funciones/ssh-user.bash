@@ -271,6 +271,8 @@ monitor_users(){
         process_is_running "dropbear" && {
             number_session_dropbear=$(get_conn_dropbear "${user}")
             number_session=$((number_session_openssh + number_session_dropbear))
+        } || process_is_running "fenixssh" && {
+            number_session=$(jq ".${user}.connection" "/var/log/FenixManager/connFenixssh.json")
         } || {
             number_session=$number_session_openssh
         }
@@ -634,8 +636,10 @@ show_acc_ssh_info(){
     for i in ${users_[@]};do
         local number_session=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$i")
         local number_session_dropbear=$(get_conn_dropbear "${i}")
+        local number_session_fenixssh=$(jq ".${i}.connection" "/var/log/FenixManager/connFenixssh.json")
         [[ "${number_session}" -ne '0' ]] && ((online_user++))
         [[ "${number_session_dropbear}" -ne '0' ]] && ((online_user++))
+        [[ "${number_session_fenixssh}" -ne '0' ]] && ((online_user++))
     done
     local offline_users=$(echo ${get_total_users} - ${online_user} | bc)
     

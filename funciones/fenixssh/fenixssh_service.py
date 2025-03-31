@@ -25,6 +25,8 @@ def loadcfg(path:str):
     return data
 
 def main(config:str):
+    try:os.remove('/var/log/FenixManager/connFenixssh.json')
+    except:pass
     data = loadcfg(config)
     
     bind_port  = data['bind_port']
