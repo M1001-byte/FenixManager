@@ -334,6 +334,7 @@ package_installed () {
     if [[ "$package" == "wireguard" ]];then if [[ -e "/etc/wireguard/params" ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ "$package" == "fenixssh" ]];then if [[ -f "/usr/bin/fenixssh" ]];then cmd=1 ; else cmd=0;fi ;fi
     if [[ "$package" == "udpcustom" ]];then if [[ -f "/etc/systemd/system/udp-custom.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
+    if [[ "$package" == "dropbear-mod" ]];then if [[ -f "/etc/systemd/system/dropbear-mod.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
     if [[ "$package" == "zivpn-udp" ]];then if [[ -f "/etc/systemd/system/zivpn.service" ]];then cmd=1 ;else cmd=0 ;fi ;fi 
     if [[ $cmd == 1 ]]; then
         return 0
@@ -582,7 +583,7 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
     #local get_actived_services="$1"
     local color_ status_
     services_actived=()
-    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom fenixssh zivpn-udp)
+    local list_services=(sshd dropbear stunnel4 squid pysocks openvpn x-ui udpgw wireguard shadowsocks-libev udpcustom dropbear-mod zivpn-udp)
     [[ "${get_actived_services}" == "get_actived_services" ]] && {
         list_services+=("v2ray")
     }
@@ -619,6 +620,17 @@ list_services_and_ports_used(){ # ! GET PORT FROM SERVICES
         case $services_ in
             "sshd")
                 port_listen=$(cat /etc/ssh/sshd_config | grep -o "^Port .*" | awk '{split($0,a," "); print a[2]}' | xargs)
+                ;;
+            "dropbear-mod")
+                local file="/etc/default/dropbear-mod"
+                [[ -f $file ]] && {
+                    local dropbear_port=$(cat "$file" 2>/dev/null | grep -o "DROPBEAR_PORT=.*" | awk '{split($0,a,"="); print a[2]}')
+                    local dropbear_extra_arg_port=$(grep -o "\-p .*" "${file}" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
+                
+                }
+                [[ -n "${dropbear_port}" ||  -n "${dropbear_extra_arg_port}" ]] && {
+                    port_listen="$dropbear_port ${dropbear_extra_arg_port}"
+                } || port_listen=""
                 ;;
             "dropbear")
                 local file="/etc/default/dropbear"
