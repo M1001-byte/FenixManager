@@ -265,7 +265,7 @@ install_dropbear_mod(){
         if [[ $? -eq 0 ]];then ufw allow $port  &>/dev/null; break ; else continue ; fi
     done
     # genmerar clave ssh
-    $binaries_folder/dropbearkey -t rsa -f "dropbear-mod" &> /dev/null && mv "dropbear-mod" "dropbear-mod.pub" "$user_folder/FenixManager/"
+    $binaries_folder/dropbearkey -t rsa -f "dropbear-mod" &> /dev/null && mv "dropbear-mod" "dropbear-mod.pub" "$user_folder/FenixManager/" &> /dev/null
     info "El banner 'fenixssh.html' fue diseñado para ser utilizado con fenixssh."
     local fenixssh_banner="<body style=background-color:#000><font color=#0000FF>〢 ──────────────────────── 〢</font><br><b><font color=#FFFFFF>〢 Script: </font><font color=#FF0000>FenixManager</font> <font color=#FFFFFF>〢</font></b><br><font color=#FFFFFF>〢 Usuario: </font><font color=#FF0000>[USER]</font> <font color=#FFFFFF>〢</font><br><font color=#FFFFFF>〢 Expira: </font><font color=#FF00FF>[EXP]</font> <font color=#FFFFFF>〢</font><br><font color=#FFFFFF>〢 Restan: </font><font color=#FFF200>[DAYS]</font> <font color=#FFFFFF>Días 〢</font><br><font color=#FFFFFF>〢 Máxima conexiones: </font><font color=#0019FF>[MAX_CONN]</font> <font color=#FFFFFF>〢</font><br><font color=#0000FF>〢 ──────────────────────── 〢</font><br>"
    
