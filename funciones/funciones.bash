@@ -871,3 +871,15 @@ random_rulet_info(){
     }
 
 }
+
+help_banner_dropbearmod(){
+    info "Una breve ayuda para crear su banner de forma exitosa."
+    info "Estos son los siguientes marcadores soportados."
+    info "[USER] = Nombre de usuario que se conecta."
+    info "[EXP] = Fecha de expiracion ( yyyy-mm-dd )."
+    info "[DAYS] = Dias de vida que le quedan."
+    info "[MAX_CONN] = Maxima conexiones permitidas."
+    info "Introduce esos marcadores en cualquier lugar de su banner, dropbear se encargara de reemplazarlo por sus valores correspondientes."
+    info "En caso que el usuario no exista, se mostrara el banner como tal, en formato crudo."
+
+}

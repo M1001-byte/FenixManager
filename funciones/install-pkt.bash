@@ -248,7 +248,7 @@ install_dropbear_mod(){
     local binaries_folder="${script_dir}/bin/dropbear/${arch}/"
     local port=0
     
-    if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
+    if [ "$arch" != "x86_64" ];then
         error "Arquitectura de cpu no sportadar."
         info "Contacta con el administrador para darle soporte."
         info "Telegram: @Mathiue1001"

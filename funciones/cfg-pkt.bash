@@ -2230,7 +2230,7 @@ cfg_dropbear_mod(){
     else
         option_color 6 "${GREEN}INICIAR DROPBEAR-MOD"
     fi
-    
+    option_color 'H' "AYUDA CON EL BANNER"
     option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
     option_color 'M' "MENU PRINCIPAL"
     option_color 'E' "SALIR"
@@ -2400,6 +2400,9 @@ cfg_dropbear_mod(){
                 fi
             cfg_dropbear_mod
             ;;
+            "h" | "H")
+                help_banner_dropbearmod
+                ;;
             "cls" | "CLS")
                 cfg_dropbear_mod
                 ;;
