@@ -243,60 +243,73 @@ install_badvpn_udpgw(){
         }
 }
 
-install_fenixssh(){
+install_dropbear_mod(){
     local arch=$(uname -m)
-    local rsa="${user_folder}/.ssh/id_rsa"
-    local binaries="${script_dir}/funciones/fenixssh/fenixssh-${arch}"
+    local binaries_folder="${script_dir}/bin/dropbear/${arch}/"
     local port=0
     
-    if [ "$arch" != "x86_64" ] && [ "$arch" != "aarch64" ]; then
+    if [ "$arch" != "x86_64" ];then
         error "Arquitectura de cpu no sportadar."
         info "Contacta con el administrador para darle soporte."
         info "Telegram: @Mathiue1001"
     fi
-    if [ ! -f "$binaries" ];then
-        error "No se encontro el binario de FenixSSH."
+    if [ ! -d "$binaries_folder" ];then
+        error "No se encontro la carpeta de dropbear-mod."
         exit 1
     fi
-    
-    touch /var/log/FenixManager/connFenixssh.json &>/dev/null
+
 
     while true ;do
         read -p "$(echo -e "$YELLOW[*] Ingrese el puerto de escucha ( Recomendado: 2222 ):${endcolor}") " port
         check_if_port_is_open $port
         if [[ $? -eq 0 ]];then ufw allow $port  &>/dev/null; break ; else continue ; fi
     done
-    if [ ! -f "$rsa" ];then
-        error "No se encontro una clave ssh privada."
-        info "Genere una con ssh-keygen -t rsa ."
-        exit 1
-    fi
+    # genmerar clave ssh
+    $binaries_folder/dropbearkey -t rsa -f "dropbear-mod" &> /dev/null && mv "dropbear-mod" "dropbear-mod.pub" "$user_folder/FenixManager/"
     info "El banner 'fenixssh.html' fue diseñado para ser utilizado con fenixssh."
-    local fenixssh_banner="<font color=#0000FF>〢 ──────────────────────── 〢</font><br><b><font color=#FFFFFF>〢 Script: </font><font color=#FF0000>FenixManager</font><font color=#FFFFFF> 〢</font></b><br><font color=#FFFFFF>〢 Usuario: </font><font color=#FF0000>[user]</font><font color=#FFFFFF> 〢</font><br><font color=#FFFFFF>〢 Expira: </font><font color=#FF00FF>[exp]</font><font color=#FFFFFF> 〢</font><br><font color=#FFFFFF>〢 Máxima conexiones: </font><font color=#FF0000>[maxConn]</font><font color=#FFFFFF> 〢</font><br><font color=#0000FF>〢 ──────────────────────── 〢</font><br>"
+    local fenixssh_banner="<body style=background-color:#000><font color=#0000FF>〢 ──────────────────────── 〢</font><br><b><font color=#FFFFFF>〢 Script: </font><font color=#FF0000>FenixManager</font> <font color=#FFFFFF>〢</font></b><br><font color=#FFFFFF>〢 Usuario: </font><font color=#FF0000>[USER]</font> <font color=#FFFFFF>〢</font><br><font color=#FFFFFF>〢 Expira: </font><font color=#FF00FF>[EXP]</font> <font color=#FFFFFF>〢</font><br><font color=#FFFFFF>〢 Restan: </font><font color=#FFF200>[DAYS]</font> <font color=#FFFFFF>Días 〢</font><br><font color=#FFFFFF>〢 Máxima conexiones: </font><font color=#0019FF>[MAX_CONN]</font> <font color=#FFFFFF>〢</font><br><font color=#0000FF>〢 ──────────────────────── 〢</font><br>"
    
     echo "${fenixssh_banner}" > "${user_folder}/FenixManager/banner/fenixssh.html"
     list_banners
     
-    cp "$binaries" "/usr/bin/fenixssh" &>/dev/null
-    chmod 777 "/usr/bin/fenixssh"&>/dev/null
+    cp "$binaries_folder/dropbear" "/usr/bin/dropbear-mod" &>/dev/null
+    chmod 777 "/usr/bin/dropbear-mod"&>/dev/null
+    echo "/bin/false" >> /etc/shells
 
-    rm "${user_folder}/FenixManager/config/fenixssh.json" &>/dev/null
-    
-    echo '{}' | jq --arg bind_port "$port" \
-   --arg banner "$BANNER_FILE" \
-   --arg ssh_key "$rsa" \
-   '.bind_port = $bind_port | .banner = $banner | .ssh_key = $ssh_key' > temp.json && mv temp.json "${user_folder}/FenixManager/fenixssh.json"
+    cat <<EOF > /etc/systemd/system/dropbear-mod.service
+[Unit]
+Description=Dropbear mod by: Mathiue1001
+After=network.target
 
-    cp "${script_dir}/funciones/fenixssh/fenixmanager-fenixssh.service" /etc/systemd/system/fenixmanager-fenixssh.service
+[Service]
+Environment=DROPBEAR_PORT=$port DROPBEAR_RECEIVE_WINDOW=65536
+EnvironmentFile=-/etc/default/dropbear-mod
+ExecStart=/usr/bin/dropbear-mod -EF -p "\$DROPBEAR_PORT" -W "\$DROPBEAR_RECEIVE_WINDOW" \$DROPBEAR_EXTRA_ARGS
+KillMode=process
+Restart=on-failure
 
-    bar "systemctl daemon-reload"
-    bar "systemctl enable fenixmanager-fenixssh.service"
-    bar "systemctl enable fenixmanager-fenixssh.service"
-    bar "systemctl start fenixmanager-fenixssh.service"
-    info "Servicio agregado correctamente."
-    
-    sleep 3
-    cfg_fenixssh
+[Install]
+WantedBy=multi-user.target
+EOF
+    info "Archivo .service creado correctamente."
+    cat <<EOF > /etc/default/dropbear-mod
+DROPBEAR_PORT=$port
+DROPBEAR_RECEIVE_WINDOW=65536
+DROPBEAR_EXTRA_ARGS="-b '$BANNER_FILE' -r '$user_folder/FenixManager/dropbear-mod'"
+EOF
+    unset $BANNER_FILE
+    info "Archivo de configuracion creado correctamente."
+    bar --cmd "systemctl enable dropbear-mod" || { 
+        error "Fallo al crear el servicion de dropbear." 
+    }
+    bar --cmd "systemctl start dropbear-mod" && { 
+        info "Dropbear-mod iniciado correctamente."
+        sleep 3
+
+        cfg_dropbear_mod
+        } || { 
+            error "Fallo al iniciar el mod de dropbear."
+            }
 }
 
 install_udpcustom(){

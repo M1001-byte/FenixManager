@@ -48,6 +48,7 @@ sudo apt-get update; sudo apt-get upgrade -y ; sudo apt-get install -y wget git 
     * fenixssh  ( Un binario personalizado de ssh,para mostrar un banner acorde al usuario a conectar)
     * Udp-custom ( Modo udp, solo funcional con HTTP Custom)
     * Zivpn-udp ( Modo udp, solo funcional con ZIVPN. Se agrego expiracion de las contrasenas)
+    * Dropbear-mod ( Un mod de dropbear donde el banner es dinamico, dependiendo el usuario a conectar mostrara tal info.)
 * Configuracion
     * Administrar Hitman ( Encargado de eliminar usuarios expirados,o que superen el número máximo de conexiones permitidas)
     * Administrar Firewall ( UFW )

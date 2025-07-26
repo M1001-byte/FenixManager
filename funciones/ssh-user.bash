@@ -232,6 +232,28 @@ list_user() {
 
 
 }
+get_conn_dropbear_mod() {
+    # Conectado = 0, Desconectado = 1
+    local userFind="$1"
+    local UserConnected=0
+    local userConnections=0
+    local pids=$(pgrep dropbear-mod)
+
+    local userCheck=""
+    IFS=$'\n' 
+    for pid in $pids; do
+        local user=$(journalctl -u dropbear-mod.service 2>/dev/null | grep -o "$pid.*Password.*" | grep -o "'.*'" | tr -d "'")
+        [[ -n "${user}" ]] && {
+            if [[ ! " ${userCheck} " =~ " ${user} " ]]; then
+                ((UserConnected++))
+                userCheck+=" ${user}"
+            fi
+        }
+        [[ "$user" == "${userFind}" ]] && ((userConnections++))
+    done
+    [[ -n "${userFind}" ]] && echo $userConnections || echo $UserConnected
+} 
+
 get_conn_dropbear() {
     # Conectado = 0, Desconectado = 1
     local userFind="$1"
@@ -243,6 +265,7 @@ get_conn_dropbear() {
     IFS=$'\n' 
     for pid in $pids; do
         local user=$(journalctl -u dropbear.service 2>/dev/null | grep -o "$pid.*Password.*" | grep -o "'.*'" | tr -d "'")
+        echo "${userCheck}" "${user}"
         [[ -n "${user}" ]] && {
             if [[ ! " ${userCheck} " =~ " ${user} " ]]; then
                 ((UserConnected++))
@@ -271,8 +294,8 @@ monitor_users(){
         process_is_running "dropbear" && {
             number_session_dropbear=$(get_conn_dropbear "${user}")
             number_session=$((number_session_openssh + number_session_dropbear))
-        } || process_is_running "fenixssh" && {
-            number_session=$(jq ".${user}.connection" "/var/log/FenixManager/connFenixssh.json")
+        } || process_is_running "dropbear-mod" && {
+            number_session_dropbear_mod=$(get_conn_dropbear "${user}")
         } || {
             number_session=$number_session_openssh
         }
@@ -636,10 +659,10 @@ show_acc_ssh_info(){
     for i in ${users_[@]};do
         local number_session=$(ps auxwww | grep 'sshd:' | awk '{print $1 }' | grep -w -c "$i")
         local number_session_dropbear=$(get_conn_dropbear "${i}")
-        local number_session_fenixssh=$(jq ".${i}.connection" "/var/log/FenixManager/connFenixssh.json")
+        local number_session_dropbear_mod=$(get_conn_dropbear_mod "${i}")
         [[ "${number_session}" -ne '0' ]] && ((online_user++))
         [[ "${number_session_dropbear}" -ne '0' ]] && ((online_user++))
-        [[ "${number_session_fenixssh}" -ne '0' ]] && ((online_user++))
+        [[ "${number_session_dropbear_mod}" -ne '0' ]] && ((online_user++))
     done
     local offline_users=$(echo ${get_total_users} - ${online_user} | bc)
     

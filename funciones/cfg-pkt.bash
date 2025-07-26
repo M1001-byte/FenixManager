@@ -1517,7 +1517,6 @@ cfg_ssh_dropbear(){
             fi
             dropbear_ports=$(grep -o "\-p .*" "/etc/default/dropbear" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
             dropbear_ports+=" $(grep "^DROPBEAR_PORT=.*" /etc/default/dropbear | awk '{split($0,a,"="); print a[2]}')"
-            local dropbear_banner=$(grep -o "^DROPBEAR_BANNER=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | sed "s|${user_folder}|~|g" | xargs)
         
             # ! dropbear status
             printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$((60 - 10 - ${#drop_str} ))s\n" "DROPBEAR:" "${drop_str}" '〢'
@@ -1657,8 +1656,7 @@ cfg_ssh_dropbear(){
                     }
                     bar "service ssh restart"
                     # ! DROPBEAR
-                    local str="${banner_file//\//\\/}"
-                    sed -i "s|\/[a-zA-Z0-9_\-\/\.]\+|${str}|g" "/etc/default/dropbear"
+                    sed -i "s|${dropbear_banner}|${banner_file}|g" "/etc/default/dropbear"
                     bar "service dropbear restart"
                 }
                 banner_select() {
@@ -1936,106 +1934,6 @@ cfg_wireguard(){
     done
 }
 
-cfg_fenixssh(){
-    local banner port
-    local pid=$(pgrep fenixssh)
-    local cfg_file="${user_folder}/FenixManager/fenixssh.json"
-    clear
-    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO FENIXSSH${BLUE} 〢────────────────〢"
-    show_info(){
-        local str_ color_ args port
-        
-        banner=$(jq '.banner'  "${cfg_file}")
-        port=$(jq '.bind_port' "${cfg_file}")
-
-        if [ -n "$pid" ]; then
-            str_="[ ACTIVO ]"
-            color_="${GREEN}"
-        else
-            str_="[ INACTIVO ]"
-            color_="${RED}"
-        fi
-        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "ESTADO:" "${str_}" "〢"
-        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((59-${#str_}-8))s \n" "PUERTO:" "${port}" "〢"
-        printf "${WHITE}〢 ${WHITE}%-8s ${color_}%-10s${WHITE} %$((27-${#str_}-8))s \n" "BANNER:" "${banner}" "〢"
-        line_separator 60
-    }
-    show_info
-    option_color 1 "CAMBIAR PUERTO"
-    option_color 2 "CAMBIAR BANNER"
-    if [ -z $pid ];then
-        option_color 3 "INICIAR SERVICIO"    
-    else
-        option_color 3 "DETENER SERVICIO"
-    fi
-    option_color 4 "VER ESTADO DE FENIXSSH"
-    option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
-    option_color 'M' "MENU PRINCIPAL"
-    option_color 'E' "SALIR"
-    while true;do
-        trap ctrl_c SIGINT SIGTERM
-        prompt=$(date "+%x %X")
-        printf "\33[2K\r${WHITE}[$BBLUE${prompt}${WHITE}] : " 2>/dev/null && read   option
-        case $option in
-            1)
-                # Cambiar puerto
-                port_input && local porti="${puertos_array[0]}" && unset puertos_array
-                jq --argjson bind_port "$porti" '.bind_port = $bind_port' "${cfg_file}" > "${cfg_file}.tmp" && mv "${cfg_file}.tmp" "${cfg_file}"
-                bar "systemctl restart fenixssh" || {
-                    error "Fallo al agregar el puerto"
-                    read
-                }
-                cfg_fenixssh
-                ;;
-            2)
-               # Cambiar banner
-               list_banners               
-               jq --arg banner "$BANNER_FILE" '.banner = $banner' "${cfg_file}" > "${cfg_file}.tmp" && mv "${cfg_file}.tmp" "${cfg_file}"
-               bar "systemctl restart fenixssh" || {
-                    error "Fallo al agregar el puerto"
-                    read
-                }
-                cfg_fenixssh
-                ;;
-            3) 
-                if [ -z $pid ];then
-                    bar "systemctl start fenixmanager-fenixssh" || {
-                        error "Fallo al agregar el puerto"
-                    }
-                    cfg_fenixssh
-                else
-                    bar "systemctl stop fenixmanager-fenixssh"
-                    info "Servicion detenido con exito"
-                    option_menu_software
-                fi
-                
-                ;;
-            4)
-                systemctl status fenixmanager-fenixssh
-                ;;
-            [Bb]) 
-            # menu de instalacion de software
-                clear
-                option_menu_software
-                ;;
-            [Mm]) 
-            # menu principal
-                clear
-                fenix
-                ;;
-            q|Q|e|E) 
-            # salir
-                exit 0
-                ;;
-            *) 
-            # opcion invalida
-                continue
-                ;;
-        esac
-    done
-}
-
-
 cfg_udpcustom(){
     local config="/root/udp/config.json"
     local is_active=$(pgrep udp-custom 2>/dev/null)
@@ -2290,6 +2188,237 @@ cfg_udpzivpn(){
     done
 
 }
+
+cfg_dropbear_mod(){
+    clear
+    echo -e "${BLUE}〢────────────────〢 ${WHITE}CONFIGURANDO DROPBEAR-MOD${BLUE} 〢─────────────〢"
+    local dropbear_file='/etc/default/dropbear-mod'
+    local dropbear_banner=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' |  sed -e "s|-r .*'||g" | sed -e "s|-b||g" | sed "s|'||g" | xargs)
+    local dropbear_is_runing=$(systemctl is-active dropbear-mod &>/dev/null;echo $?)
+
+      show_info(){
+        if [[ "${dropbear_is_runing}" -eq 0 ]];then
+            local drop_str="[ EN EJECUCION ]"
+            local color_1="${GREEN}"
+        else
+            local drop_str="[ DETENIDO ]"
+            local color_1="${RED}"
+        fi
+            dropbear_ports=$(grep -o "\-p .*" "/etc/default/dropbear-mod" |sed "s/'//g; s/-p\s\?\([0-9]\+\)/\1/g")
+            dropbear_ports+=" $(grep "^DROPBEAR_PORT=.*" /etc/default/dropbear-mod | awk '{split($0,a,"="); print a[2]}')"
+        
+            # ! dropbear status
+            printf "${WHITE}〢 %9s ${color_1}%${#drop_str}s ${WHITE} %$((60 - 14 - ${#drop_str} ))s\n" "DROPBEAR-MOD:" "${drop_str}" '〢'
+            [ -z "${dropbear_ports}" ] && dropbear_ports="No se pudieron obtener los puertos."
+            # ! dropbear ports
+            printf "${WHITE}〢 %8s ${color_1}%${#dropbear_ports}s ${WHITE}%$((60 - 12 - ${#dropbear_ports} | bc))s 〢\n" "PUERTOS:" "${dropbear_ports}"
+            # ! dropbear banner
+            printf "${WHITE}〢 %7s ${GREEN}%${#dropbear_banner}s ${WHITE}%$((60 - 11 - ${#dropbear_banner} | bc ))s 〢\n" "BANNER:" "${dropbear_banner}"
+            
+        line_separator 60
+        }
+    show_info
+    
+      
+    option_color 1 "AGREGAR PUERTOS EN DROPBEAR-MOD"
+    option_color 2 "ELIMINAR PUERTOS EN DROPBEAR-MOD"
+    option_color 3 "CAMBIAR BANNER"
+    option_color 4 "REINICIAR DROPBEAR-MOD"
+    option_color 5 "VER ESTADO DE DROPBEAR-MOD"
+    if [[ "${dropbear_is_runing}" -eq 0 ]];then
+        option_color 6 "${RED}DETENER DROPBEAR-MOD"
+    else
+        option_color 6 "${GREEN}INICIAR DROPBEAR-MOD"
+    fi
+    option_color 'H' "AYUDA CON EL BANNER"
+    option_color 'B' "MENU DE INSTALACION DE SOFTWARE"
+    option_color 'M' "MENU PRINCIPAL"
+    option_color 'E' "SALIR"
+
+    while true;do
+        trap ctrl_c SIGINT SIGTERM
+        prompt=$(date "+%x %X")
+        read -r -p "$(echo -e "${WHITE}[$BBLUE${prompt}${WHITE}")] : " opt
+        case $opt in
+            1)
+                port_input
+                local dropbear_new_port=${puertos_array[@]} && unset puertos_array
+                local dropbear_extra_args=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | xargs)
+                for port in ${dropbear_new_port[@]};do dropbear_extra_args+=" -p ${port}" ; done
+                sed -i "s|^DROPBEAR_EXTRA_ARGS=.*|DROPBEAR_EXTRA_ARGS='${dropbear_extra_args}'|g" ${dropbear_file}
+                bar "systemctl restart dropbear-mod"
+                info "Puerto ${dropbear_new_port[@]} agregado correctamente."
+                sleep 2
+                cfg_dropbear_mod
+                ;;
+            2) 
+            # ELIMINAR PUERTOS DROPBEAR/OPENSSH
+                info "2222, es el puerto por defecto de dropbear. No se puede eliminar." 
+                local dropbear_extra_ports=$(cat "/etc/default/dropbear-mod" | grep -oP '(-p\s+)([^\s]+)' | awk '{print $2}' | sed "s/'//g"  )
+                dropbear_extra_ports=$(echo "$dropbear_extra_ports" | tr -s '[:space:]' ' ')
+                
+                IFS=" " read -r -a ports_array <<< "${dropbear_extra_ports}"
+                
+                for ((i=0; i < ${#ports_array[@]} ; i++));do
+                    local port=${ports_array[$i]}
+                    echo -e "\t${WHITE}[ ${BLUE}${i}${WHITE} ] ${GREEN}${port}${WHITE}"
+                done
+                while true;do
+                    trap ctrl_c SIGINT SIGTERM
+                    read -r -p "$(echo -e "${WHITE}[*] Opcion : ")" port_index
+                    if [[ ${port_index} -ge 0 && ${port_index} -lt ${#ports_array[@]} ]];then
+                        break
+                    else
+                        error "Opcion invalida."
+                        continue
+                    fi
+                done
+                local port_to_del=${ports_array[$port_index]}
+                local str_to_del="-p ${port_to_del}"
+                local dropbear_extra_args_from_file=$(grep -o "^DROPBEAR_EXTRA_ARGS=.*"  ${dropbear_file} | awk '{split($0,a,"="); print a[2]}' | sed -e "s/'/ /g" | xargs)
+                sed -i "s|^DROPBEAR_EXTRA_ARGS=.*|DROPBEAR_EXTRA_ARGS='${dropbear_extra_args_from_file//$str_to_del/}'|g"  ${dropbear_file}
+                bar "systemctl restart dropbear-mod"
+                info "Puerto ${port_to_del} eliminado."
+                
+                sleep 2
+                cfg_dropbear_mod
+                ;;
+            3) 
+            # CAMBIAR BANNER
+                # ! SELECT OPT BANNER
+                local fenixbanner='<br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Script: </strong><strong style="color:#ff0000;font-size: 30px;">FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Version: </strong><strong style="color:#ff0000;font-size: 30px;">replace_version</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Dev: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001_byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Github: </strong><strong style="color:#ff0000;font-size: 30px;">github.com/M1001-byte/FenixManager</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@M1001-byte</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢 Telegram: </strong><strong style="color:#ff0000;font-size: 30px;">@Mathiue1001</strong><strong style="color:#FFFFFF;font-size: 30px;"> 〢</strong><br><strong style="color:#0066cc;font-size: 30px;">〢 ────────────────────────〢</strong><br><strong style="color:#FFFFFF;font-size: 30px;">〢Gracias por utilizar FenixManager!〢</strong>'
+                change_banner(){
+                    # find banner line number in ssh config
+                    local banner_file="${1}"                    
+                    local banner_size=$(wc -c < "${banner_file}")
+                    if [[ ${banner_size} -gt 2000 ]];then
+                        error "El banner supera los 2000 bytes ( 2 KB ). Limite impuesto por dropbear."
+                        rm -f "${banner_file}"
+                        return 1
+                    fi
+
+                    sed -i "s|${dropbear_banner}|${banner_file}|g" "/etc/default/dropbear-mod"
+                    bar "service dropbear-mod restart"
+                }
+                banner_select() {
+                    echo -e "${WHITE}[ ${GREEN}1${WHITE} ] ${WHITE}Cargar banner desde un archivo${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}2${WHITE} ] ${WHITE}Cargar banner desde una URL${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}3${WHITE} ] ${WHITE}Copiar banner de un servidor ssh${WHITE}"
+                    echo -e "${WHITE}[ ${GREEN}4${WHITE} ] ${WHITE}Introducir el banner${WHITE}"
+                    local banner_option
+                    until [[ ${banner_option} =~ ^[1-4]$ ]];do
+                        trap ctrl_c SIGINT SIGTERM
+                        read -r -p "$(echo -e "${WHITE}[*] Opcion : ")" banner_option
+                    done
+                    
+                    case $banner_option in 
+                        1 ) 
+                        # ! LOAD BANNER FROM FILE
+                            list_banners && local banner_file="${BANNER_FILE}" && unset BANNER_FILE
+                            change_banner "${banner_file}"
+                            ;;
+                        2 ) 
+                        # ! LOAD BANNER FROM URL
+                            info "Tenga en cuenta que, todo el contenido que devuelve la URL sera usado como banner."
+                            info "Es recomendable que el contenido sea solamente texto plano."
+                            read -r -p "$(echo -e "${WHITE}[*] URL : ")" banner_url
+                            read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file// /_}"
+                            if wget -q "${banner_url}" -O "${banner_file}";then
+                                change_banner "${banner_file}"
+                            else
+                                error "No se pudo descargar el banner."
+                                info "Compruebe su conexion a internet o firewall."
+                                exit 1
+                            fi
+                            ;;
+                        3 ) 
+                        # ! COPY BANNER FROM SSH SERVER
+                            package_installed "sshpass" || {
+                                bar "apt-get install sshpass" || {
+                                    error "No se pudo instalar sshpass."
+                                    exit 1
+                                }
+                            }
+                            info "Introduce la direccion IP del servidor ssh."
+                            until [[ "${get_banner_ip}" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ || "${get_banner_ip}" =~ (?=^.{4,253}$)(^(?:[a-zA-Z0-9](?:(?:[a-zA-Z0-9\-]){0,61}[a-zA-Z0-9])?\.)+([a-zA-Z]{2,}|xn--[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])$) ]];do
+                                read -r -p "$(echo -e "${WHITE}[*] IP / DOMINIO : ")" get_banner_ip
+                            done
+                            banner_file="${user_folder}/FenixManager/banner/${get_banner_ip}"
+                            timeout 5s sshpass -p "fenixmanager" ssh -o StrictHostKeyChecking=no "${get_banner_ip}" &> /tmp/banner_ssh_tmp
+                            [[ $(wc -l /tmp/banner_ssh_tmp | cut -d" " -f1) -gt 1 ]] || {
+                                error "No se pudo obtener el banner del servidor ssh."
+                                info "El servidor no tiene un banner configurado."
+                                info "O hay un problema de conexion."
+                                exit 1
+                            }
+                            sed -i '/Permission denied, please try again./d' /tmp/banner_ssh_tmp
+                            cat "/tmp/banner_ssh_tmp" > "${banner_file}"
+                            rm /tmp/banner_ssh_tmp
+                            change_banner "${banner_file}"
+                            ;;
+                        4 ) 
+                        # ! INPUT BANNER
+                            info "Cuando termine de introducir el banner, presiona la combinacion: ${YELLOW}CTRL + D ${WHITE}."
+                            info "Puede que necesites presionar unas dos o tres veces la combinacion mencionada."
+                            line_separator 62
+                            local banner_array
+                            readarray -t banner_array
+                            line_separator 62
+                            read -r -p "$(echo -e "${WHITE}[*] Nombre del archivo : ")" banner_file
+                            banner_file="${user_folder}/FenixManager/banner/${banner_file// /_}"
+                            echo "${banner_array[@]}" > "${banner_file}"
+                            change_banner "${banner_file}"
+                            ;;
+                    esac
+                }
+                banner_select && {
+                    info "Banner ${GREEN}${banner_file}${WHITE} cambiado correctamente."
+                    sleep 4
+                    cfg_dropbear_mod
+                } || {
+                    error "No se pudo cambiar el banner."
+                    read -r -p "$(echo -e "${WHITE}[*] Presiona enter para continuar...")"
+                    cfg_dropbear_mod
+                }
+                ;;
+            4) 
+            #  REINICIAR DROPBEAR / OPENSSH
+                bar "service dropbear-mod restart"
+                sleep 4
+                cfg_dropbear_mod
+                ;;
+            5) 
+            #  VER ESTADO DE DROPBEAR
+                systemctl status dropbear-mod
+                ;;
+            6) 
+                if [[ "${dropbear_is_runing}" -eq 0 ]];then
+                    systemctl stop dropbear-mod
+                else
+                    systemctl start dropbear-mod
+                fi
+            cfg_dropbear_mod
+            ;;
+            "h" | "H")
+                help_banner_dropbearmod
+                ;;
+            "cls" | "CLS")
+                cfg_dropbear_mod
+                ;;
+            [bB])
+                option_menu_software
+                ;;
+            [mM])
+                fenix
+                ;;
+            q|Q|e|E)
+                exit 0
+                ;;
+            esac
+    done
+}
+
 
 del_openssh_port(){
     local ssh_ports=($(grep "^Port" ${ssh_file} | cut -d' ' -f2 | tr "\n" ' '))
