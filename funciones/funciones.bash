@@ -805,6 +805,8 @@ uninstall_fenixmanager(){
                 elif [[ "${service}" == "dropbear-mod" ]];then
                     systemctl disable dropbear-mod &>/dev/null
                     rm /etc/systemd/system/dropbear-mod.service &> /dev/null
+                    rm /etc/dropbear-mod &> /dev/null
+                    rm "${user_folder}/FenixManager/dropbear*" &> /dev/null
                     rm /usr/bin/dropbear-mod  &>/dev/null
                 else
                     bar --cmd "apt-get remove --purge ${service} -y" --title "Eliminando ${service}"
