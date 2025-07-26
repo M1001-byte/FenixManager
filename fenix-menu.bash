@@ -77,7 +77,7 @@ option_menu_software () {
         list_services_and_ports_used
         line_separator 60
     }
-    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "x-ui" "fenixmanager-pysocks" "badvpn-udpgw" "fenixssh" "udpcustom" "zivpn-udp")
+    tmp_array=("OPENSSH / DROPBEAR" "squid" "stunnel4" "slowdns" "shadowsocks-libev" "openvpn" "x-ui" "fenixmanager-pysocks" "badvpn-udpgw" "dropbear-mod" "udpcustom" "zivpn-udp")
     option_menu_package "${tmp_array[@]}" ; unset tmp_array
 
     option_color E 'SALIR'
@@ -99,7 +99,7 @@ option_menu_software () {
             8) [[ ${installed_packages[*]} =~ fenixmanager-pysocks ]] && cfg_python3_proxy || install_python3_proxy ;;
             # 9) [[ ${installed_packages[*]} =~ wireguard ]] && cfg_wireguard || installWireGuard ;;
             9) [[ ${installed_packages[*]} =~ badvpn-udpgw ]] && cfg_badvpn || install_badvpn_udpgw ;;
-            10) [[ ${installed_packages[*]} =~ fenixssh ]] && cfg_fenixssh || install_fenixssh ;;
+            10) [[ ${installed_packages[*]} =~ dropbear-mod ]] && cfg_dropbear_mod || install_dropbear_mod ;;
             11) [[ ${installed_packages[*]} =~ udpcustom ]] && cfg_udpcustom || install_udpcustom ;;
             12) [[ ${installed_packages[*]} =~ zivpn-udp ]] && cfg_udpzivpn || install_udpzivpn ;;
             "cls" | "CLS") clear && option_menu_software ;;
